@@ -9,6 +9,7 @@
 	* 5.3. [Configuration](#Configuration)
 	* 5.4. [Exécution](#Excution)
 * 6. [📊 Résultats](#Rsultats)
+* 7. [ 8. Etat du projet](#8.Etatduprojet)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -23,7 +24,7 @@ Agent de génération et validation de code Terraform.
 ##  1. <a name='Objectif'></a>🎯 Objectif
 
 Cet agent:
-1. **Génère** du code Terraform en production 
+1. **Génère** du code Terraform
 2. **Valide** le code généré
 3. **Corrige** les erreurs détectées
 
@@ -45,8 +46,8 @@ Cet agent dot respecter les bonnes pratiques trouvées dans le répertoire docs.
 ```
 .
 ├── notebooks/
-│   └── deepchain-terraform-assistant.ipynb    # Notebook principal (agent orchestration)
-├── docs/                                        # Documentation Terraform & best practices
+│   └── deepchain-terraform-assistant.ipynb      # Notebook principal (agent orchestration)
+├── docs/                                        # Bonnes pratiques Terraform
 │   ├── structure.md
 │   └── cloud-storage.md
 ├── prompts/
@@ -55,20 +56,17 @@ Cet agent dot respecter les bonnes pratiques trouvées dans le répertoire docs.
 │   ├── terraform-review.md
 │   ├── terraform-evaluation.md
 │   └── terraform-validate.md
-├── .vectorstore2/                              # Base de données ChromaDB
+├── .vectorstore2/                               # Base de données ChromaDB
 ├── work/                                        # Résultats de la génération
-├── .env                                         # Configuration API keys
-└── pyproject.toml                              # Dépendances du projet
+├── .env                                         # Configuration (API keys, ...)
+└── pyproject.toml                               # Configuration du projet python
 ```
 
 ##  4. <a name='ArchitectureGlobaledunotebook'></a>🏗️ Architecture Globale du notebook
 
-L'agent est implémenté comme un notebook python.
+L'agent est implémenté comme un notebook python avec les phases suivantes :
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                    TERRAFORM AGENT WORKFLOW                      │
-└─────────────────────────────────────────────────────────────────┘
 
 1️⃣ INITIALIZATION
    ├─ Charge les prompts (system, user, templates)
@@ -98,6 +96,7 @@ L'agent est implémenté comme un notebook python.
 - **Python 3.14+** : version cible du projet (configurée dans `.python-version`)
 
 ###  5.2. <a name='Installationdesdpendances'></a>Installation des dépendances
+
 ```bash
 uv sync
 ```
@@ -118,7 +117,7 @@ LANGCHAIN_PROJECT=terraform-agent
 2. Exécuter les cellules du notebook
 3. Consulter les résultats dans le notebook et dans le répertoire `./work/`
 
-##  7. <a name='Rsultats'></a>📊 Résultats
+##  6. <a name='Rsultats'></a>📊 Résultats
 
 Après exécution, le notebook génère :
 - **Rapport de validation** : analyse syntaxique du code Terraform
@@ -126,3 +125,8 @@ Après exécution, le notebook génère :
 - **Code corrigé** : version améliorée du code avec fixes appliqués
 - **Fichiers** : sauvegardés dans `./work/` avec timestamps
 
+##  8. <a name='8.Etatduprojet'></a>État du projet
+
+Le projet est en phase de développement actif. 
+
+Le composant de validation basé LLM (judge-as-llm) est actuellement en cours de développement et de stabilisation pour améliorer la qualité de l'agent.

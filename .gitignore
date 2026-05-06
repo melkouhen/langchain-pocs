@@ -1,15 +1,63 @@
-# Python-generated files
+# Environment & Secrets
+.env
+.env.local
+*.pem
+*.key
+
+# Python
 __pycache__/
 *.py[oc]
+*.pyc
+*.pyo
+.Python
 build/
+develop-eggs/
 dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
 wheels/
-*.egg-info
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
 
 # Virtual environments
 .venv
-
-# Work files
+venv/
+ENV/
+env/
 .env
-.vectorstore2
+
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Project-specific
+.vectorstore2/
 work/
+notebooks/.vectorstore2/
+test.json
+
+# LangSmith
+.langsmithrc
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# OS
+.DS_Store
+Thumbs.db
+
