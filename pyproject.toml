@@ -1,0 +1,20 @@
+[project]
+name = "test-langchain"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "chromadb>=1.5.8",
+    "deepagents>=0.5.4",
+    "ipykernel>=7.2.0",
+    "isort>=8.0.1",
+    "langchain>=1.2.15",
+    "langchain-anthropic>=1.4.2",
+    "langchain-chroma>=1.1.0",
+    "langchain-community>=0.4.1",
+    "langchain-ollama>=1.1.0",
+    "langchain-openai>=1.2.1",
+    "langsmith[claude-agent-sdk]>=0.7.38",
+    "python-dotenv>=1.2.2",
+]
