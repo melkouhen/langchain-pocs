@@ -120,13 +120,10 @@ LANGCHAIN_PROJECT=terraform-agent
 ##  6. <a name='Rsultats'></a>📊 Résultats
 
 Après exécution, le notebook génère :
-- **Rapport de validation** : analyse syntaxique du code Terraform
-- **Rapport de révision** : best practices et recommandations
-- **Code corrigé** : version améliorée du code avec fixes appliqués
 - **Fichiers** : sauvegardés dans `./work/` avec timestamps
 
 ##  8. <a name='8.Etatduprojet'></a>État du projet
 
-Le projet est en phase de développement actif. 
+Le projet est en phase de développement `actif`. 
 
 Le composant de validation basé LLM (judge-as-llm) est actuellement en cours de développement et de stabilisation pour améliorer la qualité de l'agent.
