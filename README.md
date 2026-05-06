@@ -9,7 +9,7 @@
 	* 5.3. [Configuration](#Configuration)
 	* 5.4. [Exécution](#Excution)
 * 6. [📊 Résultats](#Rsultats)
-* 7. [ 8. Etat du projet](#8.Etatduprojet)
+* 7. [État du projet](#8.Etatduprojet)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -28,7 +28,7 @@ Cet agent:
 2. **Valide** le code généré
 3. **Corrige** les erreurs détectées
 
-Cet agent dot respecter les bonnes pratiques trouvées dans le répertoire docs.
+Cet agent doit respecter les bonnes pratiques trouvées dans le répertoire docs.
 
 
 ##  2. <a name='TechnologiesPrincipales'></a>🛠️ Technologies Principales
