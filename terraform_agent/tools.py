@@ -102,7 +102,7 @@ def validate_and_fix_code(path: str) -> str:
         return "⚠️ Error: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
         return "⚠️ Error: terraform init or validate exceeded timeout"
-    except Exception as e:
+    except (OSError, ValueError) as e:
         return f"⚠️ Error during validation: {str(e)}"
 
 
@@ -167,7 +167,7 @@ def review_and_fix_code(path: str) -> str:
 
     except FileNotFoundError as e:
         return f"⚠️ Error: File not found: {e}"
-    except Exception as e:
+    except (OSError, ValueError) as e:
         return f"⚠️ Error during review: {str(e)}"
 
 

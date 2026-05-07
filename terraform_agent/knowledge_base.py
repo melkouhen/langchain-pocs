@@ -70,7 +70,7 @@ class KnowledgeBase:
 
         # Check if vectorstore already exists
         vectorstore_path = (
-            self.config.PROJECT_ROOT / "notebooks" / ".vectorstore2"
+            self.config.PROJECT_ROOT / "notebooks" / ".vectorstore"
         )
 
         if vectorstore_path.exists():
@@ -98,14 +98,13 @@ class KnowledgeBase:
                 print(
                     f"  ✓ Vectorstore already indexed with {existing_count} documents"
                 )
-        except Exception:
+        except (KeyError, ValueError):
             # Collection doesn't exist, create and add documents
             print(f"  Indexing {len(docs)} documents...")
             self.vectorstore.add_documents(docs)
 
         print(f"  ✓ Vectorstore created and indexed")
 
-    @tool
     def search(self, query: str, k: int = 3) -> str:
         """Search the knowledge base for relevant documents using semantic similarity.
 

@@ -48,6 +48,7 @@ env/
 .vectorstore2/
 work/
 notebooks/.vectorstore2/
+notebooks/.vectorstore*
 test.json
 sample.json
 

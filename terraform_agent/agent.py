@@ -1,6 +1,5 @@
 import shutil
 from datetime import datetime
-from langchain_anthropic import ChatAnthropic
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
@@ -9,7 +8,6 @@ from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 from .tools import init_tools, search_knowledge_base, validate_and_fix_code, review_and_fix_code
-
 
 class TerraformAgent:
     """Orchestrates autonomous Terraform code generation and validation.
@@ -62,7 +60,8 @@ class TerraformAgent:
         # Initialize global tool instances
         init_tools(config, prompts, knowledge_base)
 
-        tools = [
+        # Prepare tools list
+        tools_list = [
             search_knowledge_base,
             validate_and_fix_code,
             review_and_fix_code,
@@ -70,14 +69,11 @@ class TerraformAgent:
 
         # Create agent with prompt caching enabled
         backend = FilesystemBackend(root_dir=config.PROJECT_ROOT, virtual_mode=False)
-        chat_model = ChatAnthropic(
-            model=config.AGENT_MODEL,
-            cache_control_tokens=True,
-        )
+
         self.agent = create_deep_agent(
-            model=chat_model,
+            model=config.AGENT_MODEL,
             backend=backend,
-            tools=tools,
+            tools=tools_list,
         )
 
         print(f"  ✓ System prompt loaded ({len(prompts.system)} chars)")
@@ -125,8 +121,7 @@ class TerraformAgent:
             # Build messages with cache control on system prompt
             messages = [
                 SystemMessage(
-                    content=self.prompts.system,
-                    cache_control={"type": "ephemeral"}
+                    content=self.prompts.system
                 ),
                 HumanMessage(content=self.prompts.user),
             ]
