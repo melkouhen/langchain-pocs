@@ -2,6 +2,7 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
+from langchain_core.tools import tool
 
 from .config import Config
 
@@ -92,6 +93,7 @@ class KnowledgeBase:
 
         print(f"  ✓ Vectorstore created and indexed")
 
+    @tool
     def search(self, query: str, k: int = 3) -> str:
         """Search the knowledge base for relevant documents using semantic similarity.
 

@@ -40,12 +40,12 @@ Search the knowledge base for Terraform best practices, provider documentation, 
 
 ### validate_terraform_code
 ```
-validate_terraform_code(root_folder: str) → dict
+validate_terraform_code(path: str) → dict
 ```
 Run `terraform validate` on the given folder and return validation results.
 
 **Parameters:**
-- `root_folder`: Path to Terraform working directory
+- `path`: Path to Terraform working directory
 
 **Returns:** 
 - `valid: bool` — Whether validation passed
@@ -57,12 +57,12 @@ Run `terraform validate` on the given folder and return validation results.
 
 ### review_terraform_code
 ```
-review_terraform_code(root_folder: str) → dict
+review_terraform_code(path: str) → dict
 ```
 Review code against Terraform best practices and architectural standards.
 
 **Parameters:**
-- `root_folder`: Path to Terraform working directory
+- `path`: Path to Terraform working directory
 
 **Returns:**
 - `issues: list[dict]` — Code issues with severity (CRITICAL, MAJOR, MINOR)

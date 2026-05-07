@@ -7,7 +7,7 @@ from deepagents.backends import FilesystemBackend
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
-from .tools import TerraformValidator, TerraformReviewer
+from .tools import init_tools, search_knowledge_base, validate_and_fix_code, review_and_fix_code
 
 
 class TerraformAgent:
@@ -53,14 +53,13 @@ class TerraformAgent:
 
         print("🤖 Setting up agent...")
 
-        # Initialize tools
-        validator = TerraformValidator(config, prompts)
-        reviewer = TerraformReviewer(config, prompts, knowledge_base)
+        # Initialize global tool instances
+        init_tools(config, prompts, knowledge_base)
 
         tools = [
-            knowledge_base.search,
-            validator.get_tool(),
-            reviewer.get_tool(),
+            search_knowledge_base,
+            validate_and_fix_code,
+            review_and_fix_code,
         ]
 
         # Create agent
