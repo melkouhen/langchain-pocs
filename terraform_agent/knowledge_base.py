@@ -19,7 +19,10 @@ class KnowledgeBase:
         vectorstore: ChromaDB vector store instance for similarity search
     """
 
-    def __init__(self, config: Config):
+    config: Config
+    vectorstore: Chroma
+
+    def __init__(self, config: Config) -> None:
         """Initialize the knowledge base and load documents.
 
         Loads all markdown files from the docs directory, splits them into
@@ -33,7 +36,7 @@ class KnowledgeBase:
         self.vectorstore = None
         self._initialize()
 
-    def _initialize(self):
+    def _initialize(self) -> None:
         """Initialize and populate the ChromaDB vectorstore.
 
         Performs the following steps:

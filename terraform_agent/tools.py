@@ -9,13 +9,13 @@ from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 
 # Global instances for tools
-_config: Config = None
-_prompts: PromptManager = None
-_knowledge_base: KnowledgeBase = None
-_review_model: ChatOllama = None
+_config: Config | None = None
+_prompts: PromptManager | None = None
+_knowledge_base: KnowledgeBase | None = None
+_review_model: ChatOllama | None = None
 
 
-def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase):
+def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase) -> None:
     """Initialize global instances needed by tools.
 
     Args:
@@ -45,7 +45,7 @@ def search_knowledge_base(query: str) -> str:
         Relevant best practices from knowledge base
     """
     if _knowledge_base is None:
-        return "⚠️ Erreur: Knowledge base non initialisée"
+        return "⚠️ Error: Knowledge base not initialized"
 
     return _knowledge_base.search(query)
 
@@ -58,7 +58,7 @@ def validate_and_fix_code(path: str) -> str:
         path: folder where the code is generated
     """
     if _prompts is None or _review_model is None:
-        return "⚠️ Erreur: Tools non initialisés"
+        return "⚠️ Error: Tools not initialized"
 
     try:
         # Step 1: Run terraform init
@@ -71,7 +71,7 @@ def validate_and_fix_code(path: str) -> str:
         )
 
         if init_result.returncode != 0:
-            return f"❌ Erreur lors de terraform init:\n{init_result.stderr or init_result.stdout}"
+            return f"❌ Error during terraform init:\n{init_result.stderr or init_result.stdout}"
 
         # Step 2: Run terraform validate
         validate_result = subprocess.run(
@@ -90,16 +90,16 @@ def validate_and_fix_code(path: str) -> str:
             )
 
             correction = _review_model.invoke(prompt).content
-            return f"❌ Erreurs détectées:\n{error_message}\n\n💡 Corrections suggérées:\n{correction}"
+            return f"❌ Errors detected:\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
         else:
-            return "✅ Terraform init et validate: succès - aucune erreur détectée"
+            return "✅ Terraform init and validate: success - no errors detected"
 
     except FileNotFoundError:
-        return "⚠️ Erreur: terraform n'est pas installé ou non accessible dans le PATH"
+        return "⚠️ Error: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Erreur: terraform init ou validate a dépassé le timeout"
+        return "⚠️ Error: terraform init or validate exceeded timeout"
     except Exception as e:
-        return f"⚠️ Erreur lors de la validation: {str(e)}"
+        return f"⚠️ Error during validation: {str(e)}"
 
 
 @tool
@@ -115,7 +115,7 @@ def review_and_fix_code(path: str) -> str:
         path: folder where the code is generated
     """
     if _knowledge_base is None or _prompts is None or _review_model is None:
-        return "⚠️ Erreur: Tools non initialisés"
+        return "⚠️ Error: Tools not initialized"
 
     try:
         # Step 1: Retrieve best practices from knowledge base
@@ -127,7 +127,7 @@ def review_and_fix_code(path: str) -> str:
         tf_files = sorted(glob.glob(path + "/**/*.tf", recursive=True))
 
         if not tf_files:
-            return "⚠️ Revue: Aucun fichier .tf trouvé dans le répertoire"
+            return "⚠️ Review: No .tf files found in directory"
 
         code_content = ""
         for file_path in tf_files:
@@ -162,8 +162,8 @@ def review_and_fix_code(path: str) -> str:
         return result_summary
 
     except FileNotFoundError as e:
-        return f"⚠️ Erreur: Fichier non trouvé: {e}"
+        return f"⚠️ Error: File not found: {e}"
     except Exception as e:
-        return f"⚠️ Erreur lors de la revue: {str(e)}"
+        return f"⚠️ Error during review: {str(e)}"
 
 

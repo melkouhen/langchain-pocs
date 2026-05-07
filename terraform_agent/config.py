@@ -17,7 +17,15 @@ class Config:
         AGENT_MODEL: Name of the main Claude model for the agent
     """
 
-    def __init__(self, base_dir: Path | None = None):
+    PROJECT_ROOT: Path
+    WORK_DIR: Path
+    DOCS_DIR: Path
+    PROMPTS_DIR: Path
+    EMBEDDING_MODEL: str
+    REVIEW_MODEL_NAME: str
+    AGENT_MODEL: str
+
+    def __init__(self, base_dir: Path | None = None) -> None:
         """Initialize configuration with project paths and model names.
 
         Args:

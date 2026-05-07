@@ -29,12 +29,17 @@ class TerraformAgent:
         agent: The underlying DeepAgent instance
     """
 
+    config: Config
+    prompts: PromptManager
+    knowledge_base: KnowledgeBase
+    agent: object
+
     def __init__(
         self,
         config: Config,
         prompts: PromptManager,
         knowledge_base: KnowledgeBase,
-    ):
+    ) -> None:
         """Initialize the Terraform agent with all required components.
 
         Sets up the DeepAgent with three tools:

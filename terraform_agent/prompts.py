@@ -13,7 +13,10 @@ class PromptManager:
         _cache: Internal dictionary caching loaded prompt templates
     """
 
-    def __init__(self, config: Config):
+    config: Config
+    _cache: dict[str, str]
+
+    def __init__(self, config: Config) -> None:
         """Initialize the prompt manager with a configuration.
 
         Args:
