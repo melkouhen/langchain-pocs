@@ -1,6 +1,7 @@
 import shutil
 from datetime import datetime
-from langchain.chat_models import init_chat_model
+from langchain_anthropic import ChatAnthropic
+from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
 
@@ -67,10 +68,14 @@ class TerraformAgent:
             review_and_fix_code,
         ]
 
-        # Create agent
+        # Create agent with prompt caching enabled
         backend = FilesystemBackend(root_dir=config.PROJECT_ROOT, virtual_mode=False)
+        chat_model = ChatAnthropic(
+            model=config.AGENT_MODEL,
+            cache_control_tokens=True,
+        )
         self.agent = create_deep_agent(
-            model=init_chat_model(model=config.AGENT_MODEL),
+            model=chat_model,
             backend=backend,
             tools=tools,
         )
@@ -117,8 +122,17 @@ class TerraformAgent:
         print("-" * 80)
 
         try:
+            # Build messages with cache control on system prompt
+            messages = [
+                SystemMessage(
+                    content=self.prompts.system,
+                    cache_control={"type": "ephemeral"}
+                ),
+                HumanMessage(content=self.prompts.user),
+            ]
+
             result = self.agent.invoke(
-                {"messages": [{"role": "user", "content": self.prompts.user}]}
+                {"messages": messages}
             )
 
             agent_output = result["messages"][-1].content

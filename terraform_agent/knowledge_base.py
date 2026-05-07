@@ -68,16 +68,25 @@ class KnowledgeBase:
         # Initialize embedding function
         embedding_function = OllamaEmbeddings(model=self.config.EMBEDDING_MODEL)
 
-        # Create vectorstore
+        # Check if vectorstore already exists
         vectorstore_path = (
             self.config.PROJECT_ROOT / "notebooks" / ".vectorstore2"
         )
-        print(f"  Creating vectorstore database...")
-        self.vectorstore = Chroma(
-            collection_name="terraform_docs",
-            embedding_function=embedding_function,
-            persist_directory=str(vectorstore_path),
-        )
+
+        if vectorstore_path.exists():
+            print(f"  ✓ Vectorstore found, loading existing database...")
+            self.vectorstore = Chroma(
+                collection_name="terraform_docs",
+                embedding_function=embedding_function,
+                persist_directory=str(vectorstore_path),
+            )
+        else:
+            print(f"  Creating new vectorstore database...")
+            self.vectorstore = Chroma(
+                collection_name="terraform_docs",
+                embedding_function=embedding_function,
+                persist_directory=str(vectorstore_path),
+            )
 
         # Check if documents already indexed
         try:

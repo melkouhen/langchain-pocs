@@ -95,14 +95,14 @@ Les directives de validation incluent:
 
 ### Scores par Critère
 
-| Critère | Score | Poids | Points Pondérés |
-|---------|-------|-------|-----------------|
-| Respect du Pipeline | _/5 | 30% | _/1.5 |
-| Qualité du Code | _/5 | 25% | _/1.25 |
-| Validation Terraform | _/5 | 20% | _/1 |
-| Revue de Code | _/5 | 15% | _/0.75 |
-| Documentation | _/5 | 10% | _/0.5 |
-| **SCORE TOTAL** | | | **_/5** |
+| Critère              | Score | Poids | Points Pondérés |
+| -------------------- | ----- | ----- | --------------- |
+| Respect du Pipeline  | _/5   | 30%   | _/1.5           |
+| Qualité du Code      | _/5   | 25%   | _/1.25          |
+| Validation Terraform | _/5   | 20%   | _/1             |
+| Revue de Code        | _/5   | 15%   | _/0.75          |
+| Documentation        | _/5   | 10%   | _/0.5           |
+| **SCORE TOTAL**      |       |       | **_/5**         |
 
 ### Points Forts
 1. [Point fort 1]
