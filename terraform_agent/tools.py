@@ -52,13 +52,16 @@ def search_knowledge_base(query: str) -> str:
 
 @tool
 def validate_and_fix_code(path: str) -> str:
-    """Executes terraform init and validate on generated code.
+    """Executes terraform init, validate and plan on generated code (dev environment only).
 
     Args:
         path: folder where the code is generated
     """
-    if _prompts is None or _review_model is None:
+    if _prompts is None or _review_model is None or _config is None:
         return "⚠️ Error: Tools not initialized"
+
+    if _config.ENVIRONMENT != "dev":
+        return f"⚠️ Terraform validation skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform init, validate and plan)"
 
     try:
         # Step 1: Run terraform init
@@ -95,13 +98,27 @@ def validate_and_fix_code(path: str) -> str:
 
             correction = _review_model.invoke(prompt).content
             return f"❌ Errors detected:\n\n📋 terraform validate output:\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
+
+        # Step 3: Run terraform plan
+        plan_result = subprocess.run(
+            ["terraform", "plan", "-no-color"],
+            cwd=path,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+
+        plan_output = plan_result.stdout or plan_result.stderr
+
+        if plan_result.returncode != 0:
+            return f"❌ Error during terraform plan:\n{plan_output}"
         else:
-            return f"✅ Terraform validation successful\n\n📋 terraform init output:\n{init_output}\n\n📋 terraform validate output:\n{validate_output}"
+            return f"✅ Terraform validation successful\n\n📋 terraform init output:\n{init_output}\n\n📋 terraform validate output:\n{validate_output}\n\n📋 terraform plan output:\n{plan_output}"
 
     except FileNotFoundError:
         return "⚠️ Error: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Error: terraform init or validate exceeded timeout"
+        return "⚠️ Error: terraform init, validate or plan exceeded timeout"
     except (OSError, ValueError) as e:
         return f"⚠️ Error during validation: {str(e)}"
 
