@@ -70,8 +70,10 @@ def validate_and_fix_code(path: str) -> str:
             timeout=60,
         )
 
+        init_output = init_result.stdout or init_result.stderr
+
         if init_result.returncode != 0:
-            return f"❌ Error during terraform init:\n{init_result.stderr or init_result.stdout}"
+            return f"❌ Error during terraform init:\n{init_output}"
 
         # Step 2: Run terraform validate
         validate_result = subprocess.run(
@@ -82,17 +84,19 @@ def validate_and_fix_code(path: str) -> str:
             timeout=30,
         )
 
+        validate_output = validate_result.stdout or validate_result.stderr
+
         if validate_result.returncode != 0:
-            error_message = validate_result.stderr or validate_result.stdout
+            error_message = validate_output
 
             prompt = _prompts.validate.format(
                 error_message=error_message, root_folder=path
             )
 
             correction = _review_model.invoke(prompt).content
-            return f"❌ Errors detected:\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
+            return f"❌ Errors detected:\n\n📋 terraform validate output:\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
         else:
-            return "✅ Terraform init and validate: success - no errors detected"
+            return f"✅ Terraform validation successful\n\n📋 terraform init output:\n{init_output}\n\n📋 terraform validate output:\n{validate_output}"
 
     except FileNotFoundError:
         return "⚠️ Error: terraform is not installed or not accessible in PATH"
