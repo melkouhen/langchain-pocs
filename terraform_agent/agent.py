@@ -1,4 +1,5 @@
 import shutil
+from typing import Any
 from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
@@ -31,7 +32,7 @@ class TerraformAgent:
     config: Config
     prompts: PromptManager
     knowledge_base: KnowledgeBase
-    agent: object
+    agent: Any
 
     def __init__(
         self,

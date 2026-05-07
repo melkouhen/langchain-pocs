@@ -19,8 +19,10 @@ class KnowledgeBase:
         vectorstore: ChromaDB vector store instance for similarity search
     """
 
+    VECTORSTORE_DIR : str = ".vectorstore"
+
     config: Config
-    vectorstore: Chroma
+    vectorstore: Chroma | None
 
     def __init__(self, config: Config) -> None:
         """Initialize the knowledge base and load documents.
@@ -70,7 +72,7 @@ class KnowledgeBase:
 
         # Check if vectorstore already exists
         vectorstore_path = (
-            self.config.PROJECT_ROOT / "notebooks" / ".vectorstore"
+            self.config.PROJECT_ROOT / "notebooks" / self.VECTORSTORE_DIR
         )
 
         if vectorstore_path.exists():
@@ -118,5 +120,7 @@ class KnowledgeBase:
         Returns:
             Concatenated content of the top k matching documents, separated by '---'
         """
+        if self.vectorstore is None:
+            raise RuntimeError("Vectorstore not initialized")
         results = self.vectorstore.similarity_search(query, k=k)
         return "\n---\n".join([res.page_content for res in results])

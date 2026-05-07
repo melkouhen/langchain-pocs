@@ -162,7 +162,7 @@ def review_and_fix_code(path: str) -> str:
         )
 
         # Step 4: Execute review with model
-        review_response = _review_model.invoke(review_prompt).content
+        review_response = str(_review_model.invoke(review_prompt).content)
 
         # Step 5: Parse response and apply fixes if needed
         if "CRITIQUE" in review_response or "MAJEUR" in review_response:
