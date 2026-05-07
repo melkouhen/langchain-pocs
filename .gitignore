@@ -49,6 +49,7 @@ env/
 work/
 notebooks/.vectorstore2/
 test.json
+sample.json
 
 # LangSmith
 .langsmithrc
