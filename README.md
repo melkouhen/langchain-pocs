@@ -4,12 +4,12 @@
 * 3. [📁 Structure du Projet](#StructureduProjet)
 * 4. [🏗️ Architecture Globale du notebook](#ArchitectureGlobaledunotebook)
 * 5. [🚀 Démarrage Rapide](#DmarrageRapide)
-	* 5.1. [Pré-requis](#Pr-requis)
+	* 5.1. [Pré-requis Système](#Pr-requisSystme)
 	* 5.2. [Installation des dépendances](#Installationdesdpendances)
 	* 5.3. [Configuration](#Configuration)
 	* 5.4. [Exécution](#Excution)
-* 6. [📊 Résultats](#Rsultats)
-* 7. [État du projet](#8.Etatduprojet)
+* 6. [📊 Résultats & Sortie](#RsultatsSortie)
+* 7. [État du projet](#tatduprojet)
 
 <!-- vscode-markdown-toc-config
 	numbering=true
@@ -33,33 +33,50 @@ Cet agent doit respecter les bonnes pratiques trouvées dans le répertoire docs
 
 ##  2. <a name='TechnologiesPrincipales'></a>🛠️ Technologies Principales
 
-| Technologie    | Rôle                                         |
-| -------------- | -------------------------------------------- |
-| **LangChain**  | Orchestration d'agents et chaînage d'outils  |
-| **Claude API** | Modèle LLM pour l'analyse et génération      |
-| **ChromaDB**   | Vector store pour la recherche sémantique    |
-| **DeepChain**  | Agent autonome avec planification long-terme |
-| **LangSmith**  | Tracing et debugging des agents              |
+| Technologie    | Rôle                                            | Version     |
+| -------------- | ----------------------------------------------- | ----------- |
+| **LangChain**  | Orchestration d'agents et chaînage d'outils     | >= 1.2.15   |
+| **Claude API** | Modèle LLM pour l'analyse et génération         | Haiku 4.5   |
+| **ChromaDB**   | Vector store pour la recherche sémantique       | >= 1.5.8    |
+| **DeepAgents** | Agent autonome avec planification long-terme    | >= 0.5.4    |
+| **Ollama**     | Modèle local pour validation Terraform          | qwen2.5-7b  |
+| **LangSmith**  | Tracing et debugging des agents (optionnel)     | >= 0.7.38   |
 
 ##  3. <a name='StructureduProjet'></a>📁 Structure du Projet
 
 ```
 .
 ├── notebooks/
-│   └── deepchain-terraform-assistant.ipynb      # Notebook principal (agent orchestration)
+│   ├── deepchain_terraform_assistant.ipynb      # Notebook principal (agent orchestration)
+│   ├── token_analysis.ipynb                     # Analyse consommation tokens Claude
+│   └── chromadb_explorer.ipynb                  # Exploration de la knowledge base
+├── terraform_agent/                             # Code agent Python (624 lignes)
+│   ├── agent.py                                 # Orchestration DeepAgent
+│   ├── tools.py                                 # Outils: validation, review, search
+│   ├── knowledge_base.py                        # Integration ChromaDB
+│   ├── prompts.py                               # Gestion des prompts
+│   └── config.py                                # Configuration centralisée
 ├── docs/                                        # Bonnes pratiques Terraform
 │   ├── structure.md
 │   └── cloud-storage.md
-├── prompts/
-│   ├── terraform-system.md
+├── prompts/                                     # Templates LLM
+│   ├── terraform-system.md                      # System prompt (agent behavior)
 │   ├── terraform-user.md
 │   ├── terraform-review.md
-│   ├── terraform-evaluation.md
-│   └── terraform-validate.md
-├── .vectorstore2/                               # Base de données ChromaDB
+│   ├── terraform-validate.md
+│   └── terraform-evaluation.md
 ├── work/                                        # Résultats de la génération
-├── .env                                         # Configuration (API keys, ...)
-└── pyproject.toml                               # Configuration du projet python
+│   ├── modules/gcs_bucket/                      # Module Terraform réutilisable
+│   ├── envs/{dev,prod}/                         # Environnements Terraform (dev & prod)
+│   ├── README.md                                # Documentation complète
+│   ├── DEPLOYMENT.md                            # Guide déploiement pas-à-pas
+│   ├── VALIDATION_REPORT.md                     # Rapport d'assurance qualité
+│   └── PROJECT_SUMMARY.md                       # Résumé du projet généré
+├── .vectorstore2/                               # Base de données ChromaDB (cache)
+├── .env                                         # Configuration (API keys)
+├── .env.example                                 # Template .env
+├── pyproject.toml                               # Dépendances Python (uv)
+└── .python-version                              # Python 3.14
 ```
 
 ##  4. <a name='ArchitectureGlobaledunotebook'></a>🏗️ Architecture Globale du notebook
@@ -91,9 +108,35 @@ L'agent est implémenté comme un notebook python avec les phases suivantes :
 
 ##  5. <a name='DmarrageRapide'></a>🚀 Démarrage Rapide
 
-###  5.1. <a name='Pr-requis'></a>Pré-requis 
-- **Plugin VS Code Jupyter** : nécessaire pour exécuter les notebooks interactivement
-- **Python 3.14+** : version cible du projet (configurée dans `.python-version`)
+###  5.1. <a name='Pr-requisSystme'></a>Pré-requis Système
+
+**Logiciels obligatoires:**
+- **Python 3.14+** : version cible (voir `.python-version`)
+- **uv** : gestionnaire de packages Python rapide
+  ```bash
+  # macOS/Linux
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  ```
+- **Ollama** : pour modèle local Terraform validation
+  ```bash
+  # macOS: https://ollama.ai/download
+  # Télécharger et installer, puis:
+  ollama pull qwen2.5-coder:7b
+  ```
+  - Le service Ollama doit écouter sur `http://localhost:11434`
+  - Vérifier: `curl http://localhost:11434/api/tags`
+
+**Pour déploiement Terraform (optionnel si test uniquement):**
+- **gcloud CLI** : authentification GCP
+  ```bash
+  gcloud auth application-default login
+  ```
+- **Terraform >= 1.5** : pour déployer l'infrastructure générée
+
+**IDE (recommandé):**
+- **VS Code** avec extensions:
+  - Jupyter plugin (pour exécuter les notebooks)
+  - Terraform extension (pour synthaxe HCL)
 
 ###  5.2. <a name='Installationdesdpendances'></a>Installation des dépendances
 
@@ -103,27 +146,69 @@ uv sync
 
 ###  5.3. <a name='Configuration'></a>Configuration
 
-Créer un fichier `.env` avec :
+**Copier le template et remplir les clés:**
 ```bash
-ANTHROPIC_API_KEY=sk-...
-LANGSMITH_TRACING=true
-LANGSMITH_ENDPOINT=https://api.smith.langchain.com
-LANGCHAIN_API_KEY=lsv_...
-LANGCHAIN_PROJECT=terraform-agent
+cp .env.example .env
 ```
 
+**Variables requises dans `.env`:**
+```bash
+# Anthropic API (obligatoire)
+ANTHROPIC_API_KEY=sk-ant-...
+
+# LangSmith (optionnel - pour tracing/debugging)
+LANGSMITH_API_KEY=lsv_pt_...
+LANGSMITH_PROJECT=terraform-agent
+```
+
+**Obtenir les clés:**
+- `ANTHROPIC_API_KEY` : https://console.anthropic.com/account/keys
+- `LANGSMITH_API_KEY` : https://smith.langchain.com (optionnel)
+
 ###  5.4. <a name='Excution'></a>Exécution
-1. Ouvrir `notebooks/deepchain-terraform-assistant.ipynb` dans VS Code
-2. Exécuter les cellules du notebook
-3. Consulter les résultats dans le notebook et dans le répertoire `./work/`
 
-##  6. <a name='Rsultats'></a>📊 Résultats
+**Étape 1: Vérifier les pré-requis**
+```bash
+# Python
+python --version  # Should be 3.14+
 
-Après exécution, le notebook génère :
-- **Fichiers** : sauvegardés dans `./work/` avec timestamps
+# Ollama (doit être en running)
+curl http://localhost:11434/api/tags  # Doit répondre
+```
 
-##  8. <a name='8.Etatduprojet'></a>État du projet
+**Étape 2: Installer les dépendances**
+```bash
+uv sync
+```
 
-Le projet est en phase de développement `actif`. 
+**Étape 3: Lancer le notebook**
+1. Ouvrir VS Code
+2. Ouvrir `notebooks/deepchain_terraform_assistant.ipynb`
+3. Sélectionner kernel Python (uv env)
+4. Exécuter les cellules dans l'ordre
 
-Le composant de validation basé LLM (judge-as-llm) est actuellement en cours de développement et de stabilisation pour améliorer la qualité de l'agent.
+**Étape 4: Consulter les résultats**
+- Résultats générés dans `./work/`
+- Lire `work/PROJECT_SUMMARY.md` pour vue d'ensemble
+- Consulter `work/DEPLOYMENT.md` pour déployer l'infrastructure
+
+##  6. <a name='RsultatsSortie'></a>📊 Résultats & Sortie
+
+Après exécution, le notebook génère dans `./work/`:
+
+**Infrastructure Terraform (production-ready):**
+- `modules/gcs_bucket/` — Module réutilisable Google Cloud Storage
+  - `main.tf` — Ressource GCS avec variables
+  - `variables.tf` — 11 variables d'entrée
+  - `outputs.tf` — 6 outputs pour consommation aval
+- `envs/dev/` — Environnement de développement
+  - Configuration pour bucket de test
+  - État Terraform isolé
+- `envs/prod/` — Environnement de production
+  - Configuration avec lifecycle rules (économie)
+  - État Terraform isolé
+  
+
+##  7. <a name='tatduprojet'></a>État du projet
+
+**Statut:** ✅ **En cours de développement** (dernière mise à jour 7 mai 2026)
