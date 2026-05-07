@@ -11,12 +11,42 @@ from .tools import TerraformValidator, TerraformReviewer
 
 
 class TerraformAgent:
+    """Orchestrates autonomous Terraform code generation and validation.
+
+    Creates and manages a DeepAgent that can autonomously:
+    1. Generate Terraform code based on requirements
+    2. Search the knowledge base for best practices
+    3. Validate generated code for syntax errors
+    4. Review code compliance with best practices
+
+    The agent operates in a controlled workspace (work/) and generates
+    complete Terraform projects with supporting documentation.
+
+    Attributes:
+        config: Configuration object with paths and model names
+        prompts: PromptManager instance for all prompt templates
+        knowledge_base: KnowledgeBase instance for semantic search
+        agent: The underlying DeepAgent instance
+    """
+
     def __init__(
         self,
         config: Config,
         prompts: PromptManager,
         knowledge_base: KnowledgeBase,
     ):
+        """Initialize the Terraform agent with all required components.
+
+        Sets up the DeepAgent with three tools:
+        1. Knowledge base search for retrieving best practices
+        2. Terraform validator for syntax checking and fixes
+        3. Code reviewer for best practices compliance
+
+        Args:
+            config: Configuration object containing paths and model names
+            prompts: PromptManager instance for accessing prompt templates
+            knowledge_base: KnowledgeBase instance for semantic search capabilities
+        """
         self.config = config
         self.prompts = prompts
         self.knowledge_base = knowledge_base
@@ -49,6 +79,18 @@ class TerraformAgent:
         print(f"    - review_and_fix_code")
 
     def run(self) -> str:
+        """Execute the agent to generate and validate Terraform code.
+
+        Performs the following steps:
+        1. Cleans and prepares the work directory
+        2. Invokes the agent with the user prompt
+        3. Handles any errors that occur during execution
+        4. Returns the agent's final output
+
+        Returns:
+            The agent's response content as a string, containing generated
+            Terraform code and validation/review results
+        """
         print("🛠️  Preparing workspace...")
 
         # Clean and create work directory

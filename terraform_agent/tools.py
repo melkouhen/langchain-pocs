@@ -10,12 +10,35 @@ from .knowledge_base import KnowledgeBase
 
 
 class TerraformValidator:
+    """Tool for validating Terraform code and suggesting fixes.
+
+    Uses the 'terraform validate' command to check for syntax errors and
+    configuration issues. If errors are found, uses an LLM to analyze and
+    suggest corrections based on the error messages.
+
+    Attributes:
+        config: Configuration object with model names
+        prompts: PromptManager instance for validation prompts
+        review_model: LLM model used for analyzing and fixing errors
+    """
+
     def __init__(self, config: Config, prompts: PromptManager):
+        """Initialize the Terraform validator with configuration and prompts.
+
+        Args:
+            config: Configuration object containing model names and paths
+            prompts: PromptManager instance for accessing validation templates
+        """
         self.config = config
         self.prompts = prompts
         self.review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
 
     def get_tool(self):
+        """Return a LangChain tool for terraform validation.
+
+        Returns:
+            A LangChain @tool decorated function that can be used by agents
+        """
         @tool
         def validate_and_fix_code(path: str) -> str:
             """
@@ -56,15 +79,42 @@ class TerraformValidator:
 
 
 class TerraformReviewer:
+    """Tool for reviewing Terraform code against best practices.
+
+    Performs comprehensive code reviews by:
+    1. Retrieving relevant best practices from the knowledge base
+    2. Reading all generated Terraform files
+    3. Analyzing code compliance with best practices
+    4. Identifying major issues and suggesting fixes if needed
+
+    Attributes:
+        config: Configuration object with model names and paths
+        prompts: PromptManager instance for review prompts
+        knowledge_base: KnowledgeBase instance for accessing best practices
+        review_model: LLM model used for code analysis
+    """
+
     def __init__(
         self, config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase
     ):
+        """Initialize the Terraform reviewer with dependencies.
+
+        Args:
+            config: Configuration object containing model names and paths
+            prompts: PromptManager instance for accessing review templates
+            knowledge_base: KnowledgeBase instance for accessing best practices
+        """
         self.config = config
         self.prompts = prompts
         self.knowledge_base = knowledge_base
         self.review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
 
     def get_tool(self):
+        """Return a LangChain tool for code review.
+
+        Returns:
+            A LangChain @tool decorated function that can be used by agents
+        """
         @tool
         def review_and_fix_code(path: str) -> str:
             """
