@@ -1,3 +1,7 @@
+run.json
+tmp/
+.mcp.json 
+
 # Environment & Secrets
 .env
 .env.local
