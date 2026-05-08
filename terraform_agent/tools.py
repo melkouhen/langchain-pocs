@@ -51,20 +51,44 @@ def search_knowledge_base(query: str) -> str:
 
 
 @tool
-def validate_and_fix_code(path: str) -> str:
-    """Executes terraform init, validate and plan on generated code (dev environment only).
+def load_module_spec(file_path: str) -> str:
+    """Load the specification of a Terraform module from a file.
+
+    Args:
+        file_path: Path to the module specification file (e.g., docs/terraform-module.md)
+
+    Returns:
+        Complete module specification with variables, outputs, and usage examples
+    """
+    if _config is None:
+        return "⚠️ Error: Config not initialized"
+
+    try:
+        full_path = _config.PROJECT_ROOT / file_path
+        if not full_path.exists():
+            return f"⚠️ Error: Module spec file not found: {full_path}"
+
+        return full_path.read_text()
+    except (OSError, ValueError) as e:
+        return f"⚠️ Error reading module spec: {str(e)}"
+
+
+@tool
+def terraform_init(path: str) -> str:
+    """Initialize a Terraform working directory.
+
+    Runs 'terraform init' to download providers and prepare the working directory.
 
     Args:
         path: folder where the code is generated
     """
-    if _prompts is None or _review_model is None or _config is None:
+    if _config is None:
         return "⚠️ Error: Tools not initialized"
 
     if _config.ENVIRONMENT != "dev":
-        return f"⚠️ Terraform validation skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform init, validate and plan)"
+        return f"⚠️ Terraform init skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
 
     try:
-        # Step 1: Run terraform init
         init_result = subprocess.run(
             ["terraform", "init"],
             cwd=path,
@@ -78,7 +102,32 @@ def validate_and_fix_code(path: str) -> str:
         if init_result.returncode != 0:
             return f"❌ Error during terraform init:\n{init_output}"
 
-        # Step 2: Run terraform validate
+        return f"✅ terraform init successful"
+
+    except FileNotFoundError:
+        return "⚠️ Error: terraform is not installed or not accessible in PATH"
+    except subprocess.TimeoutExpired:
+        return "⚠️ Error: terraform init exceeded timeout"
+    except (OSError, ValueError) as e:
+        return f"⚠️ Error during init: {str(e)}"
+
+
+@tool
+def terraform_validate(path: str) -> str:
+    """Validate Terraform configuration files.
+
+    Runs 'terraform validate' to check syntax and configuration validity.
+
+    Args:
+        path: folder where the code is generated
+    """
+    if _prompts is None or _review_model is None or _config is None:
+        return "⚠️ Error: Tools not initialized"
+
+    if _config.ENVIRONMENT != "dev":
+        return f"⚠️ Terraform validate skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
+
+    try:
         validate_result = subprocess.run(
             ["terraform", "validate"],
             cwd=path,
@@ -91,15 +140,38 @@ def validate_and_fix_code(path: str) -> str:
 
         if validate_result.returncode != 0:
             error_message = validate_output
-
             prompt = _prompts.validate.format(
                 error_message=error_message, root_folder=path
             )
-
             correction = _review_model.invoke(prompt).content
-            return f"❌ Errors detected:\n\n📋 terraform validate output:\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
+            return f"❌ Validation errors detected:\n\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
 
-        # Step 3: Run terraform plan
+        return f"✅ terraform validate successful"
+
+    except FileNotFoundError:
+        return "⚠️ Error: terraform is not installed or not accessible in PATH"
+    except subprocess.TimeoutExpired:
+        return "⚠️ Error: terraform validate exceeded timeout"
+    except (OSError, ValueError) as e:
+        return f"⚠️ Error during validate: {str(e)}"
+
+
+@tool
+def terraform_plan(path: str) -> str:
+    """Generate a Terraform execution plan.
+
+    Runs 'terraform plan' to preview infrastructure changes.
+
+    Args:
+        path: folder where the code is generated
+    """
+    if _config is None:
+        return "⚠️ Error: Tools not initialized"
+
+    if _config.ENVIRONMENT != "dev":
+        return f"⚠️ Terraform plan skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
+
+    try:
         plan_result = subprocess.run(
             ["terraform", "plan", "-no-color"],
             cwd=path,
@@ -112,15 +184,15 @@ def validate_and_fix_code(path: str) -> str:
 
         if plan_result.returncode != 0:
             return f"❌ Error during terraform plan:\n{plan_output}"
-        else:
-            return f"✅ Terraform validation successful\n\n📋 terraform init output:\n{init_output}\n\n📋 terraform validate output:\n{validate_output}\n\n📋 terraform plan output:\n{plan_output}"
+
+        return f"✅ terraform plan successful"
 
     except FileNotFoundError:
         return "⚠️ Error: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Error: terraform init, validate or plan exceeded timeout"
+        return "⚠️ Error: terraform plan exceeded timeout"
     except (OSError, ValueError) as e:
-        return f"⚠️ Error during validation: {str(e)}"
+        return f"⚠️ Error during plan: {str(e)}"
 
 
 @tool

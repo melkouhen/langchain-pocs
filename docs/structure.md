@@ -24,15 +24,14 @@
 
 | Contexte | Règle |
 |----------|-------|
-| **tf-version-pinning** | Épingler les versions Terraform et providers dans les blocs `required_version` et `required_providers` (ex: `~> 1.5.0`, `~> 5.0`). |
+| **tf-version-pinning** | Épingler les versions Terraform et providers dans les blocs `required_version` et `required_providers`. |
 | **tf-provider-locking** | Utiliser `~>` pour les contraintes de version. Verrouiller les sources de modules Git sur des commits ou versions spécifiques si utilisation de `source = "git::..."`. |
 
 ## 5. État et Verrouillage
 
 | Contexte | Règle |
 |----------|-------|
-| **tf-remote-state** | Utiliser un backend distant (S3 + DynamoDB ou Terraform Cloud) pour les projets d'équipe. Ne jamais garder le state localement. |
-| **tf-state-locking** | Activer le verrouillage du state distant (ex: DynamoDB pour S3) pour éviter les `terraform apply` simultanés par plusieurs personnes. |
+| **tf-remote-state** | Utiliser un backend distant (Cloud Storage) pour les projets d'équipe. Ne jamais garder le state localement. |
 | **tf-state-deletion** | Ne jamais supprimer le fichier `.tfstate` directement. Utiliser `terraform destroy` correctement ou gérer le state proprement via CLI/backends. |
 | **tf-state-drift** | Exécuter régulièrement `terraform plan` ou `terraform plan -detailed-exitcode` en CI/CD pour détecter les dérives (modifications manuelles via console). |
 
@@ -71,7 +70,6 @@
 
 | Contexte | Règle |
 |----------|-------|
-| **tf-overengineering-modules** | Ne pas wraper une ressource unique (EC2, bucket S3) en module à moins de réutilisation. Garder le design simple et significatif. |
 | **tf-workspace-confusion** | Les workspaces peuvent créer de la confusion en équipe (ex: appliquer aveuglément dans le mauvais workspace). Préférer les dossiers d'environnements. |
 | **tf-apply-blind** | Ne jamais lancer `terraform apply` sans voir le plan d'abord. C'est comme un dry-run pour l'infrastructure. |
 | **tf-hardcoding-params** | Ne pas encoder les régions ou AMI IDs. Utiliser des variables pour région, environnement et autres paramètres. |

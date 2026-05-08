@@ -252,13 +252,7 @@ Terraform upgrades can break your code. Lock versions in `required_providers` an
 
 ```
 terraform {
-  required_version = "~> 1.5.0"
-  required_providers {
-    aws = {
-      source  = "hashicorp/aws"
-      version = "~> 5.0"
-    }
-  }
+  required_version = "~> 1.15.0"
 }
 ```
 

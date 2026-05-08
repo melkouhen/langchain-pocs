@@ -8,7 +8,7 @@ from deepagents.backends import FilesystemBackend
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
-from .tools import init_tools, search_knowledge_base, validate_and_fix_code, review_and_fix_code
+from .tools import init_tools, load_module_spec, search_knowledge_base, terraform_init, terraform_validate, terraform_plan, review_and_fix_code
 
 class TerraformAgent:
     """Orchestrates autonomous Terraform code generation and validation.
@@ -42,10 +42,13 @@ class TerraformAgent:
     ) -> None:
         """Initialize the Terraform agent with all required components.
 
-        Sets up the DeepAgent with three tools:
-        1. Knowledge base search for retrieving best practices
-        2. Terraform validator for syntax checking and fixes
-        3. Code reviewer for best practices compliance
+        Sets up the DeepAgent with six tools:
+        1. Module spec loader for accessing Terraform module specifications
+        2. Knowledge base search for retrieving best practices
+        3. Terraform init for initializing working directory
+        4. Terraform validate for syntax checking and fixes
+        5. Terraform plan for previewing infrastructure changes
+        6. Code reviewer for best practices compliance
 
         Args:
             config: Configuration object containing paths and model names
@@ -63,8 +66,11 @@ class TerraformAgent:
 
         # Prepare tools list
         tools_list = [
+            load_module_spec,
             search_knowledge_base,
-            validate_and_fix_code,
+            terraform_init,
+            terraform_validate,
+            terraform_plan,
             review_and_fix_code,
         ]
 
@@ -80,9 +86,12 @@ class TerraformAgent:
         print(f"  ✓ System prompt loaded ({len(prompts.system)} chars)")
         print(f"  ✓ User prompt loaded ({len(prompts.user)} chars)")
         print(f"  ✓ Agent created with tools:")
-        print(f"    - search (knowledge base)")
-        print(f"    - validate_and_fix_code")
-        print(f"    - review_and_fix_code")
+        print(f"    - load_module_spec (module specifications)")
+        print(f"    - search_knowledge_base (best practices)")
+        print(f"    - terraform_init (initialize working directory)")
+        print(f"    - terraform_validate (validate configuration)")
+        print(f"    - terraform_plan (preview changes)")
+        print(f"    - review_and_fix_code (code review)")
 
     def run(self) -> str:
         """Execute the agent to generate and validate Terraform code.
@@ -114,7 +123,7 @@ class TerraformAgent:
 
         print("\n📝 Agent is running...")
         print(
-            "    (Agent will autonomously call: search, validate_and_fix_code, review_and_fix_code)"
+            "    (Agent will autonomously call: terraform_init, terraform_validate, terraform_plan, review_and_fix_code)"
         )
         print("-" * 80)
 
