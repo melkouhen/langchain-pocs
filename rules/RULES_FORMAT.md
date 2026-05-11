@@ -201,7 +201,7 @@ rules-{PREFIX}-{DOMAIN}.md
 - `rules-tf-security-cicd.md` — Règles Terraform sur sécurité et CI/CD
 
 **Format ID Rule:**
-- Préfixe 3 lettres: `GCS`, `TF`, `AWS`, etc.
+- Préfixe 3 lettres: `GCS`, `TF`, etc.
 - Type 2-3 lettres: `PROVIDER`, `INPUT`, `SECURITY`, `NAMING`, etc.
 - Numéro: `001`, `002`, etc. (séquentiel dans le domaine)
 

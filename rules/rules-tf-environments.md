@@ -202,28 +202,6 @@ terraform {
 }
 ```
 
-**AWS Example: Separate Buckets**
-```hcl
-# envs/dev/backend.tf
-terraform {
-  backend "s3" {
-    bucket         = "terraform-state-dev"
-    key            = "dev.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-locks-dev"
-  }
-}
-
-# envs/prod/backend.tf
-terraform {
-  backend "s3" {
-    bucket         = "terraform-state-prod"
-    key            = "prod.tfstate"
-    region         = "us-east-1"
-    dynamodb_table = "terraform-locks-prod"
-  }
-}
-```
 
 **Isolation Checklist:**
 ✓ Different backend bucket/storage per env  

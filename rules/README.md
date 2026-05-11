@@ -104,7 +104,6 @@ grep 'severity="MAJOR"' rules-*.md
 ```bash
 ls rules-gcs-*.md      # Google Cloud Storage
 ls rules-tf-*.md       # General Terraform
-ls rules-aws-*.md      # AWS (future)
 ```
 
 ## 📝 Format de Fichier

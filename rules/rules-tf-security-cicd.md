@@ -34,7 +34,7 @@ variable "db_password" {
 
 **Option 2: Secret Manager**
 ```hcl
-# Use Google Secret Manager / AWS Secrets Manager
+# Use Google Secret Manager
 data "google_secret_manager_secret_version" "db_password" {
   secret = "db-password"
   version = "latest"
@@ -373,7 +373,7 @@ terraform apply -auto-approve
 # Push code → CI runs tests → No terraform validate
 
 # ❌ WRONG: Shared credentials
-# Put AWS_ACCESS_KEY_ID in code/config
+# Put credentials directly in code/config
 # Anyone with repo access gets credentials
 ```
 
@@ -381,7 +381,7 @@ terraform apply -auto-approve
 ❌ Invalid code applied to prod  
 ❌ No audit trail  
 ❌ Credentials exposed  
-❌ Manual errors (typos, wrong account)  
+❌ Manual errors (typos, wrong environment)  
 </antipattern>
 
 <why>
@@ -454,7 +454,7 @@ terraform plan -out=tfplan
 
 # Step 2: REVIEW the plan carefully
 # Look for:
-# - Resources being destroyed (aws_instance being destroyed?)
+# - Resources being destroyed (intentional?)
 # - Unexpected modifications
 # - Correct variables being used
 
@@ -495,7 +495,7 @@ terraform apply
 # 2 hours of data lost
 
 # With plan review:
-# terraform plan would show: aws_db_instance.db will be destroyed
+# terraform plan would show: database resource will be destroyed
 # Developer sees this, stops, fixes code first
 ```
 </antipattern>

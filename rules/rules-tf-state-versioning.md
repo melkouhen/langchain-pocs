@@ -250,7 +250,7 @@ terraform init  # Uses exact version from lock file
 <title>Remote State Backend: Never Local State</title>
 
 <description>
-Use a remote backend (GCS, S3, etc.) for all team projects. Local state files
+Use a remote backend (GCS) for all team projects. Local state files
 expose infrastructure data and prevent collaboration.
 </description>
 
@@ -285,11 +285,8 @@ terraform {
 ✓ Audit logs (who changed state, when)  
 ✓ No local files = no laptop exposure  
 
-**Backend Types:**
-- GCS (Google Cloud Storage) - Recommended for GCP
-- S3 (AWS) - Recommended for AWS
-- Azure Blob Storage - Recommended for Azure
-- Terraform Cloud - Multi-cloud, advanced features
+**Backend Type:**
+- GCS (Google Cloud Storage) - Used for GCP projects
 </pattern>
 
 <antipattern id="incorrect">
@@ -336,7 +333,7 @@ terraform {
 </when-to-apply>
 
 <implementation-checklist>
-- [ ] Choose backend service (GCS, S3, etc.)
+- [ ] Choose backend service (GCS)
 - [ ] Create backend storage (bucket, enable versioning)
 - [ ] Create backend.tf with credentials
 - [ ] Run `terraform init` to migrate state (if migrating)

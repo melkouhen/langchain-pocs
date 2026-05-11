@@ -4,6 +4,7 @@ from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
+from langfuse.langchain import CallbackHandler as LangfuseCallbackHandler
 
 from .config import Config
 from .prompts import PromptManager
@@ -141,8 +142,10 @@ class TerraformAgent:
                 HumanMessage(content=prompt_content),
             ]
 
+            langfuse_handler = LangfuseCallbackHandler()
             result = self.agent.invoke(
-                {"messages": messages}
+                {"messages": messages},
+                config={"callbacks": [langfuse_handler]},
             )
 
             agent_output = result["messages"][-1].content
