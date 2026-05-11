@@ -1,4 +1,5 @@
 import shutil
+import logging
 from typing import Any
 from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
@@ -10,6 +11,8 @@ from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 from .tools import init_tools, load_module_spec, search_knowledge_base, terraform_init, terraform_validate, terraform_plan, review_and_fix_code
+
+logger = logging.getLogger(__name__)
 
 class TerraformAgent:
     """Orchestrates autonomous Terraform code generation and validation.
@@ -142,18 +145,35 @@ class TerraformAgent:
                 HumanMessage(content=prompt_content),
             ]
 
-            langfuse_handler = LangfuseCallbackHandler()
+            # Initialize Langfuse tracing if configured
+            callbacks = []
+            if self.config.LANGFUSE_ENABLED:
+                try:
+                    langfuse_handler = LangfuseCallbackHandler(
+                        public_key=self.config.LANGFUSE_PUBLIC_KEY,
+                        secret_key=self.config.LANGFUSE_SECRET_KEY,
+                        baseUrl=self.config.LANGFUSE_BASE_URL,
+                    )
+                    callbacks.append(langfuse_handler)
+                    logger.info("Langfuse tracing enabled")
+                except Exception as e:
+                    logger.warning(f"Failed to initialize Langfuse: {e}")
+            else:
+                logger.info("Langfuse tracing disabled (no credentials configured)")
+
             result = self.agent.invoke(
                 {"messages": messages},
-                config={"callbacks": [langfuse_handler]},
+                config={"callbacks": callbacks} if callbacks else {},
             )
 
             agent_output = result["messages"][-1].content
             overall_status = "✅ SUCCESS"
+            logger.info("Agent execution completed successfully")
 
         except Exception as e:
             overall_status = "❌ FAILED"
             agent_output = str(e)
+            logger.error(f"Agent execution failed: {e}", exc_info=True)
             print(f"\n❌ Agent Error: {e}")
             import traceback
 

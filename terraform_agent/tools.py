@@ -5,13 +5,14 @@ import logging
 import time
 from langchain_ollama import ChatOllama
 from langchain_core.tools import tool
+from langfuse import Langfuse
 
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 
-# Configure logger
 logger = logging.getLogger(__name__)
+langfuse_client: Langfuse | None = None
 
 # Global instances for tools
 _config: Config | None = None
@@ -28,13 +29,50 @@ def init_tools(config: Config, prompts: PromptManager, knowledge_base: Knowledge
         prompts: PromptManager instance
         knowledge_base: KnowledgeBase instance
     """
-    global _config, _prompts, _knowledge_base, _review_model
+    global _config, _prompts, _knowledge_base, _review_model, langfuse_client
     logger.info("Initializing tools with config, prompts, and knowledge base")
     _config = config
     _prompts = prompts
     _knowledge_base = knowledge_base
     _review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
     logger.info(f"Tools initialized - Review model: {config.REVIEW_MODEL_NAME}")
+
+    if config.LANGFUSE_ENABLED:
+        try:
+            langfuse_client = Langfuse(
+                public_key=config.LANGFUSE_PUBLIC_KEY,
+                secret_key=config.LANGFUSE_SECRET_KEY,
+                baseUrl=config.LANGFUSE_BASE_URL,
+            )
+            logger.info("Langfuse client initialized for tool tracing")
+        except Exception as e:
+            logger.warning(f"Failed to initialize Langfuse client: {e}")
+            langfuse_client = None
+    else:
+        logger.debug("Langfuse tracing disabled")
+
+
+def trace_tool_execution(tool_name: str, input_data: dict, output_data: str, elapsed_time: float) -> None:
+    """Log tool execution to Langfuse for observability.
+
+    Args:
+        tool_name: Name of the tool being executed
+        input_data: Input parameters to the tool
+        output_data: Output/result from the tool
+        elapsed_time: Execution time in seconds
+    """
+    if not langfuse_client:
+        return
+
+    try:
+        langfuse_client.span(
+            name=f"tool_{tool_name}",
+            input=input_data,
+            output=output_data,
+            duration=elapsed_time,
+        )
+    except Exception as e:
+        logger.debug(f"Failed to log tool execution to Langfuse: {e}")
 
 
 # ============================================================================
@@ -62,6 +100,13 @@ def search_knowledge_base(query: str) -> str:
     result = _knowledge_base.search(query)
     elapsed = time.time() - start_time
     logger.info(f"Knowledge base search completed in {elapsed:.2f}s")
+
+    trace_tool_execution(
+        "search_knowledge_base",
+        {"query": query},
+        result[:200] + ("..." if len(result) > 200 else ""),
+        elapsed,
+    )
 
     return result
 
@@ -210,6 +255,9 @@ def terraform_validate(path: str) -> str:
     except (OSError, ValueError) as e:
         logger.error(f"Exception during validate: {str(e)}")
         return f"❌ ERROR: during validate: {str(e)}"
+    finally:
+        elapsed = time.time() - start_time if 'start_time' in locals() else 0
+        trace_tool_execution("terraform_validate", {"path": path}, "validation_completed", elapsed)
 
 
 @tool

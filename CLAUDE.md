@@ -5,8 +5,8 @@
 **Terraform Code Review & Generation Agent** — An autonomous AI system that generates, validates, and improves Terraform infrastructure code following best practices.
 
 **Status:** Production-ready ✅  
-**Last Updated:** May 7, 2026  
-**Active Development:** Yes (15 commits in last 2 days)
+**Last Updated:** May 11, 2026  
+**Active Development:** Yes (Langfuse integration added)
 
 ---
 
@@ -211,10 +211,18 @@ Located in `prompts/terraform-system.md`. Key sections:
 # Required
 ANTHROPIC_API_KEY=sk-ant-...  # From https://console.anthropic.com
 
-# Optional (for tracing)
+# Optional: Langfuse (production observability platform)
+# Sign up at https://langfuse.com, get keys from Project Settings > API Keys
+LANGFUSE_PUBLIC_KEY=pk-lf-...
+LANGFUSE_SECRET_KEY=sk-lf-...
+LANGFUSE_BASE_URL=https://cloud.langfuse.com  # Or http://localhost:3000 for self-hosted
+
+# Optional: LangSmith (alternative to Langfuse)
 LANGSMITH_API_KEY=lsv_pt_...  # From https://smith.langchain.com
 LANGSMITH_PROJECT=terraform-agent
 ```
+
+**Note:** Langfuse is the recommended tracing platform. See `docs/LANGFUSE_INTEGRATION.md` for setup instructions.
 
 ### Adding Custom Knowledge
 
@@ -255,7 +263,11 @@ Edit `prompts/terraform-system.md` to change:
 ### Debugging
 
 ```bash
-# Enable LangSmith tracing (optional)
+# Enable Langfuse tracing (recommended)
+# Set in .env: LANGFUSE_PUBLIC_KEY=pk-lf-... and LANGFUSE_SECRET_KEY=sk-lf-...
+# Then open your Langfuse dashboard to see traces, tool calls, and token usage
+
+# Alternative: Enable LangSmith tracing
 # Set in .env: LANGSMITH_API_KEY=...
 
 # View agent thinking
@@ -267,6 +279,14 @@ Edit `prompts/terraform-system.md` to change:
 # Analyze token consumption
 # Run: notebooks/token_analysis.ipynb
 ```
+
+**Langfuse Features:**
+- View complete execution traces with timing
+- Inspect tool inputs/outputs
+- Track token usage and costs
+- Monitor error rates
+- Compare runs and performance metrics
+- See automatic LangChain integration traces
 
 ---
 
@@ -289,9 +309,12 @@ See `README.md` Troubleshooting section for more details.
 | File | Purpose | When to Edit |
 |------|---------|--------------|
 | `README.md` | User-facing documentation | When adding features, changing setup |
+| `docs/LANGFUSE_INTEGRATION.md` | Langfuse setup and observability guide | When configuring tracing or debugging |
+| `.env.example` | Environment variables template | When adding new configs or credentials |
 | `prompts/terraform-system.md` | Agent behavior definition | When changing generation strategy |
-| `terraform_agent/config.py` | Model/path configuration | When changing LLM or models |
-| `terraform_agent/tools.py` | Tool implementations | When adding/modifying tools |
+| `terraform_agent/config.py` | Model/path configuration (including Langfuse) | When changing LLM or observability settings |
+| `terraform_agent/agent.py` | Agent orchestration and tracing setup | When modifying agent flow or Langfuse integration |
+| `terraform_agent/tools.py` | Tool implementations and tool-level tracing | When adding/modifying tools |
 | `docs/*.md` | Best practices knowledge base | When adding new architectural patterns |
 
 ---
@@ -374,6 +397,6 @@ Types: `feat`, `fix`, `refactor`, `docs`, `chore`
 
 ---
 
-**Last Updated:** May 7, 2026  
+**Last Updated:** May 11, 2026  
 **Status:** ✅ Production-ready  
 **Maintainer:** Mehdi El Kouhen  
