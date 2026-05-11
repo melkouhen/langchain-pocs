@@ -85,8 +85,9 @@ def terraform_init(path: str) -> str:
     if _config is None:
         return "⚠️ Error: Tools not initialized"
 
-    if _config.ENVIRONMENT != "dev":
-        return f"⚠️ Terraform init skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
+    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
+    if environment != "dev":
+        return f"❌ ERROR: Terraform init skipped: running in {environment} environment (only dev environment executes terraform commands)"
 
     try:
         init_result = subprocess.run(
@@ -100,16 +101,16 @@ def terraform_init(path: str) -> str:
         init_output = init_result.stdout or init_result.stderr
 
         if init_result.returncode != 0:
-            return f"❌ Error during terraform init:\n{init_output}"
+            return f"❌ ERROR: terraform init failed:\n{init_output}"
 
         return f"✅ terraform init successful"
 
     except FileNotFoundError:
-        return "⚠️ Error: terraform is not installed or not accessible in PATH"
+        return "❌ ERROR: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Error: terraform init exceeded timeout"
+        return "❌ ERROR: terraform init exceeded timeout"
     except (OSError, ValueError) as e:
-        return f"⚠️ Error during init: {str(e)}"
+        return f"❌ ERROR: during init: {str(e)}"
 
 
 @tool
@@ -124,8 +125,9 @@ def terraform_validate(path: str) -> str:
     if _prompts is None or _review_model is None or _config is None:
         return "⚠️ Error: Tools not initialized"
 
-    if _config.ENVIRONMENT != "dev":
-        return f"⚠️ Terraform validate skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
+    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
+    if environment != "dev":
+        return f"❌ ERROR: Terraform validate skipped: running in {environment} environment (only dev environment executes terraform commands)"
 
     try:
         validate_result = subprocess.run(
@@ -139,16 +141,16 @@ def terraform_validate(path: str) -> str:
         validate_output = validate_result.stdout or validate_result.stderr
 
         if validate_result.returncode != 0:
-            return f"❌ Error: terraform validate failed. Fix the code and re-run terraform_init + terraform_validate.\n\n{validate_output}"
+            return f"❌ ERROR: terraform validate failed. Fix the code and re-run terraform_init + terraform_validate.\n\n{validate_output}"
 
         return f"✅ terraform validate successful"
 
     except FileNotFoundError:
-        return "⚠️ Error: terraform is not installed or not accessible in PATH"
+        return "❌ ERROR: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Error: terraform validate exceeded timeout"
+        return "❌ ERROR: terraform validate exceeded timeout"
     except (OSError, ValueError) as e:
-        return f"⚠️ Error during validate: {str(e)}"
+        return f"❌ ERROR: during validate: {str(e)}"
 
 
 @tool
@@ -163,8 +165,9 @@ def terraform_plan(path: str) -> str:
     if _config is None:
         return "⚠️ Error: Tools not initialized"
 
-    if _config.ENVIRONMENT != "dev":
-        return f"⚠️ Terraform plan skipped: running in {_config.ENVIRONMENT} environment (only dev environment executes terraform commands)"
+    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
+    if environment != "dev":
+        return f"❌ ERROR: Terraform plan skipped: running in {environment} environment (only dev environment executes terraform commands)"
 
     try:
         plan_result = subprocess.run(
@@ -178,16 +181,16 @@ def terraform_plan(path: str) -> str:
         plan_output = plan_result.stdout or plan_result.stderr
 
         if plan_result.returncode != 0:
-            return f"❌ Error during terraform plan:\n{plan_output}"
+            return f"❌ ERROR: terraform plan failed:\n{plan_output}"
 
         return f"✅ terraform plan successful"
 
     except FileNotFoundError:
-        return "⚠️ Error: terraform is not installed or not accessible in PATH"
+        return "❌ ERROR: terraform is not installed or not accessible in PATH"
     except subprocess.TimeoutExpired:
-        return "⚠️ Error: terraform plan exceeded timeout"
+        return "❌ ERROR: terraform plan exceeded timeout"
     except (OSError, ValueError) as e:
-        return f"⚠️ Error during plan: {str(e)}"
+        return f"❌ ERROR: during plan: {str(e)}"
 
 
 @tool
