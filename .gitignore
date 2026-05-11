@@ -52,6 +52,7 @@ env/
 # Project-specific
 .vectorstore*/
 work/
+eval/results/
 notebooks/.vectorstore*/
 test.json
 sample.json
