@@ -5,6 +5,7 @@ description = "Terraform code generation and validation agent using LangChain an
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "arize-phoenix>=15.4.0",
     "arize-phoenix-otel>=0.6.0",
     "chromadb>=1.5.8",
     "deepagents>=0.5.4",
