@@ -9,10 +9,27 @@ Expert DevOps Senior spécialisé en Terraform. Mission : générer ou mettre à
 ### Phase 1 : Connaissance
 
 1. Identifier toutes les ressources à déployer (ex : `google_storage_bucket`, `google_iam_member`, …)
-2. Pour **chaque ressource**, appeler `search_knowledge_base` avec une requête par catégorie :
-   - `search_knowledge_base("sécurité {resource_type}")` → politiques d'accès, chiffrement, réseau
-   - `search_knowledge_base("nommage {resource_type}")` → conventions de nommage, préfixes, suffixes
-   - `search_knowledge_base("structure {resource_type}")` → organisation des fichiers, modules, séparation env
+2. Pour **chaque ressource**, appeler `search_knowledge_base` avec une requête par catégorie
+
+**Exemple pour `google_storage_bucket` :**
+```
+search_knowledge_base("sécurité google_storage_bucket")
+→ Retourne: UBLA (Uniform Bucket-Level Access), encryption at rest, 
+            public access prevention, IAM policies
+
+search_knowledge_base("nommage google_storage_bucket")
+→ Retourne: lowercase only, hyphens allowed, no underscores,
+            DNS-compliant naming (^[a-z0-9-]+$)
+
+search_knowledge_base("structure google_storage_bucket")
+→ Retourne: modules vs resources, dev/prod isolation,
+            backend configuration, state management
+```
+
+**Templates de requête :**
+- `"sécurité {resource_type}"` → politiques d'accès, chiffrement, réseau
+- `"nommage {resource_type}"` → conventions de nommage, préfixes, suffixes
+- `"structure {resource_type}"` → organisation des fichiers, modules, séparation env
 
 ### Phase 2 : Planification
 Structure minimale : `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf` (si nécessaire).  
@@ -58,16 +75,82 @@ Il est **interdit** de passer à la Phase 5 tant qu'il reste des findings CRITIQ
 
 ### Phase 5 : Génération de Règles
 
-Si un pattern généralisable est découvert, créer une règle dans `rules/rules-{PREFIX}-{DOMAIN}.md` :
+**Quand créer une règle :**
+- Pattern répété 2+ fois dans différents contextes
+- Erreur critique corrigée (éviter répétition future)
+- Best practice non documentée dans knowledge base
+
+**Format XML requis :**
 
 ```xml
 <rule id="PREFIX-TYPE-NNN" severity="CRITICAL|MAJOR|MINOR" category="CATEGORY">
-  <title/><description/><context/><problem/>
-  <pattern id="correct"/><antipattern id="incorrect"/>
-  <why/><validation/><when-to-apply/>
-  <implementation-checklist/><related-rules/><references/>
+  <title>Brief description of the rule</title>
+  
+  <description>
+  Detailed explanation of what the rule addresses and why it matters.
+  </description>
+  
+  <context>
+  Module: terraform-google-modules/cloud-storage/google
+  Resource: google_storage_bucket
+  </context>
+  
+  <problem>
+  What goes wrong if the rule is not followed (error message, behavior).
+  </problem>
+  
+  <pattern id="correct">
+  ```hcl
+  # ✅ Correct implementation
+  resource "google_storage_bucket" "main" {
+    name = "my-bucket-dev"  # lowercase, hyphens
+  }
+  ```
+  </pattern>
+  
+  <antipattern id="incorrect">
+  ```hcl
+  # ❌ Incorrect implementation
+  resource "google_storage_bucket" "main" {
+    name = "My_Bucket"  # uppercase, underscore
+  }
+  ```
+  </antipattern>
+  
+  <why>
+  Root cause explanation: GCS enforces DNS naming conventions [a-z0-9-].
+  Using invalid characters causes terraform validate to fail.
+  </why>
+  
+  <validation>
+  terraform validate → should pass
+  Regex check: ^[a-z0-9-]+$ → should match
+  </validation>
+  
+  <when-to-apply>
+  Whenever creating google_storage_bucket resources
+  </when-to-apply>
+  
+  <implementation-checklist>
+  - [ ] Check bucket name against regex ^[a-z0-9-]+$
+  - [ ] Replace underscores with hyphens
+  - [ ] Convert uppercase to lowercase
+  - [ ] Run terraform validate to confirm
+  </implementation-checklist>
+  
+  <related-rules>
+  GCS-NAMING-002 (bucket name length limits)
+  TF-NAMING-001 (general naming conventions)
+  </related-rules>
+  
+  <references>
+  https://cloud.google.com/storage/docs/naming-buckets
+  https://registry.terraform.io/providers/hashicorp/google/latest
+  </references>
 </rule>
 ```
+
+**Voir aussi :** `rules/RULES_FORMAT.md` pour documentation complète du format XML et exemples supplémentaires.
 
 ---
 

@@ -61,7 +61,8 @@ class KnowledgeBase:
 
         # Split into chunks
         text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1000, chunk_overlap=100
+            chunk_size=self.config.CHUNK_SIZE,
+            chunk_overlap=self.config.CHUNK_OVERLAP
         )
         docs = text_splitter.split_documents(documents)
         print(f"  ✓ Split into {len(docs)} chunks")

@@ -341,7 +341,8 @@ def terraform_plan(path: str) -> str:
             return f"❌ ERROR: terraform plan failed:\n{plan_output}"
 
         logger.info(f"terraform plan successful in {elapsed:.2f}s")
-        truncated = plan_output[:4000] + "\n...[truncated]" if len(plan_output) > 4000 else plan_output
+        max_chars = _config.MAX_PLAN_OUTPUT_CHARS
+        truncated = plan_output[:max_chars] + "\n...[truncated]" if len(plan_output) > max_chars else plan_output
         return f"✅ terraform plan successful\n\n{truncated}"
 
     except FileNotFoundError:
@@ -355,17 +356,138 @@ def terraform_plan(path: str) -> str:
         return f"❌ ERROR: during plan: {str(e)}"
 
 
+def _retrieve_best_practices() -> str:
+    """Retrieve Terraform best practices from knowledge base.
+
+    Returns:
+        String containing relevant best practices for code review
+    """
+    if _knowledge_base is None:
+        logger.error("Knowledge base not initialized")
+        return ""
+
+    logger.debug("Retrieving best practices from knowledge base")
+    best_practices = _knowledge_base.search(
+        "Terraform best practices security standards naming conventions modules"
+    )
+    logger.debug(f"Retrieved {len(best_practices)} characters of best practices")
+    return best_practices
+
+
+def _read_terraform_files(path: str) -> tuple[str, int]:
+    """Read all Terraform files in directory.
+
+    Args:
+        path: Directory path to scan for .tf files
+
+    Returns:
+        Tuple of (concatenated file contents, number of files)
+    """
+    logger.debug("Reading Terraform files")
+    tf_files = sorted(glob.glob(path + "/**/*.tf", recursive=True))
+    logger.info(f"Found {len(tf_files)} Terraform files")
+
+    if not tf_files:
+        logger.warning(f"No .tf files found in {path}")
+        return "", 0
+
+    code_content = ""
+    for file_path in tf_files:
+        with open(file_path, "r") as tf_file:
+            file_name = os.path.basename(file_path)
+            file_content = tf_file.read()
+            code_content += f"\n\n--- {file_name} ---\n{file_content}"
+            logger.debug(f"Loaded {file_name}: {len(file_content)} bytes")
+
+    logger.info(f"Total code to review: {len(code_content)} bytes across {len(tf_files)} files")
+    return code_content, len(tf_files)
+
+
+def _execute_code_review(best_practices: str, code_content: str, path: str) -> str:
+    """Execute code review with LLM model.
+
+    Args:
+        best_practices: Best practices documentation from knowledge base
+        code_content: Terraform code to review
+        path: Root folder path for context
+
+    Returns:
+        Review response from model
+    """
+    if _prompts is None or _review_model is None or _config is None:
+        logger.error("Review components not initialized")
+        return ""
+
+    logger.debug("Preparing review prompt")
+    review_prompt = _prompts.review.format(
+        best_practices=best_practices,
+        code_content=code_content,
+        root_folder=path
+    )
+    logger.debug(f"Review prompt prepared: {len(review_prompt)} bytes")
+
+    logger.info(f"Running code review with {_config.REVIEW_MODEL_NAME}")
+    review_start = time.time()
+    review_response = str(_review_model.invoke(review_prompt).content)
+    review_elapsed = time.time() - review_start
+    logger.info(f"Code review completed in {review_elapsed:.2f}s, response length: {len(review_response)} bytes")
+
+    return review_response
+
+
+def _format_review_result(review_response: str, num_files: int, path: str) -> str:
+    """Parse review response and format final result.
+
+    Args:
+        review_response: Raw response from review model
+        num_files: Number of files reviewed
+        path: Root folder path
+
+    Returns:
+        Formatted review summary
+    """
+    if _prompts is None:
+        logger.error("Prompts not initialized")
+        return review_response
+
+    logger.debug("Parsing review response")
+
+    # Check if issues were found
+    if "CRITIQUE" in review_response or "MAJEUR" in review_response:
+        logger.warning("Issues found during review (CRITIQUE or MAJEUR)")
+        if "### Code Corrigé" in review_response:
+            logger.info("Fixed code found in response")
+            return _prompts.response_with_fixes.format(
+                num_files=num_files,
+                review_response=review_response,
+                root_folder=path,
+            )
+        else:
+            logger.info("No fixed code provided, returning review response")
+            return review_response
+    else:
+        logger.info("Code is compliant with best practices")
+        return _prompts.response_compliant.format(
+            num_files=num_files,
+            review_response=review_response,
+        )
+
+
 @tool
 def review_and_fix_code(path: str) -> str:
     """Performs comprehensive code review against best practices.
 
     Process:
     1. Retrieves Terraform best practices from knowledge base
-    2. Analyzes generated code for compliance
-    3. Identifies major issues and applies fixes if necessary
+    2. Reads and analyzes generated Terraform code
+    3. Executes LLM-based code review
+    4. Formats results with compliance status and fixes
 
     Args:
         path: folder where the code is generated
+
+    Returns:
+        Formatted review summary with findings and fixes
     """
     logger.debug(f"review_and_fix_code called with path: {path}")
 
@@ -384,66 +506,19 @@ def review_and_fix_code(path: str) -> str:
         logger.info(f"Starting code review at {validated_path}")
         start_time = time.time()
 
-        # Step 1: Retrieve best practices from knowledge base
-        logger.debug("Step 1: Retrieving best practices from knowledge base")
-        best_practices = _knowledge_base.search(
-            "Terraform best practices security standards naming conventions modules"
-        )
-        logger.debug(f"Retrieved {len(best_practices)} characters of best practices")
+        # Step 1: Retrieve best practices
+        best_practices = _retrieve_best_practices()
 
-        # Step 2: Read all generated Terraform files
-        logger.debug("Step 2: Reading Terraform files")
-        tf_files = sorted(glob.glob(path + "/**/*.tf", recursive=True))
-        logger.info(f"Found {len(tf_files)} Terraform files")
-
-        if not tf_files:
-            logger.warning(f"No .tf files found in {path}")
+        # Step 2: Read Terraform files
+        code_content, num_files = _read_terraform_files(path)
+        if num_files == 0:
             return "⚠️ Review: No .tf files found in directory"
 
-        code_content = ""
-        for file_path in tf_files:
-            with open(file_path, "r") as f:
-                file_name = os.path.basename(file_path)
-                file_content = f.read()
-                code_content += f"\n\n--- {file_name} ---\n{file_content}"
-                logger.debug(f"Loaded {file_name}: {len(file_content)} bytes")
+        # Step 3-4: Execute review with model
+        review_response = _execute_code_review(best_practices, code_content, path)
 
-        logger.info(f"Total code to review: {len(code_content)} bytes across {len(tf_files)} files")
-
-        # Step 3: Use template from markdown file
-        logger.debug("Step 3: Preparing review prompt")
-        review_prompt = _prompts.review.format(
-            best_practices=best_practices, code_content=code_content, root_folder=path
-        )
-        logger.debug(f"Review prompt prepared: {len(review_prompt)} bytes")
-
-        # Step 4: Execute review with model
-        logger.info(f"Step 4: Running code review with {_config.REVIEW_MODEL_NAME if _config else 'unknown model'}")
-        review_start = time.time()
-        review_response = str(_review_model.invoke(review_prompt).content)
-        review_elapsed = time.time() - review_start
-        logger.info(f"Code review completed in {review_elapsed:.2f}s, response length: {len(review_response)} bytes")
-
-        # Step 5: Parse response and apply fixes if needed
-        logger.debug("Step 5: Parsing review response")
-        if "CRITIQUE" in review_response or "MAJEUR" in review_response:
-            logger.warning("Issues found during review (CRITIQUE or MAJEUR)")
-            if "### Code Corrigé" in review_response:
-                logger.info("Fixed code found in response")
-                result_summary = _prompts.response_with_fixes.format(
-                    num_files=len(tf_files),
-                    review_response=review_response,
-                    root_folder=path,
-                )
-            else:
-                logger.info("No fixed code provided, returning review response")
-                result_summary = review_response
-        else:
-            logger.info("Code is compliant with best practices")
-            result_summary = _prompts.response_compliant.format(
-                num_files=len(tf_files),
-                review_response=review_response,
-            )
+        # Step 5: Format result
+        result_summary = _format_review_result(review_response, num_files, path)
 
         elapsed = time.time() - start_time
         logger.info(f"Code review and fix completed in {elapsed:.2f}s")
