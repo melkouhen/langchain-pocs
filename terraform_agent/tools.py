@@ -3,6 +3,7 @@ import glob
 import os
 import logging
 import time
+from pathlib import Path
 from langchain_ollama import ChatOllama
 from langchain_core.tools import tool
 
@@ -34,6 +35,66 @@ def init_tools(config: Config, prompts: PromptManager, knowledge_base: Knowledge
     _knowledge_base = knowledge_base
     _review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
     logger.info(f"Tools initialized - Review model: {config.REVIEW_MODEL_NAME}")
+
+
+def _validate_terraform_path(path: str) -> Path:
+    """Validate that a path is within the work directory and safe to use.
+
+    Args:
+        path: Path to validate
+
+    Returns:
+        Resolved Path object
+
+    Raises:
+        ValueError: If path is outside work directory or invalid
+    """
+    if _config is None:
+        raise RuntimeError("Tools not initialized - call init_tools() first")
+
+    try:
+        resolved = Path(path).resolve()
+        work_dir = _config.WORK_DIR.resolve()
+
+        if not resolved.is_relative_to(work_dir):
+            raise ValueError(f"Path outside work directory: {path}")
+
+        return resolved
+    except (OSError, RuntimeError) as e:
+        raise ValueError(f"Invalid path: {path} - {e}")
+
+
+def _check_dev_environment(path: str) -> str | None:
+    """Check if path is in dev environment.
+
+    Args:
+        path: Path to check
+
+    Returns:
+        Error message if not dev environment, None otherwise
+    """
+    if path.endswith("/dev") or "/dev/" in path:
+        return None
+
+    environment = "prod" if path.endswith("/prod") or "/prod/" in path else "unknown"
+    logger.warning(f"Terraform command blocked: path is in {environment} environment")
+    return f"❌ ERROR: Terraform commands only allowed in dev environment (path: {path})"
+
+
+def _check_terraform_initialized(path: str) -> str | None:
+    """Check if terraform has been initialized in the given path.
+
+    Args:
+        path: Path to check
+
+    Returns:
+        Error message if not initialized, None otherwise
+    """
+    terraform_dir = Path(path) / ".terraform"
+    if not terraform_dir.exists():
+        logger.warning(f"Terraform not initialized at {path} (.terraform/ missing)")
+        return "❌ ERROR: Run terraform_init first (.terraform/ directory missing)"
+    return None
 
 
 
@@ -114,12 +175,18 @@ def terraform_init(path: str) -> str:
         logger.error("Config not initialized")
         return "⚠️ Error: Tools not initialized"
 
-    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
-    logger.info(f"Running terraform init in {environment} environment at {path}")
+    # Validate path is within work directory
+    try:
+        validated_path = _validate_terraform_path(path)
+    except ValueError as e:
+        logger.error(f"Path validation failed: {e}")
+        return f"❌ ERROR: {e}"
 
-    if environment != "dev":
-        logger.warning(f"Skipping terraform init: running in {environment} environment (only dev allowed)")
-        return f"❌ ERROR: Terraform init skipped: running in {environment} environment (only dev environment executes terraform commands)"
+    # Check environment
+    if error := _check_dev_environment(path):
+        return error
+
+    logger.info(f"Running terraform init at {validated_path}")
 
     try:
         logger.debug("Executing: terraform init")
@@ -127,7 +194,7 @@ def terraform_init(path: str) -> str:
 
         init_result = subprocess.run(
             ["terraform", "init"],
-            cwd=path,
+            cwd=str(validated_path),
             capture_output=True,
             text=True,
             timeout=60,
@@ -170,12 +237,22 @@ def terraform_validate(path: str) -> str:
         logger.error("Tools not fully initialized")
         return "⚠️ Error: Tools not initialized"
 
-    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
-    logger.info(f"Running terraform validate in {environment} environment at {path}")
+    # Validate path is within work directory
+    try:
+        validated_path = _validate_terraform_path(path)
+    except ValueError as e:
+        logger.error(f"Path validation failed: {e}")
+        return f"❌ ERROR: {e}"
 
-    if environment != "dev":
-        logger.warning(f"Skipping terraform validate: running in {environment} environment (only dev allowed)")
-        return f"❌ ERROR: Terraform validate skipped: running in {environment} environment (only dev environment executes terraform commands)"
+    # Check environment
+    if error := _check_dev_environment(path):
+        return error
+
+    # Check terraform is initialized
+    if error := _check_terraform_initialized(path):
+        return error
+
+    logger.info(f"Running terraform validate at {validated_path}")
 
     try:
         logger.debug("Executing: terraform validate")
@@ -183,7 +260,7 @@ def terraform_validate(path: str) -> str:
 
         validate_result = subprocess.run(
             ["terraform", "validate"],
-            cwd=path,
+            cwd=str(validated_path),
             capture_output=True,
             text=True,
             timeout=30,
@@ -226,12 +303,22 @@ def terraform_plan(path: str) -> str:
         logger.error("Config not initialized")
         return "⚠️ Error: Tools not initialized"
 
-    environment = "dev" if path.endswith("/dev") or "/dev/" in path else "prod"
-    logger.info(f"Running terraform plan in {environment} environment at {path}")
+    # Validate path is within work directory
+    try:
+        validated_path = _validate_terraform_path(path)
+    except ValueError as e:
+        logger.error(f"Path validation failed: {e}")
+        return f"❌ ERROR: {e}"
 
-    if environment != "dev":
-        logger.warning(f"Skipping terraform plan: running in {environment} environment (only dev allowed)")
-        return f"❌ ERROR: Terraform plan skipped: running in {environment} environment (only dev environment executes terraform commands)"
+    # Check environment
+    if error := _check_dev_environment(path):
+        return error
+
+    # Check terraform is initialized
+    if error := _check_terraform_initialized(path):
+        return error
+
+    logger.info(f"Running terraform plan at {validated_path}")
 
     try:
         logger.debug("Executing: terraform plan -no-color")
@@ -239,7 +326,7 @@ def terraform_plan(path: str) -> str:
 
         plan_result = subprocess.run(
             ["terraform", "plan", "-no-color"],
-            cwd=path,
+            cwd=str(validated_path),
             capture_output=True,
             text=True,
             timeout=60,
@@ -286,8 +373,15 @@ def review_and_fix_code(path: str) -> str:
         logger.error("Tools not fully initialized")
         return "⚠️ Error: Tools not initialized"
 
+    # Validate path is within work directory
     try:
-        logger.info(f"Starting code review at {path}")
+        validated_path = _validate_terraform_path(path)
+    except ValueError as e:
+        logger.error(f"Path validation failed: {e}")
+        return f"❌ ERROR: {e}"
+
+    try:
+        logger.info(f"Starting code review at {validated_path}")
         start_time = time.time()
 
         # Step 1: Retrieve best practices from knowledge base
