@@ -133,12 +133,15 @@ Appeler `review_and_fix_code` pour examiner le code de l’environnement dev con
 
 ---
 
-### Phase 5 : Capture de Connaissance
+### Phase 5 : Capture de Connaissance & Génération de Règles
 
-**Objectif** : Documenter les apprentissages pour amélioration continue (si corrections apportées).
+**Objectif** : Documenter les apprentissages et les règles apprises pour amélioration continue et réutilisation future.
 
 **Étapes :**
-1. Pour chaque ensemble de corrections effectuées (s’il y en a) :
+
+#### 5.1 : Capture des Corrections (si corrections apportées)
+
+1. Pour chaque ensemble de corrections effectuées :
    - Créer un fichier Markdown dans `knowledge/`
    - Convention de nommage : `learned_<sujet>_<date>.md` (ex : `learned_gcs_security_2026-05-11.md`)
 
@@ -153,7 +156,117 @@ Appeler `review_and_fix_code` pour examiner le code de l’environnement dev con
    - Meilleures pratiques introduites (ex : variables plutôt que valeurs en dur)
    - Anti-patterns corrigés (ex : dépendances implicites)
 
-4. **Résultat attendu** : Base de connaissances enrichie, prête à être réutilisée par les générations futures.
+#### 5.2 : Génération de Règles Apprises
+
+Si des patterns généralisables ont été découverts (version constraints, erreurs récurrentes, best practices), documenter les **règles apprises** pour réutilisation future.
+
+**Cycle de Vie des Règles :**
+```
+Phase 1: GÉNÉRATION → Phase 2: DOCUMENTATION → Phase 3: RÉUTILISATION
+    ↓                        ↓                        ↓
+  Agent générant       Agent documente           Générations futures
+  code + erreurs      règles en format XML       consultent les règles
+```
+
+**Types de Règles à Générer :**
+
+1. **Compatibilité** (Compatibility) — Version constraints, API compatibility
+   - Exemple : « GCS module 12.3 requires Google provider >= 6.37.0 »
+
+2. **Sécurité** (Security) — IAM policies, encryption, secret management
+   - Exemple : « Prevent public read access on GCS buckets »
+
+3. **Performance** — Resource sizing, optimization
+   - Exemple : « Use depends_on sparingly to avoid serialization »
+
+4. **Maintenabilité** (Maintainability) — Module structure, organization
+   - Exemple : « Organize files: main.tf, variables.tf, outputs.tf, providers.tf »
+
+5. **Naming** — Resource/variable naming patterns
+   - Exemple : « Use snake_case for resource names and variables »
+
+6. **État** (State Management) — Backend configuration, locking
+   - Exemple : « Always configure state locking for shared backends »
+
+**Format de la Règle :**
+
+Chaque règle suit le format XML structuré défini dans `rules/RULES_FORMAT.md` :
+
+```xml
+<rule id="PREFIX-TYPE-NNN" severity="CRITICAL|MAJOR|MINOR" category="CATEGORY">
+<title>...</title>
+<description>...</description>
+<context>...</context>
+<problem>...</problem>
+<pattern id="correct">...</pattern>
+<antipattern id="incorrect">...</antipattern>
+<why>...</why>
+<validation>...</validation>
+<when-to-apply>...</when-to-apply>
+<implementation-checklist>...</implementation-checklist>
+<related-rules>...</related-rules>
+<references>...</references>
+</rule>
+```
+
+**Étapes de Génération :**
+
+1. **Identifier un Pattern :** Lors de la validation (Phase 4), si une erreur répétitive ou un pattern est découvert
+   - Exemple : `❌ terraform validate failed: Module version 12.3 requires Google provider >= 6.37.0`
+
+2. **Structurer la Découverte :** Créer un dictionnaire avec les informations clés
+   ```python
+   discovery = {
+       ‘id’: ‘GCS-PROVIDER-001’,
+       ‘severity’: ‘CRITICAL’,
+       ‘category’: ‘Compatibility’,
+       ‘title’: ‘GCS Module Provider Version Constraint’,
+       ‘problem’: ‘Version mismatch between module and provider’,
+       ‘correct_pattern’: ‘... HCL code ...’,
+       ‘incorrect_pattern’: ‘... HCL code ...’,
+       ‘root_cause’: ‘...’,
+       ‘validation_steps’: [...],
+       ‘when_to_apply’: ‘...’,
+       ‘checklist’: [...]
+   }
+   ```
+
+3. **Formater en XML :** Convertir la découverte en XML structuré respectant le format `rules/RULES_FORMAT.md`
+
+4. **Valider la Règle :** Vérifier que :
+   - ✓ XML bien formé (pas d’erreurs de balises)
+   - ✓ ID unique dans le répertoire `rules/`
+   - ✓ Toutes les sections obligatoires présentes
+   - ✓ Exemples testables et corrects
+   - ✓ Severity valide (CRITICAL | MAJOR | MINOR)
+   - ✓ Category valide (Compatibility, Security, Performance, etc.)
+
+5. **Sauvegarder dans `rules/` :** 
+   - Convention de nommage : `rules-{PREFIX}-{DOMAIN}.md`
+   - Exemple : `rules-gcs-providers.md`, `rules-tf-naming-state.md`
+
+6. **Indexer dans ChromaDB :** Les règles seront automatiquement indexées lors de la prochaine exécution pour consultation future
+
+7. **Réutiliser :** Lors de futures générations, l’agent consulteras les règles via `search_knowledge_base()` pour éviter les mêmes erreurs
+
+**Exemple Complet :**
+
+Si l’agent découvre during Phase 4 que :
+```
+❌ terraform validate failed:
+   Error: Module version 12.3 requires Google provider >= 6.37.0
+   but configuration specifies version ~> 5.0
+```
+
+L’agent doit :
+1. Identifier le pattern « Version constraint mismatch »
+2. Générer la règle `GCS-PROVIDER-001` au format XML
+3. Valider la structure de la règle
+4. Sauvegarder dans `rules/rules-gcs-providers.md`
+5. Indexer dans ChromaDB
+6. Dans les générations suivantes, consulter et appliquer cette règle automatiquement
+
+**Résultat attendu** : Base de connaissances enrichie avec règles réutilisables, permettant à l’agent de générer du code de meilleure qualité à chaque itération.
 
 ---
 
