@@ -3,7 +3,7 @@ import glob
 import os
 import logging
 import time
-from langchain_ollama import ChatOllama
+from langchain_anthropic import ChatAnthropic
 from langchain_core.tools import tool
 
 from .config import Config
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 _config: Config | None = None
 _prompts: PromptManager | None = None
 _knowledge_base: KnowledgeBase | None = None
-_review_model: ChatOllama | None = None
+_review_model: ChatAnthropic | None = None
 
 
 def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase) -> None:
@@ -33,7 +33,7 @@ def init_tools(config: Config, prompts: PromptManager, knowledge_base: Knowledge
     _config = config
     _prompts = prompts
     _knowledge_base = knowledge_base
-    _review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
+    _review_model = ChatAnthropic(model=config.REVIEW_MODEL_NAME)
     logger.info(f"Tools initialized - Review model: {config.REVIEW_MODEL_NAME}")
 
 
@@ -108,6 +108,7 @@ def terraform_init(path: str) -> str:
     Args:
         path: folder where the code is generated
     """
+
     logger.debug(f"terraform_init called with path: {path}")
 
     if _config is None:
