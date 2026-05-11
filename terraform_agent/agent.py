@@ -93,7 +93,7 @@ class TerraformAgent:
         print(f"    - terraform_plan (preview changes)")
         print(f"    - review_and_fix_code (code review)")
 
-    def run(self) -> str:
+    def run(self, user_prompt: str | None = None) -> str:
         """Execute the agent to generate and validate Terraform code.
 
         Performs the following steps:
@@ -101,6 +101,10 @@ class TerraformAgent:
         2. Invokes the agent with the user prompt
         3. Handles any errors that occur during execution
         4. Returns the agent's final output
+
+        Args:
+            user_prompt: Optional custom user prompt. If not provided, uses the
+                        default prompt from the prompt manager.
 
         Returns:
             The agent's response content as a string, containing generated
@@ -129,11 +133,12 @@ class TerraformAgent:
 
         try:
             # Build messages with cache control on system prompt
+            prompt_content = user_prompt if user_prompt is not None else self.prompts.user
             messages = [
                 SystemMessage(
                     content=self.prompts.system
                 ),
-                HumanMessage(content=self.prompts.user),
+                HumanMessage(content=prompt_content),
             ]
 
             result = self.agent.invoke(

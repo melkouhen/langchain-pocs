@@ -108,6 +108,9 @@ Appeler `terraform_plan` pour prévisualiser les changements d’infrastructure 
   6. **Répéter** jusqu’à obtenir "✅" en 4.3
 
 #### Étape 4.4 : Examen du Code (Review & Fix)
+
+⚠️ **GARDE CRITIQUE** : N’appeler `review_and_fix_code` QUE SI l’étape 4.3 (terraform_plan) a retourné "✅". Si 4.3 contient "❌", VOUS DEVEZ D’ABORD CORRIGER ET RELANCER 4.1 + 4.2 + 4.3. Ne passez à 4.4 SOUS AUCUNE CIRCONSTANCE tant que 4.3 n’est pas "✅".
+
 Appeler `review_and_fix_code` pour examiner le code de l’environnement dev contre les meilleures pratiques.
 - **Chemin cible** : `envs/dev`
 - Identifie les problèmes de sécurité, maintenabilité, style
@@ -158,6 +161,18 @@ Appeler `review_and_fix_code` pour examiner le code de l’environnement dev con
 
 **Règle d'Or :** Les réponses contenant "❌" signifient que l'agent DOIT corriger le code et relancer le cycle. Les outils ne corrigent PAS automatiquement — l'agent est responsable des corrections. **Toutes les validations se font sur `envs/dev` uniquement. Tous les erreurs doivent être loggées dans `terraform_logs.error` au fur et à mesure.**
 
+**⚠️ GARDE IMPÉRATIVE 4.3 → 4.4** : 
+```
+SI terraform_plan (4.3) retourne "❌" ALORS:
+  ❌ N'APPELER JAMAIS review_and_fix_code (4.4)
+  ✅ CORRIGER le code
+  ✅ RELANCER 4.1 + 4.2 + 4.3 jusqu'à obtenir "✅"
+  
+SI terraform_plan (4.3) retourne "✅" ALORS:
+  ✅ APPELER review_and_fix_code (4.4)
+```
+
+
 **Flux de Correction Unifié :**
 1. **Lire** les erreurs/problèmes dans la réponse de l'outil
 2. **Logger** en temps réel dans `terraform_logs.error` (chaque log = 1 ligne avec timestamp)
@@ -169,7 +184,7 @@ Appeler `review_and_fix_code` pour examiner le code de l’environnement dev con
 **Par étape :**
 - **❌ en 4.1** → Logs + Corriger → Relancer UNIQUEMENT 4.1 → Répéter jusqu'à "✅"
 - **❌ en 4.2** → Logs + Corriger → Relancer 4.1 + 4.2 → Répéter jusqu'à "✅" en 4.2
-- **❌ en 4.3** → Logs + Corriger → Relancer 4.1 + 4.2 + 4.3 → Répéter jusqu'à "✅" en 4.3
+- **❌ en 4.3** → Logs + Corriger → Relancer 4.1 + 4.2 + 4.3 → Répéter jusqu'à "✅" en 4.3 → **ARRÊTER ICI, NE PAS APPELER 4.4**
 - **CRITIQUE/MAJEUR en 4.4** → Logs + Corriger → Relancer 4.1 + 4.2 + 4.3 + 4.4 → Répéter jusqu'à zéro CRITIQUE/MAJEUR
 - **"✅" partout + Zéro CRITIQUE/MAJEUR + Logs complétés** → Passer à Phase 5
 
