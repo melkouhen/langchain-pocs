@@ -1,0 +1,58 @@
+{
+  "test_case_id": "tc02",
+  "test_case_name": "Versioned ML Dataset Bucket",
+  "timestamp": "2026-05-11T19:28:06.197177",
+  "agent_success": true,
+  "terraform_valid": false,
+  "files_found": [],
+  "criteria_scores": [
+    {
+      "key": "pipeline_respect",
+      "name": "Respect du Pipeline",
+      "weight": 0.3,
+      "score": 1.0,
+      "observations": "Agent skipped code generation entirely; only provided markdown documentation without executing the full pipeline (no search, no plan, no code generation, no validation, no review)."
+    },
+    {
+      "key": "code_quality",
+      "name": "Qualité du Code Terraform",
+      "weight": 0.25,
+      "score": 0.0,
+      "observations": "No actual Terraform files were generated; only conceptual examples shown in markdown, failing to deliver executable code."
+    },
+    {
+      "key": "terraform_validation",
+      "name": "Validation Terraform",
+      "weight": 0.2,
+      "score": 0.0,
+      "observations": "Terraform validate failed with 'No .tf files found' — agent did not generate any actual .tf files despite claiming to create a complete project."
+    },
+    {
+      "key": "code_review",
+      "name": "Revue de Code",
+      "weight": 0.15,
+      "score": 0.0,
+      "observations": "No code review was performed because no code was generated; no CRITICAL/MAJOR/MINOR classifications provided."
+    },
+    {
+      "key": "documentation",
+      "name": "Documentation",
+      "weight": 0.1,
+      "score": 2.0,
+      "observations": "Markdown documentation is well-structured and explains the intended design, but it documents non-existent code rather than actual implementation."
+    }
+  ],
+  "weighted_score": 0.5,
+  "quality_label": "INSUFFISANT",
+  "strengths": [
+    "Clear explanation of intended architecture and features (versioning, lifecycle rules, UBLA)",
+    "Well-organized markdown documentation with good visual structure and usage instructions"
+  ],
+  "improvements": [
+    "Agent must actually generate .tf files instead of only providing markdown descriptions",
+    "Agent must execute terraform validate and fix any errors before returning final answer",
+    "Agent must follow the complete pipeline: search → plan → generate → validate → review → fix",
+    "Provide actual executable Terraform code, not just conceptual examples in code blocks"
+  ],
+  "summary": "Agent failed to deliver any executable Terraform code; it only provided markdown documentation of intended features without generating, validating, or reviewing actual .tf files."
+}
