@@ -1,4 +1,5 @@
 from pathlib import Path
+import os
 
 
 class Config:
@@ -26,6 +27,9 @@ class Config:
     REVIEW_MODEL_NAME: str
     AGENT_MODEL: str
     ENVIRONMENT: str
+    PHOENIX_ENDPOINT: str
+    PHOENIX_PROJECT_NAME: str
+    PHOENIX_ENABLED: bool
 
     def __init__(self, base_dir: Path | None = None, environment: str = "dev") -> None:
         """Initialize configuration with project paths and model names.
@@ -46,3 +50,7 @@ class Config:
         self.REVIEW_MODEL_NAME = "qwen2.5-coder:7b-instruct"
         self.AGENT_MODEL = "claude-haiku-4-5-20251001"
         self.ENVIRONMENT = environment
+
+        self.PHOENIX_ENDPOINT = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces")
+        self.PHOENIX_PROJECT_NAME = os.getenv("PHOENIX_PROJECT_NAME", "terraform-agent")
+        self.PHOENIX_ENABLED = True  # Always enabled by default

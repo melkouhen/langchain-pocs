@@ -6,7 +6,7 @@
 
 **Status:** Production-ready ✅  
 **Last Updated:** May 11, 2026  
-**Active Development:** Yes
+**Active Development:** Yes (Arize Phoenix integration added)
 
 ---
 
@@ -209,6 +209,12 @@ Located in `prompts/terraform-system.md`. Key sections:
 ```bash
 # Required
 ANTHROPIC_API_KEY=sk-ant-...  # From https://console.anthropic.com
+
+# Optional: Arize Phoenix (observability — self-hosted)
+# Start Phoenix locally: python -m phoenix.server.main serve
+# Then access http://localhost:6006 to view traces
+PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006/v1/traces
+PHOENIX_PROJECT_NAME=terraform-agent
 ```
 
 ### Adding Custom Knowledge
@@ -249,6 +255,32 @@ Edit `prompts/terraform-system.md` to change:
 
 ### Debugging
 
+**Phoenix Observability (Recommended)**
+
+Start Phoenix locally to trace all agent execution, tool calls, and model invocations:
+
+```bash
+# 1. Start Phoenix server (in a separate terminal)
+python -m phoenix.server.main serve
+# → Server runs at http://localhost:6006
+
+# 2. Configure .env with Phoenix endpoint
+PHOENIX_COLLECTOR_ENDPOINT=http://localhost:6006/v1/traces
+PHOENIX_PROJECT_NAME=terraform-agent
+
+# 3. Run the notebook - traces will be captured automatically
+# 4. Open http://localhost:6006 in your browser to explore traces
+```
+
+Phoenix will show:
+- Complete agent execution traces (with all decisions and tool calls)
+- Tool invocation details (inputs, outputs, timing)
+- LLM interactions (Claude API + Ollama qwen2.5-coder)
+- Token usage and latency metrics per span
+- Error tracking and debugging context
+
+**Alternative debugging methods:**
+
 ```bash
 # View agent thinking
 # Set in terraform-system.md: Add logging statements
@@ -283,8 +315,8 @@ See `README.md` Troubleshooting section for more details.
 | `README.md` | User-facing documentation | When adding features, changing setup |
 | `.env.example` | Environment variables template | When adding new configs or credentials |
 | `prompts/terraform-system.md` | Agent behavior definition | When changing generation strategy |
-| `terraform_agent/config.py` | Model/path configuration | When changing LLM or model settings |
-| `terraform_agent/agent.py` | Agent orchestration | When modifying agent flow |
+| `terraform_agent/config.py` | Model/path configuration (including Phoenix) | When changing LLM or observability settings |
+| `terraform_agent/agent.py` | Agent orchestration and Phoenix tracing setup | When modifying agent flow |
 | `terraform_agent/tools.py` | Tool implementations | When adding/modifying tools |
 | `docs/*.md` | Best practices knowledge base | When adding new architectural patterns |
 

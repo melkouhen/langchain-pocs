@@ -5,6 +5,8 @@ from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
+from phoenix.otel import register
+from openinference.instrumentation.langchain import LangChainInstrumentor
 
 from .config import Config
 from .prompts import PromptManager
@@ -66,6 +68,20 @@ class TerraformAgent:
 
         # Initialize global tool instances
         init_tools(config, prompts, knowledge_base)
+
+        # Initialize Phoenix tracing if enabled
+        if config.PHOENIX_ENABLED:
+            try:
+                tracer_provider = register(
+                    project_name=config.PHOENIX_PROJECT_NAME,
+                    endpoint=config.PHOENIX_ENDPOINT,
+                )
+                LangChainInstrumentor().instrument(tracer_provider=tracer_provider)
+                logger.info(f"✓ Phoenix tracing enabled → {config.PHOENIX_ENDPOINT}")
+                print(f"  ✓ Phoenix tracing enabled → {config.PHOENIX_ENDPOINT}")
+            except Exception as e:
+                logger.warning(f"Failed to initialize Phoenix: {e}")
+                print(f"  ⚠️  Phoenix initialization failed: {e}")
 
         # Prepare tools list
         tools_list = [
