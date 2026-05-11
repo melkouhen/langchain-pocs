@@ -43,6 +43,6 @@ class Config:
         self.PROMPTS_DIR = self.PROJECT_ROOT / "prompts"
 
         self.EMBEDDING_MODEL = "nomic-embed-text"
-        self.REVIEW_MODEL_NAME = "qwen2.5-coder:7b-instruct"
+        self.REVIEW_MODEL_NAME = "claude-haiku-4-5-20251001"
         self.AGENT_MODEL = "claude-haiku-4-5-20251001"
         self.ENVIRONMENT = environment
