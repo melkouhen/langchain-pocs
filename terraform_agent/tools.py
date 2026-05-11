@@ -139,12 +139,7 @@ def terraform_validate(path: str) -> str:
         validate_output = validate_result.stdout or validate_result.stderr
 
         if validate_result.returncode != 0:
-            error_message = validate_output
-            prompt = _prompts.validate.format(
-                error_message=error_message, root_folder=path
-            )
-            correction = _review_model.invoke(prompt).content
-            return f"❌ Validation errors detected:\n\n{error_message}\n\n💡 Suggested fixes:\n{correction}"
+            return f"❌ Error: terraform validate failed. Fix the code and re-run terraform_init + terraform_validate.\n\n{validate_output}"
 
         return f"✅ terraform validate successful"
 
