@@ -20,7 +20,7 @@ class Config:
 
     PROJECT_ROOT: Path
     WORK_DIR: Path
-    DOCS_DIR: Path
+    RULES_DIR: Path
     PROMPTS_DIR: Path
     EMBEDDING_MODEL: str
     REVIEW_MODEL_NAME: str
@@ -39,7 +39,7 @@ class Config:
 
         self.PROJECT_ROOT = base_dir
         self.WORK_DIR = self.PROJECT_ROOT / "work"
-        self.DOCS_DIR = self.PROJECT_ROOT / "docs"
+        self.RULES_DIR = self.PROJECT_ROOT / "rules"
         self.PROMPTS_DIR = self.PROJECT_ROOT / "prompts"
 
         self.EMBEDDING_MODEL = "nomic-embed-text"

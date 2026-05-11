@@ -52,13 +52,13 @@ class KnowledgeBase:
 
         # Load documents from docs directory
         loader = DirectoryLoader(
-            str(self.config.DOCS_DIR),
+            str(self.config.RULES_DIR),
             glob="**/*.md",
             loader_cls=TextLoader,
             recursive=True,
         )
         documents = loader.load()
-        print(f"  ✓ Loaded {len(documents)} document(s) from {self.config.DOCS_DIR}")
+        print(f"  ✓ Loaded {len(documents)} document(s) from {self.config.RULES_DIR}")
 
         # Split into chunks
         text_splitter = RecursiveCharacterTextSplitter(
