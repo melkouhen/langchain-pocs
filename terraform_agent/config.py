@@ -1,5 +1,4 @@
 from pathlib import Path
-import os
 
 
 class Config:
@@ -27,10 +26,6 @@ class Config:
     REVIEW_MODEL_NAME: str
     AGENT_MODEL: str
     ENVIRONMENT: str
-    LANGFUSE_ENABLED: bool
-    LANGFUSE_PUBLIC_KEY: str
-    LANGFUSE_SECRET_KEY: str
-    LANGFUSE_BASE_URL: str
 
     def __init__(self, base_dir: Path | None = None, environment: str = "dev") -> None:
         """Initialize configuration with project paths and model names.
@@ -51,8 +46,3 @@ class Config:
         self.REVIEW_MODEL_NAME = "qwen2.5-coder:7b-instruct"
         self.AGENT_MODEL = "claude-haiku-4-5-20251001"
         self.ENVIRONMENT = environment
-
-        self.LANGFUSE_PUBLIC_KEY = os.getenv("LANGFUSE_PUBLIC_KEY", "")
-        self.LANGFUSE_SECRET_KEY = os.getenv("LANGFUSE_SECRET_KEY", "")
-        self.LANGFUSE_BASE_URL = os.getenv("LANGFUSE_BASE_URL", "https://cloud.langfuse.com")
-        self.LANGFUSE_ENABLED = bool(self.LANGFUSE_PUBLIC_KEY and self.LANGFUSE_SECRET_KEY)

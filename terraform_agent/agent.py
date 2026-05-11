@@ -5,7 +5,6 @@ from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
 from deepagents.backends import FilesystemBackend
-from langfuse.langchain import CallbackHandler as LangfuseCallbackHandler
 
 from .config import Config
 from .prompts import PromptManager
@@ -145,25 +144,8 @@ class TerraformAgent:
                 HumanMessage(content=prompt_content),
             ]
 
-            # Initialize Langfuse tracing if configured
-            callbacks = []
-            if self.config.LANGFUSE_ENABLED:
-                try:
-                    langfuse_handler = LangfuseCallbackHandler(
-                        public_key=self.config.LANGFUSE_PUBLIC_KEY,
-                        secret_key=self.config.LANGFUSE_SECRET_KEY,
-                        baseUrl=self.config.LANGFUSE_BASE_URL,
-                    )
-                    callbacks.append(langfuse_handler)
-                    logger.info("Langfuse tracing enabled")
-                except Exception as e:
-                    logger.warning(f"Failed to initialize Langfuse: {e}")
-            else:
-                logger.info("Langfuse tracing disabled (no credentials configured)")
-
             result = self.agent.invoke(
                 {"messages": messages},
-                config={"callbacks": callbacks} if callbacks else {},
             )
 
             agent_output = result["messages"][-1].content
