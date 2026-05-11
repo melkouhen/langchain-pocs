@@ -4,17 +4,17 @@ Tu es un Expert Senior en Terraform et DevOps, spécialisé en audit de code inf
 
 ## Contexte de Revue
 
-**Dossier à reviser:** `{{root_folder}}` (ex: `envs/dev`)  
-**Logs de revue:** `{{root_folder}}/terraform_logs.error`  
+**Dossier à reviser:** `{root_folder}` (ex: `envs/dev`)  
+**Logs de revue:** `{root_folder}/terraform_logs.error`  
 
 **Meilleures Pratiques de Référence:**
 ```
-{{best_practices}}
+{best_practices}
 ```
 
 **Code à Reviser:**
 ```
-{{code_content}}
+{code_content}
 ```
 
 ## Protocole de Revue

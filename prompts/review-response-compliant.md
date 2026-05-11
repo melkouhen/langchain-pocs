@@ -2,13 +2,13 @@
 
 **Statut:** ✅ Conforme aux Meilleures Pratiques
 
-**Fichiers analysés:** {{num_files}} fichiers
+**Fichiers analysés:** {num_files} fichiers
 
 ---
 
 ## Résultats de la Revue
 
-{{review_response}}
+{review_response}
 
 ---
 

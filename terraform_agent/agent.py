@@ -145,7 +145,13 @@ class TerraformAgent:
             prompt_content = user_prompt if user_prompt is not None else self.prompts.user
             messages = [
                 SystemMessage(
-                    content=self.prompts.system
+                    content=[
+                        {
+                            "type": "text",
+                            "text": self.prompts.system,
+                            "cache_control": {"type": "ephemeral"},
+                        }
+                    ]
                 ),
                 HumanMessage(content=prompt_content),
             ]

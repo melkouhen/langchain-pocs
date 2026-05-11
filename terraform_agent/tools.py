@@ -250,11 +250,12 @@ def terraform_plan(path: str) -> str:
 
         if plan_result.returncode != 0:
             logger.error(f"terraform plan failed (exit code {plan_result.returncode}) after {elapsed:.2f}s")
-            logger.debug(f"Plan output: {plan_output[:500]}...")  # Log first 500 chars
+            logger.debug(f"Plan output: {plan_output[:500]}...")
             return f"❌ ERROR: terraform plan failed:\n{plan_output}"
 
         logger.info(f"terraform plan successful in {elapsed:.2f}s")
-        return f"✅ terraform plan successful"
+        truncated = plan_output[:4000] + "\n...[truncated]" if len(plan_output) > 4000 else plan_output
+        return f"✅ terraform plan successful\n\n{truncated}"
 
     except FileNotFoundError:
         logger.error("terraform is not installed or not accessible in PATH")
@@ -318,7 +319,7 @@ def review_and_fix_code(path: str) -> str:
         # Step 3: Use template from markdown file
         logger.debug("Step 3: Preparing review prompt")
         review_prompt = _prompts.review.format(
-            best_practices=best_practices, code_content=code_content
+            best_practices=best_practices, code_content=code_content, root_folder=path
         )
         logger.debug(f"Review prompt prepared: {len(review_prompt)} bytes")
 
