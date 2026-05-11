@@ -70,15 +70,6 @@ class PromptManager:
         return self.load("terraform-user.md")
 
     @property
-    def validate(self) -> str:
-        """Prompt template for terraform validation error analysis and fixes.
-
-        Returns:
-            Validation prompt template from terraform-validate.md
-        """
-        return self.load("terraform-validate.md")
-
-    @property
     def review(self) -> str:
         """Prompt template for comprehensive code review against best practices.
 
