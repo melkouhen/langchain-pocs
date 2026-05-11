@@ -1,214 +1,242 @@
-<!-- vscode-markdown-toc -->
-* 1. [🎯 Objectif](#Objectif)
-* 2. [🛠️ Technologies Principales](#TechnologiesPrincipales)
-* 3. [📁 Structure du Projet](#StructureduProjet)
-* 4. [🏗️ Architecture Globale du notebook](#ArchitectureGlobaledunotebook)
-* 5. [🚀 Démarrage Rapide](#DmarrageRapide)
-	* 5.1. [Pré-requis Système](#Pr-requisSystme)
-	* 5.2. [Installation des dépendances](#Installationdesdpendances)
-	* 5.3. [Configuration](#Configuration)
-	* 5.4. [Exécution](#Excution)
-* 6. [📊 Résultats & Sortie](#RsultatsSortie)
-* 7. [État du projet](#tatduprojet)
-
-<!-- vscode-markdown-toc-config
-	numbering=true
-	autoSave=true
-	/vscode-markdown-toc-config -->
-<!-- /vscode-markdown-toc -->
 
 # Terraform Code Review & Generation Agent
 
-Agent de génération et validation de code Terraform.
+Agent autonome de génération et validation de code Terraform respectant les meilleures pratiques.
 
-##  1. <a name='Objectif'></a>🎯 Objectif
+## 🎯 Objectif
 
-Cet agent:
-1. **Génère** du code Terraform
-2. **Valide** le code généré
-3. **Corrige** les erreurs détectées
+L'agent génère du code Terraform, le valide et corrige automatiquement les erreurs détectées en s'appuyant sur les bonnes pratiques définies dans le répertoire `docs/`.
 
-Cet agent doit respecter les bonnes pratiques trouvées dans le répertoire docs.
+## 💡 Pourquoi cet agent?
 
+- **Gain de temps:** Génération automatique de modules Terraform production-ready en 2-5 minutes
+- **Qualité garantie:** Validation syntaxique + revue de code automatique (sécurité, performance, coûts)
+- **Best practices intégrées:** Recherche sémantique dans la knowledge base avant génération
+- **Multi-environnements:** Génère dev/prod avec configurations adaptées
 
-##  2. <a name='TechnologiesPrincipales'></a>🛠️ Technologies Principales
+**Cas d'usage:**
+- Bootstrapping rapide d'infrastructure GCP
+- Standardisation de modules Terraform dans l'équipe
+- Audit automatique de code Terraform existant
 
-| Technologie    | Rôle                                            | Version     |
-| -------------- | ----------------------------------------------- | ----------- |
-| **LangChain**  | Orchestration d'agents et chaînage d'outils     | >= 1.2.15   |
-| **Claude API** | Modèle LLM pour l'analyse et génération         | Haiku 4.5   |
-| **ChromaDB**   | Vector store pour la recherche sémantique       | >= 1.5.8    |
-| **DeepAgents** | Agent autonome avec planification long-terme    | >= 0.5.4    |
-| **Ollama**     | Modèle local pour validation Terraform          | qwen2.5-7b  |
-| **LangSmith**  | Tracing et debugging des agents (optionnel)     | >= 0.7.38   |
+## 🛠️ Technologies
 
-##  3. <a name='StructureduProjet'></a>📁 Structure du Projet
+| Technologie    | Rôle                                       |
+| -------------- | ------------------------------------------ |
+| **LangChain**  | Orchestration des agents                   |
+| **Claude API** | Génération de code (Haiku 4.5)             |
+| **ChromaDB**   | Recherche sémantique des bonnes pratiques  |
+| **DeepAgents** | Planification autonome                     |
+| **Ollama**     | Validation locale (qwen2.5-coder:7b)       |
 
-```
-.
-├── notebooks/
-│   ├── deepchain_terraform_assistant.ipynb      # Notebook principal (agent orchestration)
-│   ├── token_analysis.ipynb                     # Analyse consommation tokens Claude
-│   └── chromadb_explorer.ipynb                  # Exploration de la knowledge base
-├── terraform_agent/                             # Code agent Python (624 lignes)
-│   ├── agent.py                                 # Orchestration DeepAgent
-│   ├── tools.py                                 # Outils: validation, review, search
-│   ├── knowledge_base.py                        # Integration ChromaDB
-│   ├── prompts.py                               # Gestion des prompts
-│   └── config.py                                # Configuration centralisée
-├── docs/                                        # Bonnes pratiques Terraform
-│   ├── structure.md
-│   └── cloud-storage.md
-├── prompts/                                     # Templates LLM
-│   ├── terraform-system.md                      # System prompt (agent behavior)
-│   ├── terraform-user.md
-│   ├── terraform-review.md
-│   ├── terraform-validate.md
-│   └── terraform-evaluation.md
-├── work/                                        # Résultats de la génération
-│   ├── modules/gcs_bucket/                      # Module Terraform réutilisable
-│   ├── envs/{dev,prod}/                         # Environnements Terraform (dev & prod)
-│   ├── README.md                                # Documentation complète
-│   ├── DEPLOYMENT.md                            # Guide déploiement pas-à-pas
-│   ├── VALIDATION_REPORT.md                     # Rapport d'assurance qualité
-│   └── PROJECT_SUMMARY.md                       # Résumé du projet généré
-├── .vectorstore2/                               # Base de données ChromaDB (cache)
-├── .env                                         # Configuration (API keys)
-├── .env.example                                 # Template .env
-├── pyproject.toml                               # Dépendances Python (uv)
-└── .python-version                              # Python 3.14
-```
-
-##  4. <a name='ArchitectureGlobaledunotebook'></a>🏗️ Architecture Globale du notebook
-
-L'agent est implémenté comme un notebook python avec les phases suivantes :
+## 📁 Structure
 
 ```
+notebooks/
+├── deepchain_terraform_assistant.ipynb    # Point d'entrée principal
+├── token_analysis.ipynb                   # Analyse consommation tokens
+└── chromadb_explorer.ipynb                # Exploration knowledge base
 
-1️⃣ INITIALIZATION
-   ├─ Charge les prompts (system, user, templates)
-   ├─ Crée une base vectorielle (ChromaDB) 
-   └─ Index les documents (docs/*.md) dans ChromaDB
+terraform_agent/                           # Agent Python (624 lignes)
+├── agent.py                               # Orchestration
+├── tools.py                               # 3 outils: search, validate, review
+├── knowledge_base.py                      # ChromaDB
+├── prompts.py                             # Templates
+└── config.py                              # Configuration
 
-2️⃣ AGENT SETUP
-   ├─ Initialise le modèle Claude
-   └─ Configure les outils disponibles
+docs/                                      # Bonnes pratiques
+├── structure.md
+└── cloud-storage.md
 
-3️⃣ AGENT EXECUTION
-   ├─ Lance l'agent autonome
-   ├─ L'agent appelle les outils selon les besoins :
-   │  ├─ search_knowledge_base    → Récupère les best practices
-   │  ├─ validate_and_fix_code    → Valide la syntaxe
-   │  └─ review_and_fix_code      → Effectue la revue de code
-   └─ Génère le code Terraform final
+prompts/                                   # Templates LLM
+├── terraform-system.md                    # Comportement agent
+├── terraform-user.md
+├── terraform-review.md
+├── terraform-validate.md
+└── terraform-evaluation.md
 
-4️⃣ OUTPUT
-   └─ Résultats dans ./work/ avec rapport de validation/révision
+work/                                      # Sortie générée
+├── modules/gcs_bucket/                    # Module réutilisable
+├── envs/{dev,prod}/                       # Environnements
+├── README.md
+├── DEPLOYMENT.md
+├── VALIDATION_REPORT.md
+└── PROJECT_SUMMARY.md
 ```
 
-##  5. <a name='DmarrageRapide'></a>🚀 Démarrage Rapide
+## 🏗️ Architecture
 
-###  5.1. <a name='Pr-requisSystme'></a>Pré-requis Système
+```
+1. INITIALIZATION
+   → Charge prompts + crée ChromaDB + index docs/
 
-**Logiciels obligatoires:**
-- **Python 3.14+** : version cible (voir `.python-version`)
-- **uv** : gestionnaire de packages Python rapide
-  ```bash
-  # macOS/Linux
-  curl -LsSf https://astral.sh/uv/install.sh | sh
-  ```
-- **Ollama** : pour modèle local Terraform validation
-  ```bash
-  # macOS: https://ollama.ai/download
-  # Télécharger et installer, puis:
-  ollama pull qwen2.5-coder:7b
-  ```
-  - Le service Ollama doit écouter sur `http://localhost:11434`
-  - Vérifier: `curl http://localhost:11434/api/tags`
+2. SETUP
+   → Initialise Claude + enregistre outils
 
-**Pour déploiement Terraform (optionnel si test uniquement):**
-- **gcloud CLI** : authentification GCP
-  ```bash
-  gcloud auth application-default login
-  ```
-- **Terraform >= 1.5** : pour déployer l'infrastructure générée
+3. EXECUTION
+   → Agent autonome appelle:
+      - search_knowledge_base → bonnes pratiques
+      - validate_and_fix_code → validation syntaxe
+      - review_and_fix_code   → revue qualité
 
-**IDE (recommandé):**
-- **VS Code** avec extensions:
-  - Jupyter plugin (pour exécuter les notebooks)
-  - Terraform extension (pour synthaxe HCL)
+4. OUTPUT
+   → Génère Terraform + documentation dans work/
+```
 
-###  5.2. <a name='Installationdesdpendances'></a>Installation des dépendances
+## 🚀 Démarrage
+
+### Pré-requis
+
+**Obligatoires:**
+```bash
+# Python 3.14+
+python --version
+
+# uv (gestionnaire packages)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Ollama + modèle qwen2.5-coder:7b
+ollama pull qwen2.5-coder:7b
+curl http://localhost:11434/api/tags  # Vérifier
+```
+
+**Optionnels (déploiement GCP):**
+```bash
+gcloud auth application-default login
+terraform version  # >= 1.5
+```
+
+### Installation
 
 ```bash
 uv sync
 ```
 
-###  5.3. <a name='Configuration'></a>Configuration
+### Configuration
 
-**Copier le template et remplir les clés:**
 ```bash
+# Créer .env depuis le template
 cp .env.example .env
+
+# Éditer .env et ajouter:
+# ANTHROPIC_API_KEY=sk-ant-...
+
+# Obtenir clé: https://console.anthropic.com/account/keys
 ```
 
-**Variables requises dans `.env`:**
+### Exécution
+
 ```bash
-# Anthropic API (obligatoire)
-ANTHROPIC_API_KEY=sk-ant-...
+# 1. Vérifier setup
+python --version                          # 3.14+
+curl http://localhost:11434/api/tags      # Ollama OK
 
-# LangSmith (optionnel - pour tracing/debugging)
-LANGSMITH_API_KEY=lsv_pt_...
-LANGSMITH_PROJECT=terraform-agent
+# 2. Ouvrir notebook
+code notebooks/deepchain_terraform_assistant.ipynb
+
+# 3. Exécuter les cellules (durée: 2-5 min)
+
+# 4. Résultats dans work/
+#    → work/PROJECT_SUMMARY.md (vue d'ensemble)
+#    → work/DEPLOYMENT.md (guide déploiement)
 ```
 
-**Obtenir les clés:**
-- `ANTHROPIC_API_KEY` : https://console.anthropic.com/account/keys
-- `LANGSMITH_API_KEY` : https://smith.langchain.com (optionnel)
+## 📊 Résultats
 
-###  5.4. <a name='Excution'></a>Exécution
+**Infrastructure générée dans `work/`:**
 
-**Étape 1: Vérifier les pré-requis**
-```bash
-# Python
-python --version  # Should be 3.14+
-
-# Ollama (doit être en running)
-curl http://localhost:11434/api/tags  # Doit répondre
-```
-
-**Étape 2: Installer les dépendances**
-```bash
-uv sync
-```
-
-**Étape 3: Lancer le notebook**
-1. Ouvrir VS Code
-2. Ouvrir `notebooks/deepchain_terraform_assistant.ipynb`
-3. Sélectionner kernel Python (uv env)
-4. Exécuter les cellules dans l'ordre
-
-**Étape 4: Consulter les résultats**
-- Résultats générés dans `./work/`
-- Lire `work/PROJECT_SUMMARY.md` pour vue d'ensemble
-- Consulter `work/DEPLOYMENT.md` pour déployer l'infrastructure
-
-##  6. <a name='RsultatsSortie'></a>📊 Résultats & Sortie
-
-Après exécution, le notebook génère dans `./work/`:
-
-**Infrastructure Terraform (production-ready):**
-- `modules/gcs_bucket/` — Module réutilisable Google Cloud Storage
-  - `main.tf` — Ressource GCS avec variables
-  - `variables.tf` — 11 variables d'entrée
-  - `outputs.tf` — 6 outputs pour consommation aval
-- `envs/dev/` — Environnement de développement
-  - Configuration pour bucket de test
-  - État Terraform isolé
-- `envs/prod/` — Environnement de production
-  - Configuration avec lifecycle rules (économie)
-  - État Terraform isolé
+- **Module réutilisable** (`modules/gcs_bucket/`)
+  - `main.tf`: 1 ressource google_storage_bucket avec 11 variables
+  - `variables.tf`: versioning, encryption, IAM, lifecycle, logging...
+  - `outputs.tf`: bucket URL, nom, self_link, etc.
   
+- **Environnements**
+  - `envs/dev/`: Bucket simple pour tests
+  - `envs/prod/`: Bucket avec lifecycle rules (transition vers COLDLINE après 90j)
 
-##  7. <a name='tatduprojet'></a>État du projet
+**Documentation auto-générée:**
+- `README.md` (400+ lignes): Guide complet d'utilisation
 
-**Statut:** ✅ **En cours de développement** (dernière mise à jour 7 mai 2026)
+
+**Exemple de résultat:**
+```hcl
+# work/modules/gcs_bucket/main.tf
+resource "google_storage_bucket" "this" {
+  name          = var.bucket_name
+  location      = var.location
+  storage_class = var.storage_class
+  
+  uniform_bucket_level_access = true  # Sécurité
+  public_access_prevention    = "enforced"
+  
+  versioning {
+    enabled = var.versioning_enabled
+  }
+}
+```
+
+## 🔧 Troubleshooting
+
+| Problème | Cause | Solution |
+|----------|-------|----------|
+| `ModuleNotFoundError: chromadb` | Environnement virtuel non initialisé | `rm -rf .venv && uv sync` |
+| `Ollama connection error` | Service Ollama non démarré | `ollama serve` (terminal séparé) |
+| `ANTHROPIC_API_KEY invalid` | Clé manquante ou erronée | Vérifier sur [console.anthropic.com](https://console.anthropic.com/account/keys) |
+| `ChromaDB initialization hangs` | Base vectorielle corrompue | `rm -rf .vectorstore .vectorstore2` |
+| `Permission denied: ./work/` | Droits fichiers | `chmod 755 work/ && rm -rf work/*` |
+
+**Logs utiles:**
+```bash
+# Vérifier Ollama
+curl http://localhost:11434/api/tags
+
+# Tester clé Anthropic
+python -c "from anthropic import Anthropic; Anthropic(api_key='sk-ant-...')"
+
+# Explorer ChromaDB
+jupyter notebook notebooks/chromadb_explorer.ipynb
+```
+
+## 📚 Documentation complémentaire
+
+Pour plus de détails, consulter **[CLAUDE.md](CLAUDE.md)** (documentation complète du projet).
+
+## État du projet
+
+**Statut:** ✅ Production-ready (mise à jour: 11 mai 2026)
+
+### Limitations connues
+
+- **Cloud providers:** Actuellement GCP uniquement (AWS/Azure à venir)
+- **Modules:** Focus sur Google Cloud Storage (autres services en développement)
+- **Langues:** Prompts et documentation en français/anglais mélangés
+
+### Roadmap
+
+**Court terme (1-2 semaines):**
+- [ ] Support AWS S3 et Azure Blob Storage
+- [ ] Backend Terraform remote state (GCS)
+- [ ] Exemple CI/CD (GitHub Actions)
+
+**Moyen terme (1-2 mois):**
+- [ ] Catalogue de modules personnalisables
+- [ ] Estimation de coûts (Infracost)
+- [ ] Intégration Terraform Cloud
+
+### Support & Contribution
+
+**Besoin d'aide?**
+1. Consulter section [Troubleshooting](#-troubleshooting)
+2. Vérifier [CLAUDE.md](CLAUDE.md) pour détails techniques
+3. Consulter l'historique: `git log --oneline -15`
+
+**Contribuer:**
+- Lire [CLAUDE.md](CLAUDE.md) avant modification
+- Un commit = une fonctionnalité/fix
+- Format commit: `<type>: <description>` (types: `feat`, `fix`, `docs`, `refactor`, `chore`)
+
+**Liens utiles:**
+- [Terraform Documentation](https://www.terraform.io/language)
+- [Google Cloud Provider](https://registry.terraform.io/providers/hashicorp/google/latest/docs)
+- [Anthropic Claude API](https://docs.anthropic.com)
+- [LangChain Docs](https://python.langchain.com)
