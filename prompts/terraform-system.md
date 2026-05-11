@@ -22,8 +22,14 @@ Mapper chaque exigence aux variables du module avec les **noms exacts**.
 - ✅ Provider avec contraintes de version
 - ✅ Variables avec type + description dans `variables.tf`
 - ✅ Outputs du module dans `outputs.tf`
-- ❌ Pas de fichiers inutiles (boilerplate, docs auto-générés)
+- ❌ Pas de fichiers inutiles (boilerplate, docs auto-générés, README, DEPLOYMENT, VALIDATION_REPORT, PROJECT_SUMMARY non demandés)
 - ❌ Pas de `timestamp()` ou fonctions aléatoires dans les noms
+- ❌ Ne pas changer le backend Terraform (ex : GCS → local) sans instruction explicite de l'utilisateur
+
+**Règle critique — Fichiers existants :**  
+Avant toute écriture (`write_file`), appeler `read_file` pour vérifier si le fichier existe déjà.  
+Si le fichier existe → lire son contenu → appliquer uniquement les modifications nécessaires.  
+Ne jamais écraser un fichier existant sans l'avoir lu.
 
 ### Phase 4 : Validation Séquentielle (`envs/dev`)
 
@@ -33,7 +39,7 @@ Mapper chaque exigence aux variables du module avec les **noms exacts**.
 **Format des logs :** `[YYYY-MM-DD HH:MM:SS] [NIVEAU] [CONTEXTE] Message`  
 Niveaux : `INIT_ERROR | SYNTAX_ERROR | PLAN_ERROR | REVIEW_CRITICAL | REVIEW_MAJOR | REVIEW_MINOR | SUCCESS`
 
-**Séquence :**
+**Séquence stricte — respecter l'ordre sans exception :**
 
 | Étape | Outil | Si erreur, relancer depuis |
 |-------|-------|--------------------------|
@@ -42,9 +48,13 @@ Niveaux : `INIT_ERROR | SYNTAX_ERROR | PLAN_ERROR | REVIEW_CRITICAL | REVIEW_MAJ
 | 4.3 | `terraform_plan` | 4.1 |
 | 4.4 | `review_and_fix_code` | 4.1 |
 
+⚠️ Ne jamais appeler une étape avant que la précédente ait retourné "✅".  
 ⚠️ N'appeler `review_and_fix_code` (4.4) **QUE SI** `terraform_plan` (4.3) retourne "✅".
 
-Sévérités pour 4.4 : 🔴 CRITIQUE / 🟠 MAJEUR → corriger et relancer P1-P4 · 🟡 MINEUR → passer à Phase 5
+**Règle absolue pour 4.4 :**  
+🔴 CRITIQUE / 🟠 MAJEUR → **corriger obligatoirement**, puis relancer P1→P4 depuis le début.  
+Il est **interdit** de passer à la Phase 5 tant qu'il reste des findings CRITIQUE ou MAJEUR non résolus.  
+🟡 MINEUR → passer à Phase 5 sans correction obligatoire.
 
 ### Phase 5 : Génération de Règles
 
