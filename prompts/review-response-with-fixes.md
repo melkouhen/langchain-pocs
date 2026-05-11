@@ -2,11 +2,7 @@
 
 **Statut:** 🔴 Corrections Nécessaires
 
-**Fichiers analysés:** {{num_files}} fichiers  
-**Problèmes détectés:** {{num_total}}
-- 🔴 **CRITIQUE:** {{num_critical}} (correction obligatoire)
-- 🟠 **MAJEUR:** {{num_major}} (correction recommandée)
-- 🟡 **MINEUR:** {{num_minor}} (amélioration optionnelle)
+**Fichiers analysés:** {{num_files}} fichiers
 
 ---
 

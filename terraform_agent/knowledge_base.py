@@ -2,7 +2,6 @@ from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
-from langchain_core.tools import tool
 
 from .config import Config
 
@@ -70,10 +69,7 @@ class KnowledgeBase:
         # Initialize embedding function
         embedding_function = OllamaEmbeddings(model=self.config.EMBEDDING_MODEL)
 
-        # Check if vectorstore already exists
-        vectorstore_path = (
-            self.config.PROJECT_ROOT / "notebooks" / self.VECTORSTORE_DIR
-        )
+        vectorstore_path = self.config.PROJECT_ROOT / self.VECTORSTORE_DIR
 
         print(f"  Creating new vectorstore database...")
         self.vectorstore = Chroma(

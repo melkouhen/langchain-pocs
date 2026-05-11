@@ -50,10 +50,9 @@ env/
 .DS_Store
 
 # Project-specific
-.vectorstore2/
+.vectorstore*/
 work/
-notebooks/.vectorstore2/
-notebooks/.vectorstore*
+notebooks/.vectorstore*/
 test.json
 sample.json
 

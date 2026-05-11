@@ -1,4 +1,3 @@
-import shutil
 import logging
 from typing import Any
 from datetime import datetime
@@ -130,15 +129,6 @@ class TerraformAgent:
             Terraform code and validation/review results
         """
         print("🛠️  Preparing workspace...")
-
-        # Clean and create work directory
-        #if self.config.WORK_DIR.exists():
-        #    shutil.rmtree(self.config.WORK_DIR)
-        #    print(f"  ✓ Cleaned existing work directory")
-
-        # self.config.WORK_DIR.mkdir(exist_ok=True)
-        # print(f"  ✓ Created fresh work directory: {self.config.WORK_DIR}")
-
         print("\n🚀 Starting Terraform Code Generation Agent")
         print("=" * 80)
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")

@@ -11,7 +11,7 @@ class Config:
     Attributes:
         PROJECT_ROOT: Base directory of the project
         WORK_DIR: Directory for agent output and generated files
-        DOCS_DIR: Directory containing documentation and best practices
+        RULES_DIR: Directory containing rule documentation and best practices
         PROMPTS_DIR: Directory containing prompt templates
         EMBEDDING_MODEL: Name of the embedding model for ChromaDB
         REVIEW_MODEL_NAME: Name of the LLM model used for validation/review
@@ -53,4 +53,4 @@ class Config:
 
         self.PHOENIX_ENDPOINT = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces")
         self.PHOENIX_PROJECT_NAME = os.getenv("PHOENIX_PROJECT_NAME", "terraform-agent")
-        self.PHOENIX_ENABLED = True  # Always enabled by default
+        self.PHOENIX_ENABLED = os.getenv("PHOENIX_ENABLED", "true").lower() == "true"
