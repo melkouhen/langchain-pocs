@@ -173,6 +173,112 @@ Appeler `review_and_fix_code` pour examiner le code de l’environnement dev con
 - **CRITIQUE/MAJEUR en 4.4** → Logs + Corriger → Relancer 4.1 + 4.2 + 4.3 + 4.4 → Répéter jusqu'à zéro CRITIQUE/MAJEUR
 - **"✅" partout + Zéro CRITIQUE/MAJEUR + Logs complétés** → Passer à Phase 5
 
+---
+
+## Format des Logs Terraform
+
+**Fichier centralisé:** `{{PROJECT_ROOT}}/envs/dev/terraform_logs.error`
+
+**Importance:** Chaque erreur DOIT être loggée en temps réel (au fur et à mesure) pour créer une audit trail complète.
+
+### Spécification du Format
+
+#### Structure Générale
+```
+[YYYY-MM-DD HH:MM:SS] [NIVEAU] [CONTEXTE] Message
+```
+
+**Champs obligatoires:**
+- `[TIMESTAMP]` : ISO 8601 format (ex: 2026-05-11 14:23:45)
+- `[NIVEAU]` : INIT_ERROR | SYNTAX_ERROR | PLAN_ERROR | REVIEW_CRITICAL | REVIEW_MAJOR | REVIEW_MINOR | SUCCESS
+- `[CONTEXTE]` : Fichier, ligne, ou type d'erreur
+- `Message` : Description claire et actionnable
+
+#### Exemples par Étape
+
+**Étape 4.1 - terraform_init:**
+```
+[2026-05-11 14:23:45] [INIT_ERROR] [envs/dev] No valid credential file found in ~/.config/gcloud
+[2026-05-11 14:23:46] [INIT_ERROR] [envs/dev] Provider download failed: timeout after 60s
+[2026-05-11 14:24:12] [SUCCESS] [envs/dev] terraform init completed in 27s - Providers initialized
+```
+
+**Étape 4.2 - terraform_validate:**
+```
+[2026-05-11 14:24:20] [SYNTAX_ERROR] [main.tf:15] Missing required argument "bucket" in resource "google_storage_bucket"
+[2026-05-11 14:24:20] [SYNTAX_ERROR] [variables.tf:8] Variable name 'bucket_Name' does not match naming convention (expected: bucket_name)
+[2026-05-11 14:24:20] [SYNTAX_ERROR] [main.tf:32] Reference to undefined variable 'region' (available: gcp_region, gcp_project_id)
+[2026-05-11 14:25:10] [SUCCESS] [envs/dev] terraform validate passed - 0 errors - 0 warnings
+```
+
+**Étape 4.3 - terraform_plan:**
+```
+[2026-05-11 14:25:20] [PLAN_ERROR] [envs/dev] Variable value missing: gcp_project_id (required but not provided in terraform.tfvars)
+[2026-05-11 14:25:20] [PLAN_ERROR] [envs/dev] Invalid module reference: module.gcs_bucket requires source but source is empty
+[2026-05-11 14:26:05] [SUCCESS] [envs/dev] terraform plan successful - 3 resources to create - 0 to change - 0 to destroy
+```
+
+**Étape 4.4 - review_and_fix_code:**
+```
+[2026-05-11 14:26:15] [REVIEW_CRITICAL] [main.tf:42] Rule: TF-NO-HARDCODED-SECRETS AWS access key detected: AKIA... - Line 42: access_key = "AKIA..."
+[2026-05-11 14:26:15] [REVIEW_CRITICAL] [main.tf:45] Rule: TF-NO-HARDCODED-SECRETS Secret key hardcoded - Line 45: secret_key = "wJal..."
+[2026-05-11 14:26:16] [REVIEW_MAJOR] [variables.tf:12] Rule: TF-NAMING Variable name 'bucket_Name' violates snake_case convention - Expected: bucket_name
+[2026-05-11 14:26:16] [REVIEW_MAJOR] [outputs.tf:8] Rule: TF-AVOID-HARDCODING Region hardcoded to 'europe-west9' - Expected: use variable {{region_variable}}
+[2026-05-11 14:26:17] [REVIEW_MINOR] [main.tf:1] Rule: TF-DOCUMENTATION Missing comment block for main resource definitions
+[2026-05-11 14:26:30] [SUCCESS] [envs/dev] review_and_fix_code completed - 2 CRITICAL - 2 MAJOR - 1 MINOR
+```
+
+### Format de Sortie (Echo dans les Logs)
+
+Après chaque commande terraform, logger le résultat:
+```
+[TIMESTAMP] [COMMAND] terraform {{command}} {{working_dir}} - Exit Code: {{exit_code}} - Duration: {{elapsed_time}}s
+```
+
+Exemple:
+```
+[2026-05-11 14:24:10] [COMMAND] terraform init envs/dev - Exit Code: 0 - Duration: 27s
+[2026-05-11 14:25:10] [COMMAND] terraform validate envs/dev - Exit Code: 0 - Duration: 5s
+[2026-05-11 14:26:05] [COMMAND] terraform plan envs/dev - Exit Code: 0 - Duration: 45s
+```
+
+### Rotation et Archivage
+
+**Politique de rétention:**
+- **Fichier actif:** `terraform_logs.error` (logs courants)
+- **Archive par date:** `terraform_logs.error.2026-05-11` (fin de journée)
+- **Rétention:** Minimum 7 jours, archivés dans `{{PROJECT_ROOT}}/logs-archive/`
+
+**Commande d'archivage (après validation complète):**
+```bash
+mv envs/dev/terraform_logs.error logs-archive/terraform_logs.$(date +%Y-%m-%d).error
+```
+
+### Utilisation pour Audit et Debugging
+
+Les logs doivent permettre de:
+1. ✅ Reconstruire exactement ce qui s'est passé (ordre chronologique)
+2. ✅ Identifier tous les problèmes rencontrés (search par NIVEAU)
+3. ✅ Vérifier que toutes les corrections ont été appliquées
+4. ✅ Tracer le temps d'exécution de chaque phase
+5. ✅ Créer un audit trail pour conformité
+
+### Parsing et Automation
+
+Format conçu pour être facilement parsable:
+```bash
+# Trouver tous les erreurs CRITICAL
+grep "REVIEW_CRITICAL" terraform_logs.error
+
+# Compter les erreurs par type
+awk '{print $2}' terraform_logs.error | sort | uniq -c
+
+# Extraire timeline complète
+grep "SUCCESS\|ERROR" terraform_logs.error | cut -d' ' -f1,2,3,4
+```
+
+---
+
 ## Référence des Outils
 
 Les outils sont groupés par phase du protocole opérationnel.
