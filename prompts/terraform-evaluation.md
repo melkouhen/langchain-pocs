@@ -85,6 +85,21 @@ Les directives de validation incluent:
 - Manque de justification des choix? -0.5 point
 - Surcommentaires inutiles? -0.5 point
 
+### 6. **Logging et Observabilité (10%)**
+- [ ] Les logs sont-ils complets dans `terraform_logs.error`?
+- [ ] Chaque erreur est-elle loggée avec timestamp?
+- [ ] Le format des logs est-il cohérent et parsable?
+- [ ] Tous les problèmes CRITIQUE/MAJEUR sont-ils loggés?
+- [ ] Les logs fournissent-ils une audit trail complète?
+- **Score**: ___ / 5
+
+**Détails**:
+- Logs absents ou incomplets? -2 points
+- Timestamps manquants? -1 point
+- Format incohérent ou imparsable? -1 point
+- Logs partiels (certains problèmes manquent)? -0.5 point
+- Logs excellents et complets? +0.5 bonus
+
 ## Template de Rapport d'Évaluation
 
 ```
@@ -97,12 +112,20 @@ Les directives de validation incluent:
 
 | Critère              | Score | Poids | Points Pondérés |
 | -------------------- | ----- | ----- | --------------- |
-| Respect du Pipeline  | _/5   | 30%   | _/1.5           |
-| Qualité du Code      | _/5   | 25%   | _/1.25          |
+| Respect du Pipeline  | _/5   | 25%   | _/1.25          |
+| Qualité du Code      | _/5   | 20%   | _/1             |
 | Validation Terraform | _/5   | 20%   | _/1             |
 | Revue de Code        | _/5   | 15%   | _/0.75          |
 | Documentation        | _/5   | 10%   | _/0.5           |
-| **SCORE TOTAL**      |       |       | **_/5**         |
+| Logging & Observ.   | _/5   | 10%   | _/0.5           |
+| **SCORE TOTAL**      |       | 100%  | **_/5**         |
+
+**Scoring Final:**
+- **5.0 ⭐⭐⭐⭐⭐**: EXCELLENT - Production Ready
+- **4.0-4.9 ⭐⭐⭐⭐**: BON - Très acceptable
+- **3.0-3.9 ⭐⭐⭐**: ACCEPTABLE - Corrections mineures requises
+- **2.0-2.9 ⭐⭐**: À AMÉLIORER - Défauts majeurs
+- **<2.0 ⭐**: INSUFFISANT - Redémarrage requis
 
 ### Points Forts
 1. [Point fort 1]
@@ -141,6 +164,13 @@ Les directives de validation incluent:
 **Qualité des commentaires**: [Suffisant/Insuffisant/Excessif]
 **Clarté des explications**: [Excellente/Bonne/À améliorer]
 **Justification des choix**: [Présente/Partiellement présente/Absente]
+
+#### 6. Logging et Observabilité
+**Fichier terraform_logs.error**: [Présent/Absent]
+**Complétude des logs**: [Tous les problèmes/Partiels/Absents]
+**Format des logs**: [Cohérent/Incohérent/Non spécifié]
+**Timestamps**: [Présents/Absents]
+**Audit trail**: [Complet/Partiel/Absent]
 
 ### Recommandations
 
