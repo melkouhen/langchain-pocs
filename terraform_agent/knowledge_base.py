@@ -46,7 +46,7 @@ class KnowledgeBase:
         2. Splits documents into overlapping chunks (1000 chars with 100 char overlap)
         3. Creates embeddings using OllamaEmbeddings
         4. Creates or reuses a ChromaDB collection
-        5. Adds documents to the vectorstore if not already indexed
+        5. Clears existing documents and indexes new ones
         """
         print("📚 Loading knowledge base...")
 
@@ -75,36 +75,24 @@ class KnowledgeBase:
             self.config.PROJECT_ROOT / "notebooks" / self.VECTORSTORE_DIR
         )
 
-        if vectorstore_path.exists():
-            print(f"  ✓ Vectorstore found, loading existing database...")
-            self.vectorstore = Chroma(
-                collection_name="terraform_docs",
-                embedding_function=embedding_function,
-                persist_directory=str(vectorstore_path),
-            )
-        else:
-            print(f"  Creating new vectorstore database...")
-            self.vectorstore = Chroma(
-                collection_name="terraform_docs",
-                embedding_function=embedding_function,
-                persist_directory=str(vectorstore_path),
-            )
+        print(f"  Creating new vectorstore database...")
+        self.vectorstore = Chroma(
+            collection_name="terraform_docs",
+            embedding_function=embedding_function,
+            persist_directory=str(vectorstore_path),
+        )
 
-        # Check if documents already indexed
+        # Clear existing documents and index new ones
         try:
-            existing_count = len(self.vectorstore.get()["ids"])
-            if existing_count == 0:
-                print(f"  Indexing {len(docs)} documents...")
-                self.vectorstore.add_documents(docs)
-            else:
-                print(
-                    f"  ✓ Vectorstore already indexed with {existing_count} documents"
-                )
+            existing_ids = self.vectorstore.get()["ids"]
+            if existing_ids:
+                print(f"  🗑️ Clearing {len(existing_ids)} existing documents...")
+                self.vectorstore.delete(ids=existing_ids)
         except (KeyError, ValueError):
-            # Collection doesn't exist, create and add documents
-            print(f"  Indexing {len(docs)} documents...")
-            self.vectorstore.add_documents(docs)
+            pass
 
+        print(f"  Indexing {len(docs)} documents...")
+        self.vectorstore.add_documents(docs)
         print(f"  ✓ Vectorstore created and indexed")
 
     def search(self, query: str, k: int = 3) -> str:
