@@ -58,7 +58,7 @@ class KnowledgeBase:
         # Load documents from docs directory
         loader = DirectoryLoader(
             str(self.config.RULES_DIR),
-            glob="**/rules-*.md",
+            glob="**/*.md",
             loader_cls=TextLoader,
             recursive=True,
         )

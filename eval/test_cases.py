@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from pathlib import Path
 
 
 @dataclass(frozen=True)
@@ -8,12 +9,21 @@ class TestCase:
     prompt: str
 
 
+def _load_prompt(filename: str) -> str:
+    """Load prompt content from user_prompts directory."""
+    prompt_path = Path(__file__).parent.parent / "user_prompts" / filename
+    return prompt_path.read_text(encoding="utf-8")
+
+
 TEST_CASES: list[TestCase] = [
     TestCase(
         id="tc01",
         name="Simple GCS Bucket",
-        prompt=(
-            "# Spécifications Utilisateur - Projet Terraform **Rôle:** Senior Cloud Engineer & Terraform Architect. **Tâche:** Générer une structure de projet Terraform production-ready pour déployer des resources GCP. **Vue d'Ensemble du Projet:** - **Objectif:** Créer une infrastructure résiliente et maintainable avec isolation dev/prod - **Bénéficiaires:** Équipe DevOps, développeurs, infrastructures **Spécifications Techniques:** **Ressources:** - GCS buckets (environnements dev et prod) - Bucket dev: `{{BUCKET_PREFIX}}-dev` (ex: `my-bucket-elkouhen-dev`) - Bucket prod: `{{BUCKET_PREFIX}}-prod` (ex: `my-bucket-elkouhen-prod`) **Infrastructure Cloud:** - **Provider:** GCP (Google Cloud Platform) - **Région:** ` europe-west9` - **Projet GCP:** `beaming-botany-495511-n6` **Environnements:** - **Dev** et **Prod** (état séparé, configurations isolées) **Répertoire de Génération:** - **work_dir:** `/Users/melkouhen/audit-tools/test-langchain/work` **Voir Also:** - Pour le protocole complet → `prompts/terraform-system.md`"
-        ),
+        prompt=_load_prompt("1-bucket.md"),
+    ), 
+    TestCase(
+        id="tc02",
+        name="Simple Service Cloud Run",
+        prompt=_load_prompt("2-cloudrun.md"),
     )
 ]

@@ -276,7 +276,7 @@ def terraform_init(path: str) -> str:
         start_time = time.time()
 
         init_result = subprocess.run(
-            ["rtk", "terraform", "init"],
+            ["terraform", "init"],
             cwd=path,
             capture_output=True,
             text=True,
@@ -338,7 +338,7 @@ def terraform_validate(path: str) -> str:
         start_time = time.time()
 
         validate_result = subprocess.run(
-            ["rtk", "terraform", "validate"],
+            ["terraform", "validate"],
             cwd=path,
             capture_output=True,
             text=True,
@@ -404,7 +404,7 @@ def terraform_plan(path: str) -> str:
         start_time = time.time()
 
         plan_result = subprocess.run(
-            ["rtk", "terraform", "plan", "-no-color"],
+            ["terraform", "plan", "-no-color"],
             cwd=path,
             capture_output=True,
             text=True,
