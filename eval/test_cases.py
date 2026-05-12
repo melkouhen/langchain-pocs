@@ -13,26 +13,7 @@ TEST_CASES: list[TestCase] = [
         id="tc01",
         name="Simple GCS Bucket",
         prompt=(
-            "Create a simple Google Cloud Storage bucket for storing application logs "
-            "in the dev environment. Follow security best practices."
+            "# Spécifications Utilisateur - Projet Terraform **Rôle:** Senior Cloud Engineer & Terraform Architect. **Tâche:** Générer une structure de projet Terraform production-ready pour déployer des resources GCP. **Vue d'Ensemble du Projet:** - **Objectif:** Créer une infrastructure résiliente et maintainable avec isolation dev/prod - **Bénéficiaires:** Équipe DevOps, développeurs, infrastructures **Spécifications Techniques:** **Ressources:** - GCS buckets (environnements dev et prod) - Bucket dev: `{{BUCKET_PREFIX}}-dev` (ex: `my-bucket-elkouhen-dev`) - Bucket prod: `{{BUCKET_PREFIX}}-prod` (ex: `my-bucket-elkouhen-prod`) **Infrastructure Cloud:** - **Provider:** GCP (Google Cloud Platform) - **Région:** ` europe-west9` - **Projet GCP:** `beaming-botany-495511-n6` **Environnements:** - **Dev** et **Prod** (état séparé, configurations isolées) **Répertoire de Génération:** - **work_dir:** `/Users/melkouhen/audit-tools/test-langchain/work` **Voir Also:** - Pour le protocole complet → `prompts/terraform-system.md`"
         ),
-    ),
-    TestCase(
-        id="tc02",
-        name="Versioned ML Dataset Bucket",
-        prompt=(
-            "Create a Google Cloud Storage bucket for ML training datasets with "
-            "versioning enabled and a lifecycle rule to delete versions older than 90 days. "
-            "Enable UBLA (Uniform Bucket-Level Access)."
-        ),
-    ),
-    TestCase(
-        id="tc03",
-        name="Multi-env Secure Bucket",
-        prompt=(
-            "Create a reusable Terraform module for a Google Cloud Storage bucket and deploy it "
-            "in both dev and prod environments. Requirements: UBLA enabled, public access prevention "
-            "on prod, optional versioning via variable, configurable storage class."
-        ),
-    ),
+    )
 ]

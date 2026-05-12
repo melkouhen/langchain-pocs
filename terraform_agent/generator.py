@@ -172,7 +172,7 @@ class TerraformGenerator:
                         {
                             "type": "text",
                             "text": self.prompts.system,
-                            # "cache_control": {"type": "ephemeral"},
+                            "cache_control": {"type": "ephemeral"},
                         }
                     ]
                 ),
