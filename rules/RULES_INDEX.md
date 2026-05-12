@@ -1,9 +1,10 @@
 # Terraform Rules Index
 
-**Version:** 2.3  
+**Version:** 2.4  
 **Last Updated:** 2026-05-12  
 **Total Rules:** 25  
-**Total Categories:** 5
+**Total Categories:** 5  
+**Scopes:** 3 (cloudrun, gcs, global)
 
 ---
 
@@ -11,43 +12,43 @@
 
 ### CRITICAL (16 règles)
 
-| ID | Title | Category | File |
-|----|-------|----------|------|
-| CLOUDRUN-INGRESS-SECURITY | Restrict Ingress to Minimum Required Access | Security | rule-cloudrun-ingress-security.md |
-| CLOUDRUN-MODULE-USAGE | Use Official GoogleCloudPlatform/cloud-run/google Module | Architecture | rule-cloudrun-module-usage.md |
-| CLOUDRUN-SECRETS-MANAGEMENT | Use Secret Manager for Sensitive Environment Variables | Security | rule-cloudrun-secrets-management.md |
-| GCS-MODULE-USAGE | Use Official terraform-google-modules/cloud-storage/google Module | Architecture | rule-gcs-module-usage.md |
-| GCS-NAMING-UBLA | GCS Bucket Naming Convention and Uniform Bucket-Level Access | Security | rule-gcs-naming-ubla.md |
-| GCS-PROVIDER-VERSION | GCS Module Provider Version Constraint | Code Quality | rule-gcs-provider-version.md |
-| TF-ALWAYS-PLAN | Always Review Plan Before Apply | Operations | rule-tf-always-plan.md |
-| TF-BACKEND-STATE | Remote State Management via GCS Backend | State Management | rule-tf-backend-state.md |
-| TF-ENV-COMPOSITION | Environment Configurations Must Not Declare Cloud Resources Directly | Architecture | rule-tf-env-composition.md |
-| TF-ENV-ISOLATION | Environment Isolation: Separate Directories and State Files | Architecture | rule-tf-env-isolation.md |
-| TF-ENV-ISOLATION-BACKEND | Environment Isolation: Separate Backends & State | Security | rule-tf-env-isolation-backend.md |
-| TF-ENV-SEPARATION | Environment Separation: Folders vs Workspaces | Architecture | rule-tf-env-separation.md |
-| TF-NO-SECRETS | No Hardcoded Secrets | Security | rule-tf-no-hardcoded-secrets.md |
-| TF-STATE-DELETION | Never Delete State Files Directly | Security | rule-tf-state-deletion.md |
-| TF-STRUCTURE | Project Layout Organization | Architecture | rule-tf-structure.md |
-| TF-VERSION-PINNING | Version Pinning: Providers & Terraform | State Management | rule-tf-version-pinning.md |
+| ID | Title | Scope | Category | File |
+|----|-------|-------|----------|------|
+| CLOUDRUN-INGRESS-SECURITY | Restrict Ingress to Minimum Required Access | cloudrun | Security | rule-cloudrun-ingress-security.md |
+| CLOUDRUN-MODULE-USAGE | Use Official GoogleCloudPlatform/cloud-run/google Module | cloudrun | Architecture | rule-cloudrun-module-usage.md |
+| CLOUDRUN-SECRETS-MANAGEMENT | Use Secret Manager for Sensitive Environment Variables | cloudrun | Security | rule-cloudrun-secrets-management.md |
+| GCS-MODULE-USAGE | Use Official terraform-google-modules/cloud-storage/google Module | gcs | Architecture | rule-gcs-module-usage.md |
+| GCS-NAMING-UBLA | GCS Bucket Naming Convention and Uniform Bucket-Level Access | gcs | Security | rule-gcs-naming-ubla.md |
+| GCS-PROVIDER-VERSION | GCS Module Provider Version Constraint | gcs | Code Quality | rule-gcs-provider-version.md |
+| TF-ALWAYS-PLAN | Always Review Plan Before Apply | global | Operations | rule-tf-always-plan.md |
+| TF-BACKEND-STATE | Remote State Management via GCS Backend | global | State Management | rule-tf-backend-state.md |
+| TF-ENV-COMPOSITION | Environment Configurations Must Not Declare Cloud Resources Directly | global | Architecture | rule-tf-env-composition.md |
+| TF-ENV-ISOLATION | Environment Isolation: Separate Directories and State Files | global | Architecture | rule-tf-env-isolation.md |
+| TF-ENV-ISOLATION-BACKEND | Environment Isolation: Separate Backends & State | global | Security | rule-tf-env-isolation-backend.md |
+| TF-ENV-SEPARATION | Environment Separation: Folders vs Workspaces | global | Architecture | rule-tf-env-separation.md |
+| TF-NO-SECRETS | No Hardcoded Secrets | global | Security | rule-tf-no-hardcoded-secrets.md |
+| TF-STATE-DELETION | Never Delete State Files Directly | global | Security | rule-tf-state-deletion.md |
+| TF-STRUCTURE | Project Layout Organization | global | Architecture | rule-tf-structure.md |
+| TF-VERSION-PINNING | Version Pinning: Providers & Terraform | global | State Management | rule-tf-version-pinning.md |
 
 ### MAJOR (8 règles)
 
-| ID | Title | Category | File |
-|----|-------|----------|------|
-| GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
-| GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | Code Quality | rule-gcs-input-types.md |
-| TF-AVOID-HARDCODING | Avoid Hardcoding: Use Variables & Locals | Code Quality | rule-tf-avoid-hardcoding.md |
-| TF-CICD | CI/CD Integration: Format, Validate, Plan | Operations | rule-tf-cicd-integration.md |
-| TF-MODULES-DRY | Module Creation Criteria (DRY Principle) | Code Quality | rule-tf-modules-dry.md |
-| TF-MODULES-SCOPE | Module Scope: Shallow & Focused | Code Quality | rule-tf-modules-scope.md |
-| TF-PROVIDER-LOCKING | Provider Lock Files: Commit .terraform.lock.hcl | State Management | rule-tf-provider-locking.md |
-| TF-RESOURCE-NAMING | Resource Naming Convention | Code Quality | rule-tf-resource-naming.md |
+| ID | Title | Scope | Category | File |
+|----|-------|-------|----------|------|
+| GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | gcs | Code Quality | rule-gcs-bucket-syntax.md |
+| GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | gcs | Code Quality | rule-gcs-input-types.md |
+| TF-AVOID-HARDCODING | Avoid Hardcoding: Use Variables & Locals | global | Code Quality | rule-tf-avoid-hardcoding.md |
+| TF-CICD | CI/CD Integration: Format, Validate, Plan | global | Operations | rule-tf-cicd-integration.md |
+| TF-MODULES-DRY | Module Creation Criteria (DRY Principle) | global | Code Quality | rule-tf-modules-dry.md |
+| TF-MODULES-SCOPE | Module Scope: Shallow & Focused | global | Code Quality | rule-tf-modules-scope.md |
+| TF-PROVIDER-LOCKING | Provider Lock Files: Commit .terraform.lock.hcl | global | State Management | rule-tf-provider-locking.md |
+| TF-RESOURCE-NAMING | Resource Naming Convention | global | Code Quality | rule-tf-resource-naming.md |
 
 ### MINOR (1 règle)
 
-| ID | Title | Category | File |
-|----|-------|----------|------|
-| TF-STATE-DRIFT | State Drift Detection: Regular Plan Runs | Operations | rule-tf-state-drift.md |
+| ID | Title | Scope | Category | File |
+|----|-------|-------|----------|------|
+| TF-STATE-DRIFT | State Drift Detection: Regular Plan Runs | global | Operations | rule-tf-state-drift.md |
 
 ---
 
@@ -123,18 +124,55 @@
 
 ---
 
-## Rules by Prefix
+## Rules by Scope
 
-### GCS (Google Cloud Storage) — 4 rules
+### Cloud Run (cloudrun) — 3 rules
 | ID | Severity | Category |
 |----|----------|----------|
-| GCS-BUCKET-SYNTAX | CRITICAL | Code Quality |
-| GCS-INPUT-TYPES | CRITICAL | Code Quality |
+| CLOUDRUN-INGRESS-SECURITY | CRITICAL | Security |
+| CLOUDRUN-MODULE-USAGE | CRITICAL | Architecture |
+| CLOUDRUN-SECRETS-MANAGEMENT | CRITICAL | Security |
+
+**Scope:** Google Cloud Run services (containerized applications)
+
+---
+
+### Cloud Storage (gcs) — 5 rules
+| ID | Severity | Category |
+|----|----------|----------|
+| GCS-BUCKET-SYNTAX | MAJOR | Code Quality |
+| GCS-INPUT-TYPES | MAJOR | Code Quality |
+| GCS-MODULE-USAGE | CRITICAL | Architecture |
 | GCS-NAMING-UBLA | CRITICAL | Security |
 | GCS-PROVIDER-VERSION | CRITICAL | Code Quality |
 
-### TF (Terraform General) — 17 rules
-All other rules covering architecture, state management, operations, and code quality
+**Scope:** Google Cloud Storage buckets and objects
+
+---
+
+### Global (global) — 17 rules
+All Terraform general rules covering architecture, state management, operations, and code quality.
+Applicable to all resources and project structure regardless of GCP service.
+
+| ID | Severity | Category |
+|----|----------|----------|
+| TF-ALWAYS-PLAN | CRITICAL | Operations |
+| TF-AVOID-HARDCODING | MAJOR | Code Quality |
+| TF-BACKEND-STATE | CRITICAL | State Management |
+| TF-CICD | MAJOR | Operations |
+| TF-ENV-COMPOSITION | CRITICAL | Architecture |
+| TF-ENV-ISOLATION | CRITICAL | Architecture |
+| TF-ENV-ISOLATION-BACKEND | CRITICAL | Security |
+| TF-ENV-SEPARATION | CRITICAL | Architecture |
+| TF-MODULES-DRY | MAJOR | Code Quality |
+| TF-MODULES-SCOPE | MAJOR | Code Quality |
+| TF-NO-SECRETS | CRITICAL | Security |
+| TF-PROVIDER-LOCKING | MAJOR | State Management |
+| TF-RESOURCE-NAMING | MAJOR | Code Quality |
+| TF-STATE-DELETION | CRITICAL | Security |
+| TF-STATE-DRIFT | MINOR | Operations |
+| TF-STRUCTURE | CRITICAL | Architecture |
+| TF-VERSION-PINNING | CRITICAL | State Management |
 
 ---
 

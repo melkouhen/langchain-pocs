@@ -1,9 +1,10 @@
 # Catégories des Règles Terraform
 
-**Version:** 2.3  
+**Version:** 2.4  
 **Date:** 2026-05-12  
 **Total Règles:** 25  
-**Total Catégories:** 5
+**Total Catégories:** 5  
+**Scopes:** 3 (cloudrun, gcs, global)
 
 ---
 

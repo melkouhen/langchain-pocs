@@ -1,6 +1,6 @@
 # Cloud Run Ingress Security
 
-<rule id="CLOUDRUN-INGRESS-SECURITY" severity="CRITICAL" category="Security">
+<rule id="CLOUDRUN-INGRESS-SECURITY" severity="CRITICAL" scope="cloudrun" category="Security">
 <title>Restrict Ingress to Minimum Required Access</title>
 
 <description>

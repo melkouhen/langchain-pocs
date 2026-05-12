@@ -1,6 +1,6 @@
 # Terraform Resource Naming Convention
 
-<rule id="TF-RESOURCE-NAMING" severity="MAJOR" category="Code Quality">
+<rule id="TF-RESOURCE-NAMING" severity="MAJOR" scope="global" category="Code Quality">
 <title>Resource Naming Convention</title>
 
 <description>

@@ -1,6 +1,6 @@
 # GCS Module Best Practices Rules
 
-<rule id="GCS-PROVIDER-VERSION" severity="CRITICAL" category="Code Quality">
+<rule id="GCS-PROVIDER-VERSION" severity="CRITICAL" scope="gcs" category="Code Quality">
 <title>GCS Module Provider Version Constraint</title>
 
 <description>

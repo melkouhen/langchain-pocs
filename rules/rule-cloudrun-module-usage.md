@@ -1,6 +1,6 @@
 # Cloud Run Module Usage
 
-<rule id="CLOUDRUN-MODULE-USAGE" severity="CRITICAL" category="Code Quality">
+<rule id="CLOUDRUN-MODULE-USAGE" severity="CRITICAL" scope="cloudrun" category="Architecture">
 <title>Use Official GoogleCloudPlatform/cloud-run/google Module</title>
 
 <description>

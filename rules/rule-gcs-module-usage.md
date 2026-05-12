@@ -1,6 +1,6 @@
 # GCS Bucket Module Usage
 
-<rule id="GCS-MODULE-USAGE" severity="CRITICAL" category="Code Quality">
+<rule id="GCS-MODULE-USAGE" severity="CRITICAL" scope="gcs" category="Architecture">
 <title>Use Official terraform-google-modules/cloud-storage/google Module</title>
 
 <description>

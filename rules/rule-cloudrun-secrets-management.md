@@ -1,6 +1,6 @@
 # Cloud Run Secrets Management
 
-<rule id="CLOUDRUN-SECRETS-MANAGEMENT" severity="CRITICAL" category="Security">
+<rule id="CLOUDRUN-SECRETS-MANAGEMENT" severity="CRITICAL" scope="cloudrun" category="Security">
 <title>Use Secret Manager for Sensitive Environment Variables</title>
 
 <description>

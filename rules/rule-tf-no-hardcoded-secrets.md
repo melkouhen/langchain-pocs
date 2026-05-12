@@ -1,6 +1,6 @@
 # Terraform Security: No Hardcoded Secrets
 
-<rule id="TF-NO-SECRETS" severity="CRITICAL" category="Security">
+<rule id="TF-NO-SECRETS" severity="CRITICAL" scope="global" category="Security">
 <title>No Hardcoded Secrets</title>
 
 <description>

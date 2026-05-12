@@ -1,6 +1,6 @@
 # Terraform Module Creation Criteria
 
-<rule id="TF-MODULES-DRY" severity="MAJOR" category="Code Quality">
+<rule id="TF-MODULES-DRY" severity="MAJOR" scope="global" category="Code Quality">
 <title>Module Creation Criteria (DRY Principle)</title>
 
 <description>

@@ -1,6 +1,6 @@
 # Terraform Provider Lock Files
 
-<rule id="TF-PROVIDER-LOCKING" severity="MAJOR" category="State Management">
+<rule id="TF-PROVIDER-LOCKING" severity="MAJOR" scope="global" category="State Management">
 <title>Provider Lock Files: Commit .terraform.lock.hcl</title>
 
 <description>

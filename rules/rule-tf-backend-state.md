@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF"?>
-<rule id="TF-BACKEND-STATE" severity="CRITICAL" category="State Management">
+<rule id="TF-BACKEND-STATE" severity="CRITICAL" scope="global" category="State Management">
   <title>Remote State Management via GCS Backend</title>
 
   <description>

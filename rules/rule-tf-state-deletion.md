@@ -1,6 +1,6 @@
 # Terraform State File Safety
 
-<rule id="TF-STATE-DELETION" severity="CRITICAL" category="Security">
+<rule id="TF-STATE-DELETION" severity="CRITICAL" scope="global" category="Security">
 <title>Never Delete State Files Directly</title>
 
 <description>
