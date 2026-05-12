@@ -79,13 +79,18 @@ class TerraformPhaseCallback(BaseCallbackHandler):
         """Called when a tool finishes executing.
 
         Args:
-            output: Tool output (can be str or ToolMessage)
+            output: Tool output (can be str, ToolMessage, Command, or other types)
             **kwargs: Additional arguments
         """
         tool_name = kwargs.get("name", "unknown")
 
-        # Convert output to string if it's a ToolMessage
-        output_str = str(output) if not isinstance(output, str) else output
+        # Convert output to string if it's not already a string
+        # Handles ToolMessage, Command, and other LangChain/LangGraph types
+        if isinstance(output, str):
+            output_str = output
+        else:
+            # For ToolMessage, extract content; for others, use str()
+            output_str = getattr(output, 'content', None) or str(output)
 
         # Store tool result for reporting
         self.tool_results[tool_name] = {
@@ -303,10 +308,15 @@ class DetailedTerraformCallback(TerraformPhaseCallback):
         """Extract security and best practice checks from review output.
 
         Args:
-            output: Review tool output (can be str or ToolMessage)
+            output: Review tool output (can be str, ToolMessage, Command, or other types)
         """
-        # Convert output to string if it's a ToolMessage
-        output_str = str(output) if not isinstance(output, str) else output
+        # Convert output to string if it's not already a string
+        # Handles ToolMessage, Command, and other LangChain/LangGraph types
+        if isinstance(output, str):
+            output_str = output
+        else:
+            # For ToolMessage, extract content; for others, use str()
+            output_str = getattr(output, 'content', None) or str(output)
 
         # Security checks
         self.security_checks = {
