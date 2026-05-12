@@ -1,14 +1,16 @@
 # Terraform Rules Index
 
-**Version:** 1.0  
+**Version:** 1.1  
 **Last Updated:** 2026-05-12  
-**Total Rules:** 25
+**Total Rules:** 24 (1 doublon supprimé)
 
 ---
 
 ## Rules by Severity
 
 ### CRITICAL (14 règles)
+
+> **Note:** TF-REMOTE-STATE-008 a été supprimé car il était un doublon de TF-BACKEND-STATE-003
 | ID | Title | Category | File |
 |----|-------|----------|------|
 | GCS-BUCKET-SYNTAX-001 | GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
@@ -22,12 +24,11 @@
 | TF-ENV-ISOLATION-005 | Environment Isolation: Separate Backends & State | Security | rule-tf-env-isolation-backend.md |
 | TF-ENV-SEPARATION-004 | Environment Separation: Folders vs Workspaces | Architecture | rule-tf-env-separation.md |
 | TF-NO-HARDCODED-SECRETS-009 | No Hardcoded Secrets | Security | rule-tf-no-hardcoded-secrets.md |
-| TF-REMOTE-STATE-008 | Remote State Backend: Never Local State | Architecture | rule-tf-remote-state.md |
 | TF-STATE-DELETION-009 | Never Delete State Files Directly | Safety | rule-tf-state-deletion.md |
 | TF-STRUCTURE-001 | Project Layout Organization | Architecture | rule-tf-structure.md |
 | TF-VERSION-PINNING-006 | Version Pinning: Providers & Terraform | Reliability | rule-tf-version-pinning.md |
 
-### MAJOR (11 règles)
+### MAJOR (10 règles)
 | ID | Title | Category | File |
 |----|-------|----------|------|
 | TF-AVOID-HARDCODING-011 | Avoid Hardcoding: Use Variables & Locals | Code Quality | rule-tf-avoid-hardcoding.md |
@@ -129,9 +130,9 @@ Each rule file contains:
 
 | Metric | Value |
 |--------|-------|
-| Total Rules | 25 |
-| CRITICAL | 14 (56%) |
-| MAJOR | 11 (44%) |
+| Total Rules | 24 |
+| CRITICAL | 14 (58%) |
+| MAJOR | 10 (42%) |
 | MINOR | 0 (0%) |
 | Categories | 13 |
 | Average Checklist Items | 8-12 per rule |

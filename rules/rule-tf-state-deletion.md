@@ -128,7 +128,7 @@ rm .terraform.tfstate.backup
 </implementation-checklist>
 
 <related-rules>
-- TF-REMOTE-STATE-008: Remote backend storage
+- TF-BACKEND-STATE-003: Remote state management via GCS backend
 - TF-STATE-DRIFT-010: Drift detection
 </related-rules>
 
