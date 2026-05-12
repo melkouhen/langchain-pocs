@@ -18,17 +18,18 @@ La base de règles couvre **3 scopes de ressources** :
 
 1. Identifier toutes les ressources à déployer (ex : `google_storage_bucket`, `google_iam_member`, …)
 2. Déterminer le **scope** des ressources (`google_cloud_run_service`, `google_storage_bucket`, ou `global`)
-3. **Toujours** interroger le scope `global` : appeler `search_knowledge_base` avec une requête par catégorie vers le scope global
+3. Pour chaque **scope** : appeler `search_knowledge_base` avec une requête par catégorie vers le scope
+4. Pour avoir les règles globales, **Toujours** interroger le scope `global` : appeler `search_knowledge_base` avec une requête par catégorie vers le scope global
 
 **Templates de requête par catégorie :**
 
-| Catégorie            | Requête                              | Exemples de retour                                                 |
-| -------------------- | ------------------------------------ | ------------------------------------------------------------------ |
-| **Security**         | `"Security {resource_type}"`         | UBLA, encryption at rest, IAM policies, public access prevention   |
-| **Code Quality**     | `"Code Quality {resource_type}"`     | Conventions de nommage, validation, formatage (ex: `^[a-z0-9-]+$`) |
-| **Architecture**     | `"Architecture {resource_type}"`     | Modules vs resources, isolation env, backend configuration         |
-| **State Management** | `"State Management {resource_type}"` | Backend config, state locking, remote state, workspaces            |
-| **Operations**       | `"Operations {resource_type}"`       | Déploiement, CI/CD integration, lifecycle management               |
+| Catégorie            | Requête                              | 
+| -------------------- | ------------------------------------ | 
+| **Security**         | `"Security {resource_type}"`         |
+| **Code Quality**     | `"Code Quality {resource_type}"`     | 
+| **Architecture**     | `"Architecture {resource_type}"`     | 
+| **State Management** | `"State Management {resource_type}"` | 
+| **Operations**       | `"Operations {resource_type}"`       | 
 
 **Exemple :** `search_knowledge_base("Security google_storage_bucket")` → retourne règles UBLA, encryption, IAM
 
