@@ -92,15 +92,32 @@ class TerraformPhaseCallback(BaseCallbackHandler):
             # For ToolMessage, extract content; for others, use str()
             output_str = getattr(output, 'content', None) or str(output)
 
+        # Determine if tool succeeded
+        # Success if output contains success indicators OR doesn't contain error indicators
+        has_success_indicator = "✅" in output_str or "successful" in output_str.lower()
+
+        # Check for error indicators (more specific patterns to avoid false positives)
+        output_lower = output_str.lower()
+        has_error_indicator = (
+            "❌" in output_str or
+            "error:" in output_lower or
+            output_lower.startswith("error ") or
+            " error " in output_lower[:100] or  # "terraform error" or "init error"
+            "failed" in output_lower[:100]      # "init failed" or "operation failed"
+        )
+
+        # Consider successful if no error indicators (default to success unless proven otherwise)
+        success = has_success_indicator or not has_error_indicator
+
         # Store tool result for reporting
         self.tool_results[tool_name] = {
             "output": output_str,
-            "success": "✅" in output_str or "successful" in output_str.lower(),
+            "success": success,
             "timestamp": datetime.now().isoformat(),
         }
 
         if self.verbose:
-            status = "✅" if self.tool_results[tool_name]["success"] else "❌"
+            status = "✅" if success else "❌"
             print(f"   {status} {tool_name} completed")
 
         logger.debug(f"Tool ended: {tool_name}")

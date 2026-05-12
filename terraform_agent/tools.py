@@ -288,7 +288,7 @@ def terraform_init(path: str) -> str:
 
         if init_result.returncode != 0:
             logger.error(f"terraform init failed (exit code {init_result.returncode}) after {elapsed:.2f}s")
-            logger.debug(f"Init output: {init_output}")
+            logger.error(f"Init output: {init_output[:500]}")  # Show first 500 chars in ERROR log
             _log_to_file("INIT_ERROR", "terraform_init", f"Failed with exit code {init_result.returncode}: {init_output[:200]}", path)
             return f"❌ ERROR: terraform init failed:\n{init_output}"
 
