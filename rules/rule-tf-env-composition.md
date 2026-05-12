@@ -1,6 +1,6 @@
 # Terraform Environment Module Composition Rules
 
-<rule id="TF-ENV-COMPOSITION" severity="CRITICAL" category="Structure">
+<rule id="TF-ENV-COMPOSITION" severity="CRITICAL" category="Architecture">
 <title>Environment Configurations Must Not Declare Cloud Resources Directly</title>
 
 <description>

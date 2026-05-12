@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF"?>
-<rule id="TF-ENV-ISOLATION" severity="CRITICAL" category="Infrastructure">
+<rule id="TF-ENV-ISOLATION" severity="CRITICAL" category="Architecture">
   <title>Environment Isolation: Separate Directories and State Files</title>
 
   <description>
