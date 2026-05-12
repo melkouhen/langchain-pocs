@@ -118,8 +118,11 @@ class KnowledgeBase:
         if self.vectorstore is None:
             raise RuntimeError("Vectorstore not initialized")
 
+        logger.info(f"Searching vectorstore for: '{query}' (k={k})")
         results = self.vectorstore.similarity_search(query, k=k)
         raw_content = "\n---\n".join([res.page_content for res in results])
+        preview = raw_content[:50].replace('\n', ' ') if raw_content else '(empty)'
+        logger.info(f"Found {len(results)} results ({len(raw_content)} chars) - preview: {preview}...")
 
         # If summarization disabled or no model router, return raw content
         if not summarize or self.model_router is None:
@@ -140,7 +143,8 @@ Content:
 Summary:"""
 
             summary = self.model_router.invoke("summarization", prompt)
-            logger.info(f"Summarization completed: {len(raw_content)} → {len(summary)} chars")
+            summary_preview = summary[:50].replace('\n', ' ') if summary else '(empty)'
+            logger.info(f"Summarization completed: {len(raw_content)} → {len(summary)} chars - preview: {summary_preview}...")
             return summary
 
         except Exception as e:
