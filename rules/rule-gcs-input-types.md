@@ -1,6 +1,6 @@
 # GCS Module Input Types Rules
 
-<rule id="GCS-INPUT-002" severity="CRITICAL" category="Code Quality">
+<rule id="GCS-INPUT-TYPES" severity="CRITICAL" category="Code Quality">
 <title>Module Input Types: Map vs Scalar</title>
 
 <description>

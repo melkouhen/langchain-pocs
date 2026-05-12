@@ -1,6 +1,6 @@
 # Terraform Project Structure & Organization
 
-<rule id="TF-STRUCTURE-001" severity="CRITICAL" category="Architecture">
+<rule id="TF-STRUCTURE" severity="CRITICAL" category="Architecture">
 <title>Project Layout Organization</title>
 
 <description>

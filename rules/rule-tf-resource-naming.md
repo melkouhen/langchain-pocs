@@ -1,6 +1,6 @@
 # Terraform Resource Naming Convention
 
-<rule id="TF-RESOURCE-NAMING-010" severity="MAJOR" category="Code Quality">
+<rule id="TF-RESOURCE-NAMING" severity="MAJOR" category="Code Quality">
 <title>Resource Naming Convention</title>
 
 <description>
@@ -35,7 +35,7 @@ resource "google_sql_database_instance" "db" {
 }
 
 resource "google_compute_instance" "web" {
-  name = "${local.environment}-compute-0"     # dev-compute-0
+  name = "${local.environment}-compute"     # dev-compute-0
   
   # For multiple instances, use count
   for_each = toset(["web1", "web2", "web3"])

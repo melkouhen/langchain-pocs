@@ -1,6 +1,6 @@
 # Terraform Module Scope
 
-<rule id="TF-MODULES-003" severity="MAJOR" category="Code Quality">
+<rule id="TF-MODULES-SCOPE" severity="MAJOR" category="Code Quality">
 <title>Module Scope: Shallow & Focused</title>
 
 <description>

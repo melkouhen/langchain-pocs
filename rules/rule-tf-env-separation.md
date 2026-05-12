@@ -1,6 +1,6 @@
 # Terraform Environment Separation
 
-<rule id="TF-ENV-SEPARATION-004" severity="CRITICAL" category="Architecture">
+<rule id="TF-ENV-SEPARATION" severity="CRITICAL" category="Architecture">
 <title>Environment Separation: Folders vs Workspaces</title>
 
 <description>

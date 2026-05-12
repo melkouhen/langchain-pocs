@@ -1,6 +1,6 @@
 # Terraform Versioning & State Management Rules
 
-<rule id="TF-VERSION-PINNING-006" severity="CRITICAL" category="Reliability">
+<rule id="TF-VERSION-PINNING" severity="CRITICAL" category="Reliability">
 <title>Version Pinning: Providers & Terraform</title>
 
 <description>

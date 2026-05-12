@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<rule id="GCS-NAMING-UBLA-001" severity="CRITICAL" category="Naming & Security">
+<?xml version="1.0" encoding="UTF"?>
+<rule id="GCS-NAMING-UBLA" severity="CRITICAL" category="Naming & Security">
   <title>GCS Bucket Naming Convention and Uniform Bucket-Level Access</title>
 
   <description>

@@ -1,6 +1,6 @@
 # Terraform Environment Isolation: Backend & State
 
-<rule id="TF-ENV-ISOLATION-005" severity="CRITICAL" category="Security">
+<rule id="TF-ENV-ISOLATION-BACKEND" severity="CRITICAL" category="Security">
 <title>Environment Isolation: Separate Backends & State</title>
 
 <description>

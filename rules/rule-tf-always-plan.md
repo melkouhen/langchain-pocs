@@ -1,6 +1,6 @@
 # Terraform: Always Review Plan Before Apply
 
-<rule id="TF-ALWAYS-PLAN-013" severity="CRITICAL" category="Best Practice">
+<rule id="TF-ALWAYS-PLAN" severity="CRITICAL" category="Best Practice">
 <title>Always Review Plan Before Apply</title>
 
 <description>

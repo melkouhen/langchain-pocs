@@ -1,6 +1,6 @@
 # Terraform: Avoid Hardcoding Values
 
-<rule id="TF-AVOID-HARDCODING-011" severity="MAJOR" category="Code Quality">
+<rule id="TF-AVOID-HARDCODING" severity="MAJOR" category="Code Quality">
 <title>Avoid Hardcoding: Use Variables & Locals</title>
 
 <description>

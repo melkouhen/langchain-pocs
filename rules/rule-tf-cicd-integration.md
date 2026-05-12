@@ -1,6 +1,6 @@
 # Terraform CI/CD Integration
 
-<rule id="TF-CI-CD-INTEGRATION-012" severity="MAJOR" category="Automation">
+<rule id="TF-CICD" severity="MAJOR" category="Automation">
 <title>CI/CD Integration: Format, Validate, Plan</title>
 
 <description>
