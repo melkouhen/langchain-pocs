@@ -1,8 +1,8 @@
 # Catégories des Règles Terraform
 
-**Version:** 2.1  
+**Version:** 2.2  
 **Date:** 2026-05-12  
-**Total Règles:** 23  
+**Total Règles:** 25  
 **Total Catégories:** 5
 
 ---
@@ -12,11 +12,11 @@
 Les règles sont organisées en **5 catégories principales** pour une meilleure clarté et cohérence.
 
 ```
-Code Quality     ██████████████████████████████░░░░░░ 7 règles (30%)
-Security         ██████████████████████████░░░░░░░░░ 6 règles (26%)
-Architecture     █████████████████░░░░░░░░░░░░░░░░░░ 4 règles (17%)
-State Management █████████████░░░░░░░░░░░░░░░░░░░░░ 3 règles (13%)
-Operations       █████████████░░░░░░░░░░░░░░░░░░░░░ 3 règles (13%)
+Code Quality     ████████████████████████████████████ 9 règles (36%)
+Security         ████████████████████████░░░░░░░░░░░ 6 règles (24%)
+Architecture     ████████████████░░░░░░░░░░░░░░░░░░░ 4 règles (16%)
+State Management ████████████░░░░░░░░░░░░░░░░░░░░░░ 3 règles (12%)
+Operations       ████████████░░░░░░░░░░░░░░░░░░░░░░ 3 règles (12%)
 ```
 
 ---
@@ -86,14 +86,16 @@ Operations       █████████████░░░░░░░░
 
 ---
 
-## ✨ 4. Code Quality (7 règles)
+## ✨ 4. Code Quality (9 règles)
 
-**Scope:** Qualité du code, maintenabilité, bonnes pratiques de développement
+**Scope:** Qualité du code, maintenabilité, bonnes pratiques de développement, utilisation de modules officiels
 
 | ID | Gravité | Règle |
 |----|---------|-------|
+| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
 | GCS-BUCKET-SYNTAX | CRITICAL | GCS Bucket Block vs Argument Syntax |
 | GCS-INPUT-TYPES | CRITICAL | Module Input Types: Map vs Scalar |
+| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | GCS-PROVIDER-VERSION | CRITICAL | GCS Module Provider Version Constraint |
 | TF-MODULES-DRY | MAJOR | Module Creation Criteria (DRY Principle) |
 | TF-MODULES-SCOPE | MAJOR | Module Scope: Shallow & Focused |
@@ -101,13 +103,14 @@ Operations       █████████████░░░░░░░░
 | TF-AVOID-HARDCODING | MAJOR | Avoid Hardcoding: Use Variables & Locals |
 
 **Principes clés:**
+- **Utiliser les modules officiels** pour Cloud Run et GCS (pas de ressources directes)
 - Respecter la syntaxe Terraform (blocks vs arguments)
 - Types d'inputs corrects (maps pour per-bucket configs)
 - Modules = DRY (2+ usages), shallow (pas de deep nesting)
 - Naming cohérent: `${env}-${type}-${purpose}`
 - Paramétrage via variables (pas de hardcoding)
 
-**Impact:** CRITICAL/MAJOR - Code de qualité = maintenabilité + scalabilité
+**Impact:** CRITICAL/MAJOR - Code de qualité = maintenabilité + scalabilité + sécurité
 
 ---
 
@@ -136,8 +139,8 @@ Operations       █████████████░░░░░░░░
 
 | Gravité | Nombre | % |
 |---------|--------|---|
-| CRITICAL | 16 | 70% |
-| MAJOR | 7 | 30% |
+| CRITICAL | 18 | 72% |
+| MAJOR | 7 | 28% |
 | MINOR | 0 | 0% |
 
 ### Par Catégorie + Gravité
@@ -147,9 +150,9 @@ Operations       █████████████░░░░░░░░
 | Architecture | 4 | 0 | 4 |
 | Security | 6 | 0 | 6 |
 | State Management | 2 | 1 | 3 |
-| Code Quality | 3 | 4 | 7 |
+| Code Quality | 5 | 4 | 9 |
 | Operations | 1 | 2 | 3 |
-| **Total** | **16** | **7** | **23** |
+| **Total** | **18** | **7** | **25** |
 
 ---
 

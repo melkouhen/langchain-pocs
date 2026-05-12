@@ -1,22 +1,24 @@
 # Terraform Rules Index
 
-**Version:** 2.1  
+**Version:** 2.2  
 **Last Updated:** 2026-05-12  
-**Total Rules:** 23  
+**Total Rules:** 25  
 **Total Categories:** 5
 
 ---
 
 ## Rules by Severity
 
-### CRITICAL (16 règles)
+### CRITICAL (18 règles)
 
 | ID | Title | Category | File |
 |----|-------|----------|------|
 | CLOUDRUN-INGRESS-SECURITY | Restrict Ingress to Minimum Required Access | Security | rule-cloudrun-ingress-security.md |
+| CLOUDRUN-MODULE-USAGE | Use Official GoogleCloudPlatform/cloud-run/google Module | Code Quality | rule-cloudrun-module-usage.md |
 | CLOUDRUN-SECRETS-MANAGEMENT | Use Secret Manager for Sensitive Environment Variables | Security | rule-cloudrun-secrets-management.md |
 | GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
 | GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | Code Quality | rule-gcs-input-types.md |
+| GCS-MODULE-USAGE | Use Official terraform-google-modules/cloud-storage/google Module | Code Quality | rule-gcs-module-usage.md |
 | GCS-NAMING-UBLA | GCS Bucket Naming Convention and Uniform Bucket-Level Access | Security | rule-gcs-naming-ubla.md |
 | GCS-PROVIDER-VERSION | GCS Module Provider Version Constraint | Code Quality | rule-gcs-provider-version.md |
 | TF-ALWAYS-PLAN | Always Review Plan Before Apply | Operations | rule-tf-always-plan.md |
@@ -86,19 +88,21 @@
 
 ---
 
-### Code Quality (7 règles)
+### Code Quality (9 règles)
 
 | ID | Severity | Title |
 |----|----------|-------|
+| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
 | GCS-BUCKET-SYNTAX | CRITICAL | Distinguish GCS Bucket Block vs Argument Syntax |
 | GCS-INPUT-TYPES | CRITICAL | Module Input Types: Map vs Scalar |
+| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | GCS-PROVIDER-VERSION | CRITICAL | GCS Module Provider Version Constraint |
 | TF-AVOID-HARDCODING | MAJOR | Avoid Hardcoding: Use Variables & Locals |
 | TF-MODULES-DRY | MAJOR | Module Creation Criteria (DRY Principle) |
 | TF-MODULES-SCOPE | MAJOR | Module Scope: Shallow & Focused |
 | TF-RESOURCE-NAMING | MAJOR | Resource Naming Convention |
 
-**Principes:** Syntaxe correcte, types appropriés, modules DRY et shallow, paramétrage via variables
+**Principes:** Utilisation des modules officiels (Cloud Run, GCS), syntaxe correcte, types appropriés, modules DRY et shallow, paramétrage via variables
 
 ---
 
@@ -135,9 +139,9 @@ All other rules covering architecture, state management, operations, and code qu
 
 | Metric | Value |
 |--------|-------|
-| Total Rules | 23 |
-| CRITICAL | 16 (70%) |
-| MAJOR | 7 (30%) |
+| Total Rules | 25 |
+| CRITICAL | 18 (72%) |
+| MAJOR | 7 (28%) |
 | MINOR | 0 (0%) |
 | Categories | 5 |
 
@@ -148,9 +152,9 @@ All other rules covering architecture, state management, operations, and code qu
 | Architecture | 4 | 0 | 4 |
 | Security | 6 | 0 | 6 |
 | State Management | 2 | 1 | 3 |
-| Code Quality | 3 | 4 | 7 |
+| Code Quality | 5 | 4 | 9 |
 | Operations | 1 | 2 | 3 |
-| **Total** | **16** | **7** | **23** |
+| **Total** | **18** | **7** | **25** |
 
 ---
 
