@@ -1,8 +1,8 @@
 # Terraform Rules Index
 
-**Version:** 2.4  
+**Version:** 2.5  
 **Last Updated:** 2026-05-12  
-**Total Rules:** 25  
+**Total Rules:** 26  
 **Total Categories:** 5  
 **Scopes:** 3 (cloudrun, gcs, global)
 
@@ -10,7 +10,7 @@
 
 ## Rules by Severity
 
-### CRITICAL (16 règles)
+### CRITICAL (17 règles)
 
 | ID | Title | Scope | Category | File |
 |----|-------|-------|----------|------|
@@ -25,6 +25,7 @@
 | TF-ENV-COMPOSITION | Environment Configurations Must Not Declare Cloud Resources Directly | global | Architecture | rule-tf-env-composition.md |
 | TF-ENV-ISOLATION | Environment Isolation: Separate Directories and State Files | global | Architecture | rule-tf-env-isolation.md |
 | TF-ENV-ISOLATION-BACKEND | Environment Isolation: Separate Backends & State | global | Security | rule-tf-env-isolation-backend.md |
+| TF-ENV-MODULE-DELEGATION | Environment Modules Must Only Call Shared Modules With Environment Parameters | global | Architecture | rule-tf-env-module-delegation.md |
 | TF-ENV-SEPARATION | Environment Separation: Folders vs Workspaces | global | Architecture | rule-tf-env-separation.md |
 | TF-NO-SECRETS | No Hardcoded Secrets | global | Security | rule-tf-no-hardcoded-secrets.md |
 | TF-STATE-DELETION | Never Delete State Files Directly | global | Security | rule-tf-state-deletion.md |
@@ -54,7 +55,7 @@
 
 ## Rules by Category
 
-### Architecture (6 règles)
+### Architecture (7 règles)
 
 | ID | Severity | Title |
 |----|----------|-------|
@@ -62,10 +63,11 @@
 | GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | TF-ENV-COMPOSITION | CRITICAL | Environment Configurations Must Not Declare Cloud Resources Directly |
 | TF-ENV-ISOLATION | CRITICAL | Environment Isolation: Separate Directories and State Files |
+| TF-ENV-MODULE-DELEGATION | CRITICAL | Environment Modules Must Only Call Shared Modules With Environment Parameters |
 | TF-ENV-SEPARATION | CRITICAL | Environment Separation: Folders vs Workspaces |
 | TF-STRUCTURE | CRITICAL | Project Layout Organization |
 
-**Principes:** Structure 3-tiers (modules/ + envs/ + global/), séparation environnements, composition via modules, utilisation modules officiels
+**Principes:** Structure 3-tiers (modules/ + envs/ + global/), séparation environnements, composition via modules, utilisation modules officiels, délégation à modules partagés
 
 ---
 
@@ -150,7 +152,7 @@
 
 ---
 
-### Global (global) — 17 rules
+### Global (global) — 18 rules
 All Terraform general rules covering architecture, state management, operations, and code quality.
 Applicable to all resources and project structure regardless of GCP service.
 
@@ -163,6 +165,7 @@ Applicable to all resources and project structure regardless of GCP service.
 | TF-ENV-COMPOSITION | CRITICAL | Architecture |
 | TF-ENV-ISOLATION | CRITICAL | Architecture |
 | TF-ENV-ISOLATION-BACKEND | CRITICAL | Security |
+| TF-ENV-MODULE-DELEGATION | CRITICAL | Architecture |
 | TF-ENV-SEPARATION | CRITICAL | Architecture |
 | TF-MODULES-DRY | MAJOR | Code Quality |
 | TF-MODULES-SCOPE | MAJOR | Code Quality |
@@ -182,9 +185,9 @@ Applicable to all resources and project structure regardless of GCP service.
 
 | Metric | Value |
 |--------|-------|
-| Total Rules | 25 |
-| CRITICAL | 16 (64%) |
-| MAJOR | 8 (32%) |
+| Total Rules | 26 |
+| CRITICAL | 17 (65%) |
+| MAJOR | 8 (31%) |
 | MINOR | 1 (4%) |
 | Categories | 5 |
 
@@ -192,12 +195,12 @@ Applicable to all resources and project structure regardless of GCP service.
 
 | Catégorie | CRITICAL | MAJOR | MINOR | Total |
 |-----------|----------|-------|-------|-------|
-| Architecture | 6 | 0 | 0 | 6 |
+| Architecture | 7 | 0 | 0 | 7 |
 | Security | 6 | 0 | 0 | 6 |
 | State Management | 2 | 1 | 0 | 3 |
 | Code Quality | 1 | 6 | 0 | 7 |
 | Operations | 1 | 1 | 1 | 3 |
-| **Total** | **16** | **8** | **1** | **25** |
+| **Total** | **17** | **8** | **1** | **26** |
 
 ---
 
@@ -205,11 +208,11 @@ Applicable to all resources and project structure regardless of GCP service.
 
 ### For Developers
 
-**Priorité 1 — CRITICAL (14 règles):**
-1. Architecture (4) — structure du projet
-2. Security (4) — credentials et isolation  
+**Priorité 1 — CRITICAL (17 règles):**
+1. Architecture (7) — structure du projet, délégation à modules partagés
+2. Security (6) — credentials et isolation  
 3. State Management (2) — backend et versioning
-4. Code Quality (3) + Operations (1)
+4. Code Quality (1) + Operations (1)
 
 **Priorité 2 — MAJOR (7 règles):**
 - Appliquer progressivement pour qualité et ops
@@ -259,6 +262,11 @@ Chaque fichier de règle contient:
 
 ## Version History
 
+**v2.5 (2026-05-12):**
+- Added TF-ENV-MODULE-DELEGATION (CRITICAL): Environment modules must only call shared modules
+- Total rules: 26 (17 CRITICAL, 8 MAJOR, 1 MINOR)
+- Architecture category now has 7 CRITICAL rules
+
 **v2.0 (2026-05-12):**
 - Consolidated 13 categories into 5 main categories
 - Updated all 21 rules with new category structure
@@ -275,4 +283,4 @@ Chaque fichier de règle contient:
 
 **Generated:** 2026-05-12  
 **By:** Claude Sonnet 4.5  
-**Version:** 2.0
+**Version:** 2.5

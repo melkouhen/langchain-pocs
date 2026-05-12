@@ -1,6 +1,6 @@
 # Cloud Run Ingress Security
 
-<rule id="CLOUDRUN-INGRESS-SECURITY" severity="CRITICAL" scope="cloudrun" category="Security">
+<rule id="CLOUDRUN-INGRESS-SECURITY" severity="CRITICAL" scope="google_cloud_run_service" category="Security">
 <title>Restrict Ingress to Minimum Required Access</title>
 
 <description>

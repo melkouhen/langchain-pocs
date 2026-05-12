@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF"?>
-<rule id="GCS-NAMING-UBLA" severity="CRITICAL" scope="gcs" category="Security">
+<rule id="GCS-NAMING-UBLA" severity="CRITICAL" scope="google_storage_bucket" category="Security">
   <title>GCS Bucket Naming Convention and Uniform Bucket-Level Access</title>
 
   <description>
