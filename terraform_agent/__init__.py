@@ -1,11 +1,15 @@
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
-from .agent import TerraformAgent
+from .generator import TerraformGenerator
+from .reviewer import TerraformReviewer
+from .agent import TerraformAgent  # Backward compatibility (deprecated)
 
 __all__ = [
     "Config",
     "PromptManager",
     "KnowledgeBase",
-    "TerraformAgent",
+    "TerraformGenerator",
+    "TerraformReviewer",
+    "TerraformAgent",  # Deprecated, use TerraformGenerator
 ]
