@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import logging
 import shutil
 import sys
 from datetime import datetime
@@ -21,9 +22,10 @@ from pathlib import Path
 from dotenv import load_dotenv
 
 PROJECT_ROOT = Path(__file__).parent.parent
+print(f"Project root: {PROJECT_ROOT}")
 sys.path.insert(0, str(PROJECT_ROOT))
 
-from terraform_agent.agent import TerraformAgent
+from terraform_agent.generator import TerraformGenerator
 from terraform_agent.config import Config
 from terraform_agent.knowledge_base import KnowledgeBase
 from terraform_agent.prompts import PromptManager
@@ -44,7 +46,7 @@ def _snapshot_tf_files(src: Path, dest: Path) -> None:
 
 def _run_test_case(
     test_case: TestCase,
-    agent: TerraformAgent,
+    agent: TerraformGenerator,
     config: Config,
     run_dir: Path,
 ) -> EvaluationResult:
@@ -53,6 +55,7 @@ def _run_test_case(
     print(f"{'='*72}")
 
     work_dir = config.WORK_DIR
+    print(f"Work dir : {work_dir}")
 
     # Clear work/ for a clean run
     if work_dir.exists():
@@ -119,6 +122,14 @@ def _print_summary(results: list[EvaluationResult]) -> None:
 
 
 def main() -> None:
+    # Configure logging to display all logs to console
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+        handlers=[logging.StreamHandler(sys.stdout)]
+    )
+
     load_dotenv()
 
     parser = argparse.ArgumentParser(description="Terraform Agent Evaluation Harness")
@@ -146,7 +157,7 @@ def main() -> None:
     config = Config(base_dir=PROJECT_ROOT)
     prompts = PromptManager(config)
     kb = KnowledgeBase(config)
-    agent = TerraformAgent(config, prompts, kb)
+    agent = TerraformGenerator(config, prompts, kb)
 
     results: list[EvaluationResult] = []
     for tc in cases:

@@ -50,7 +50,6 @@ docs/                                      # Bonnes pratiques
 
 prompts/                                   # Templates LLM
 ├── terraform-system.md                    # Comportement agent
-├── terraform-user.md
 ├── terraform-review.md
 ├── terraform-validate.md
 └── terraform-evaluation.md

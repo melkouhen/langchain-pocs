@@ -24,7 +24,7 @@
 - **Dev** et **Prod** (état séparé, configurations isolées)
 
 **Répertoire de Génération:**
-- **Chemin:** `/Users/melkouhen/audit-tools/test-langchain/work`
+- **work_dir:** `/Users/melkouhen/audit-tools/test-langchain/work`
 
 **Voir Also:**
 - Pour le protocole complet → `prompts/terraform-system.md`

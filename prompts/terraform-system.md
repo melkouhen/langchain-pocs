@@ -49,6 +49,12 @@ Structure minimale : `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf` (si
 Mapper chaque exigence aux variables du module avec les **noms exacts**.
 
 ### Phase 3 : Génération de Code
+
+**Répertoire de génération :**  
+Tous les fichiers Terraform sont générés dans le répertoire `work_dir` fourni en paramètre.  
+Ce paramètre définit l'emplacement de génération et doit être respecté pour tous les fichiers créés.
+
+**Contenu à générer :**
 - ✅ Provider avec contraintes de version
 - ✅ Variables avec type + description dans `variables.tf`
 - ✅ Outputs du module dans `outputs.tf`

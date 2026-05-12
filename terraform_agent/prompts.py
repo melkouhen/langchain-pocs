@@ -65,18 +65,18 @@ class PromptManager:
         """User prompt describing the task for the agent.
 
         Returns:
-            User prompt template from terraform-user.md
+            User prompt template from t1-bucket.md
         """
         # Load from user_prompts directory
-        filepath = self.config.USER_PROMPTS_DIR / "terraform-user.md"
+        filepath = self.config.USER_PROMPTS_DIR / "1-bucket.md"
         if not filepath.exists():
             raise FileNotFoundError(f"User prompt file not found: {filepath}")
 
-        if "terraform-user.md" in self._cache:
-            return self._cache["terraform-user.md"]
+        if "1-bucket.md" in self._cache:
+            return self._cache["1-bucket.md"]
 
         content = filepath.read_text()
-        self._cache["terraform-user.md"] = content
+        self._cache["1-bucket.md"] = content
         return content
 
     @property

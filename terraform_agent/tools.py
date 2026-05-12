@@ -209,7 +209,8 @@ def search_knowledge_base(query: str) -> str:
 
     logger.info(f"Searching knowledge base for: {query}")
     result = _knowledge_base.search(query)
-    logger.info(f"Knowledge base search completed")
+    preview = result[:50].replace('\n', ' ') if result else '(empty)'
+    logger.info(f"Knowledge base search completed - preview: {preview}...")
 
     return result
 
@@ -450,7 +451,8 @@ def _retrieve_best_practices() -> str:
     best_practices = _knowledge_base.search(
         "Terraform best practices security standards naming conventions modules"
     )
-    logger.debug(f"Retrieved {len(best_practices)} characters of best practices")
+    preview = best_practices[:50].replace('\n', ' ') if best_practices else '(empty)'
+    logger.debug(f"Retrieved {len(best_practices)} characters - preview: {preview}...")
     return best_practices
 
 

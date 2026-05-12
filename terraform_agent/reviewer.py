@@ -76,7 +76,8 @@ class TerraformReviewer:
             logger.warning("No documents found in knowledge base")
             return "No best practices found."
 
-        logger.info(f"Retrieved {len(best_practices)} chars of best practices")
+        preview = best_practices[:50].replace('\n', ' ') if best_practices else '(empty)'
+        logger.info(f"Retrieved {len(best_practices)} chars - preview: {preview}...")
         return best_practices
 
     def read_terraform_files(self, path: str) -> tuple[str, int]:
