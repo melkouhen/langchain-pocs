@@ -134,7 +134,7 @@ class TerraformGenerator:
         else:
             print(f"    - All tasks using Claude ({config.AGENT_MODEL})")
 
-    def run(self, user_prompt: str | None = None) -> str:
+    def run(self, user_prompt: str | None = None, callbacks: list | None = None) -> str:
         """Execute the agent to generate and validate Terraform code.
 
         Performs the following steps:
@@ -146,6 +146,8 @@ class TerraformGenerator:
         Args:
             user_prompt: Optional custom user prompt. If not provided, uses the
                         default prompt from the prompt manager.
+            callbacks: Optional list of LangChain callback handlers for tracking
+                      execution phases and tool calls.
 
         Returns:
             The agent's response content as a string, containing generated
@@ -179,13 +181,23 @@ class TerraformGenerator:
                 HumanMessage(content=prompt_content),
             ]
 
+            # Prepare config with callbacks if provided
+            config = {"callbacks": callbacks} if callbacks else {}
+
             result = self.agent.invoke(
                 {"messages": messages},
+                config=config,
             )
 
             agent_output = result["messages"][-1].content
             overall_status = "✅ SUCCESS"
             logger.info("Agent execution completed successfully")
+
+            # Finalize callbacks
+            if callbacks:
+                for callback in callbacks:
+                    if hasattr(callback, 'finalize'):
+                        callback.finalize()
 
         except Exception as e:
             overall_status = "❌ FAILED"
