@@ -1,6 +1,6 @@
 # Terraform State Drift Detection
 
-<rule id="TF-STATE-DRIFT" severity="MAJOR" category="Operations">
+<rule id="TF-STATE-DRIFT" severity="MINOR" category="Operations">
 <title>State Drift Detection: Regular Plan Runs</title>
 
 <description>

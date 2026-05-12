@@ -1,6 +1,6 @@
 # Catégories des Règles Terraform
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Date:** 2026-05-12  
 **Total Règles:** 25  
 **Total Catégories:** 5
@@ -12,33 +12,36 @@
 Les règles sont organisées en **5 catégories principales** pour une meilleure clarté et cohérence.
 
 ```
-Code Quality     ████████████████████████████████████ 9 règles (36%)
+Code Quality     ████████████████████████████░░░░░░░ 7 règles (28%)
+Architecture     ████████████████████████░░░░░░░░░░░ 6 règles (24%)
 Security         ████████████████████████░░░░░░░░░░░ 6 règles (24%)
-Architecture     ████████████████░░░░░░░░░░░░░░░░░░░ 4 règles (16%)
 State Management ████████████░░░░░░░░░░░░░░░░░░░░░░ 3 règles (12%)
 Operations       ████████████░░░░░░░░░░░░░░░░░░░░░░ 3 règles (12%)
 ```
 
 ---
 
-## 🏗️ 1. Architecture (4 règles)
+## 🏗️ 1. Architecture (6 règles)
 
-**Scope:** Structure globale du projet, organisation des fichiers et environnements
+**Scope:** Structure globale du projet, organisation des fichiers, environnements, modules officiels
 
 | ID | Gravité | Règle |
 |----|---------|-------|
+| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
+| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | TF-STRUCTURE | CRITICAL | Project Layout Organization |
 | TF-ENV-SEPARATION | CRITICAL | Environment Separation: Folders vs Workspaces |
 | TF-ENV-COMPOSITION | CRITICAL | Environment Configurations Must Not Declare Resources |
 | TF-ENV-ISOLATION | CRITICAL | Environment Isolation: Separate Directories and State |
 
 **Principes clés:**
+- **Utiliser les modules officiels** (Cloud Run, GCS) au lieu de ressources directes
 - Structure 3 tiers: modules/ + envs/ + global/
 - Dossiers séparés par environnement (pas de workspaces)
 - Environnements = composition de modules (pas de ressources inline)
 - Isolation complète dev/staging/prod
 
-**Impact:** CRITIQUE - Mauvaise architecture = chaos opérationnel
+**Impact:** CRITIQUE - Mauvaise architecture ou absence de modules = chaos opérationnel + incohérences
 
 ---
 
@@ -86,31 +89,29 @@ Operations       ████████████░░░░░░░░░
 
 ---
 
-## ✨ 4. Code Quality (9 règles)
+## ✨ 4. Code Quality (7 règles)
 
-**Scope:** Qualité du code, maintenabilité, bonnes pratiques de développement, utilisation de modules officiels
+**Scope:** Qualité du code, maintenabilité, bonnes pratiques de développement
 
 | ID | Gravité | Règle |
 |----|---------|-------|
-| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
-| GCS-BUCKET-SYNTAX | CRITICAL | GCS Bucket Block vs Argument Syntax |
-| GCS-INPUT-TYPES | CRITICAL | Module Input Types: Map vs Scalar |
-| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | GCS-PROVIDER-VERSION | CRITICAL | GCS Module Provider Version Constraint |
+| GCS-BUCKET-SYNTAX | MAJOR | GCS Bucket Block vs Argument Syntax |
+| GCS-INPUT-TYPES | MAJOR | Module Input Types: Map vs Scalar |
 | TF-MODULES-DRY | MAJOR | Module Creation Criteria (DRY Principle) |
 | TF-MODULES-SCOPE | MAJOR | Module Scope: Shallow & Focused |
 | TF-RESOURCE-NAMING | MAJOR | Resource Naming Convention |
 | TF-AVOID-HARDCODING | MAJOR | Avoid Hardcoding: Use Variables & Locals |
 
 **Principes clés:**
-- **Utiliser les modules officiels** pour Cloud Run et GCS (pas de ressources directes)
+- Version pinning des modules (CRITICAL - évite breaking changes)
 - Respecter la syntaxe Terraform (blocks vs arguments)
 - Types d'inputs corrects (maps pour per-bucket configs)
 - Modules = DRY (2+ usages), shallow (pas de deep nesting)
 - Naming cohérent: `${env}-${type}-${purpose}`
 - Paramétrage via variables (pas de hardcoding)
 
-**Impact:** CRITICAL/MAJOR - Code de qualité = maintenabilité + scalabilité + sécurité
+**Impact:** CRITICAL (version) / MAJOR (syntaxe, qualité) - Code propre = maintenabilité + scalabilité
 
 ---
 
@@ -122,14 +123,14 @@ Operations       ████████████░░░░░░░░░
 |----|---------|-------|
 | TF-ALWAYS-PLAN | CRITICAL | Always Review Plan Before Apply |
 | TF-CICD | MAJOR | CI/CD Integration: Format, Validate, Plan |
-| TF-STATE-DRIFT | MAJOR | State Drift Detection: Regular Plan Runs |
+| TF-STATE-DRIFT | MINOR | State Drift Detection: Regular Plan Runs |
 
 **Principes clés:**
-- Toujours `terraform plan` avant `apply` (review obligatoire)
-- CI/CD: fmt + validate + plan + approval gate
-- Drift detection régulière (plan schedulé pour détecter changements manuels)
+- Toujours `terraform plan` avant `apply` (review obligatoire - CRITICAL)
+- CI/CD: fmt + validate + plan + approval gate (MAJOR - qualité)
+- Drift detection régulière (MINOR - monitoring, pas bloquant)
 
-**Impact:** CRITICAL/MAJOR - Bonnes pratiques = prévention des erreurs humaines
+**Impact:** CRITICAL (plan obligatoire) / MAJOR (CI/CD) / MINOR (drift detection)
 
 ---
 
@@ -139,20 +140,20 @@ Operations       ████████████░░░░░░░░░
 
 | Gravité | Nombre | % |
 |---------|--------|---|
-| CRITICAL | 18 | 72% |
-| MAJOR | 7 | 28% |
-| MINOR | 0 | 0% |
+| CRITICAL | 16 | 64% |
+| MAJOR | 8 | 32% |
+| MINOR | 1 | 4% |
 
 ### Par Catégorie + Gravité
 
-| Catégorie | CRITICAL | MAJOR | Total |
-|-----------|----------|-------|-------|
-| Architecture | 4 | 0 | 4 |
-| Security | 6 | 0 | 6 |
-| State Management | 2 | 1 | 3 |
-| Code Quality | 5 | 4 | 9 |
-| Operations | 1 | 2 | 3 |
-| **Total** | **18** | **7** | **25** |
+| Catégorie | CRITICAL | MAJOR | MINOR | Total |
+|-----------|----------|-------|-------|-------|
+| Architecture | 6 | 0 | 0 | 6 |
+| Security | 6 | 0 | 0 | 6 |
+| State Management | 2 | 1 | 0 | 3 |
+| Code Quality | 1 | 6 | 0 | 7 |
+| Operations | 1 | 1 | 1 | 3 |
+| **Total** | **16** | **8** | **1** | **25** |
 
 ---
 

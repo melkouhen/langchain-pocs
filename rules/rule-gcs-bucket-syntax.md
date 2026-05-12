@@ -1,7 +1,7 @@
 
 # GCS Bucket Block vs Argument Syntax Rules
 
-<rule id="GCS-BUCKET-SYNTAX" severity="CRITICAL" category="Code Quality">
+<rule id="GCS-BUCKET-SYNTAX" severity="MAJOR" category="Code Quality">
 <title>Distinguish GCS Bucket Block vs Argument Syntax</title>
 
 <description>

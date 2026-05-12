@@ -1,6 +1,6 @@
 # Terraform Rules Index
 
-**Version:** 2.2  
+**Version:** 2.3  
 **Last Updated:** 2026-05-12  
 **Total Rules:** 25  
 **Total Categories:** 5
@@ -9,16 +9,14 @@
 
 ## Rules by Severity
 
-### CRITICAL (18 règles)
+### CRITICAL (16 règles)
 
 | ID | Title | Category | File |
 |----|-------|----------|------|
 | CLOUDRUN-INGRESS-SECURITY | Restrict Ingress to Minimum Required Access | Security | rule-cloudrun-ingress-security.md |
-| CLOUDRUN-MODULE-USAGE | Use Official GoogleCloudPlatform/cloud-run/google Module | Code Quality | rule-cloudrun-module-usage.md |
+| CLOUDRUN-MODULE-USAGE | Use Official GoogleCloudPlatform/cloud-run/google Module | Architecture | rule-cloudrun-module-usage.md |
 | CLOUDRUN-SECRETS-MANAGEMENT | Use Secret Manager for Sensitive Environment Variables | Security | rule-cloudrun-secrets-management.md |
-| GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
-| GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | Code Quality | rule-gcs-input-types.md |
-| GCS-MODULE-USAGE | Use Official terraform-google-modules/cloud-storage/google Module | Code Quality | rule-gcs-module-usage.md |
+| GCS-MODULE-USAGE | Use Official terraform-google-modules/cloud-storage/google Module | Architecture | rule-gcs-module-usage.md |
 | GCS-NAMING-UBLA | GCS Bucket Naming Convention and Uniform Bucket-Level Access | Security | rule-gcs-naming-ubla.md |
 | GCS-PROVIDER-VERSION | GCS Module Provider Version Constraint | Code Quality | rule-gcs-provider-version.md |
 | TF-ALWAYS-PLAN | Always Review Plan Before Apply | Operations | rule-tf-always-plan.md |
@@ -32,32 +30,41 @@
 | TF-STRUCTURE | Project Layout Organization | Architecture | rule-tf-structure.md |
 | TF-VERSION-PINNING | Version Pinning: Providers & Terraform | State Management | rule-tf-version-pinning.md |
 
-### MAJOR (7 règles)
+### MAJOR (8 règles)
 
 | ID | Title | Category | File |
 |----|-------|----------|------|
+| GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
+| GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | Code Quality | rule-gcs-input-types.md |
 | TF-AVOID-HARDCODING | Avoid Hardcoding: Use Variables & Locals | Code Quality | rule-tf-avoid-hardcoding.md |
 | TF-CICD | CI/CD Integration: Format, Validate, Plan | Operations | rule-tf-cicd-integration.md |
 | TF-MODULES-DRY | Module Creation Criteria (DRY Principle) | Code Quality | rule-tf-modules-dry.md |
 | TF-MODULES-SCOPE | Module Scope: Shallow & Focused | Code Quality | rule-tf-modules-scope.md |
 | TF-PROVIDER-LOCKING | Provider Lock Files: Commit .terraform.lock.hcl | State Management | rule-tf-provider-locking.md |
 | TF-RESOURCE-NAMING | Resource Naming Convention | Code Quality | rule-tf-resource-naming.md |
+
+### MINOR (1 règle)
+
+| ID | Title | Category | File |
+|----|-------|----------|------|
 | TF-STATE-DRIFT | State Drift Detection: Regular Plan Runs | Operations | rule-tf-state-drift.md |
 
 ---
 
 ## Rules by Category
 
-### Architecture (4 règles)
+### Architecture (6 règles)
 
 | ID | Severity | Title |
 |----|----------|-------|
+| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
+| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
 | TF-ENV-COMPOSITION | CRITICAL | Environment Configurations Must Not Declare Cloud Resources Directly |
 | TF-ENV-ISOLATION | CRITICAL | Environment Isolation: Separate Directories and State Files |
 | TF-ENV-SEPARATION | CRITICAL | Environment Separation: Folders vs Workspaces |
 | TF-STRUCTURE | CRITICAL | Project Layout Organization |
 
-**Principes:** Structure 3-tiers (modules/ + envs/ + global/), séparation environnements, composition via modules
+**Principes:** Structure 3-tiers (modules/ + envs/ + global/), séparation environnements, composition via modules, utilisation modules officiels
 
 ---
 
@@ -88,21 +95,19 @@
 
 ---
 
-### Code Quality (9 règles)
+### Code Quality (7 règles)
 
 | ID | Severity | Title |
 |----|----------|-------|
-| CLOUDRUN-MODULE-USAGE | CRITICAL | Use Official GoogleCloudPlatform/cloud-run/google Module |
-| GCS-BUCKET-SYNTAX | CRITICAL | Distinguish GCS Bucket Block vs Argument Syntax |
-| GCS-INPUT-TYPES | CRITICAL | Module Input Types: Map vs Scalar |
-| GCS-MODULE-USAGE | CRITICAL | Use Official terraform-google-modules/cloud-storage/google Module |
+| GCS-BUCKET-SYNTAX | MAJOR | Distinguish GCS Bucket Block vs Argument Syntax |
+| GCS-INPUT-TYPES | MAJOR | Module Input Types: Map vs Scalar |
 | GCS-PROVIDER-VERSION | CRITICAL | GCS Module Provider Version Constraint |
 | TF-AVOID-HARDCODING | MAJOR | Avoid Hardcoding: Use Variables & Locals |
 | TF-MODULES-DRY | MAJOR | Module Creation Criteria (DRY Principle) |
 | TF-MODULES-SCOPE | MAJOR | Module Scope: Shallow & Focused |
 | TF-RESOURCE-NAMING | MAJOR | Resource Naming Convention |
 
-**Principes:** Utilisation des modules officiels (Cloud Run, GCS), syntaxe correcte, types appropriés, modules DRY et shallow, paramétrage via variables
+**Principes:** Syntaxe correcte, types appropriés, version pinning, modules DRY et shallow, paramétrage via variables
 
 ---
 
@@ -112,9 +117,9 @@
 |----|----------|-------|
 | TF-ALWAYS-PLAN | CRITICAL | Always Review Plan Before Apply |
 | TF-CICD | MAJOR | CI/CD Integration: Format, Validate, Plan |
-| TF-STATE-DRIFT | MAJOR | State Drift Detection: Regular Plan Runs |
+| TF-STATE-DRIFT | MINOR | State Drift Detection: Regular Plan Runs |
 
-**Principes:** Plan avant apply, CI/CD pipelines, drift detection régulière
+**Principes:** Plan avant apply (CRITICAL), CI/CD pipelines (MAJOR), drift detection (MINOR - monitoring)
 
 ---
 
@@ -140,21 +145,21 @@ All other rules covering architecture, state management, operations, and code qu
 | Metric | Value |
 |--------|-------|
 | Total Rules | 25 |
-| CRITICAL | 18 (72%) |
-| MAJOR | 7 (28%) |
-| MINOR | 0 (0%) |
+| CRITICAL | 16 (64%) |
+| MAJOR | 8 (32%) |
+| MINOR | 1 (4%) |
 | Categories | 5 |
 
 ### By Category + Severity
 
-| Catégorie | CRITICAL | MAJOR | Total |
-|-----------|----------|-------|-------|
-| Architecture | 4 | 0 | 4 |
-| Security | 6 | 0 | 6 |
-| State Management | 2 | 1 | 3 |
-| Code Quality | 5 | 4 | 9 |
-| Operations | 1 | 2 | 3 |
-| **Total** | **18** | **7** | **25** |
+| Catégorie | CRITICAL | MAJOR | MINOR | Total |
+|-----------|----------|-------|-------|-------|
+| Architecture | 6 | 0 | 0 | 6 |
+| Security | 6 | 0 | 0 | 6 |
+| State Management | 2 | 1 | 0 | 3 |
+| Code Quality | 1 | 6 | 0 | 7 |
+| Operations | 1 | 1 | 1 | 3 |
+| **Total** | **16** | **8** | **1** | **25** |
 
 ---
 
