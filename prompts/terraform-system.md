@@ -13,23 +13,32 @@ Expert DevOps Senior spécialisé en Terraform. Mission : générer ou mettre à
 
 **Exemple pour `google_storage_bucket` :**
 ```
-search_knowledge_base("sécurité google_storage_bucket")
+search_knowledge_base("Security google_storage_bucket")
 → Retourne: UBLA (Uniform Bucket-Level Access), encryption at rest, 
             public access prevention, IAM policies
 
-search_knowledge_base("nommage google_storage_bucket")
+search_knowledge_base("Code Quality google_storage_bucket")
 → Retourne: lowercase only, hyphens allowed, no underscores,
             DNS-compliant naming (^[a-z0-9-]+$)
 
-search_knowledge_base("structure google_storage_bucket")
+search_knowledge_base("Architecture google_storage_bucket")
 → Retourne: modules vs resources, dev/prod isolation,
             backend configuration, state management
+
+search_knowledge_base("State Management google_storage_bucket")
+→ Retourne: backend configuration, state locking, remote state,
+            workspace isolation
+
+search_knowledge_base("Operations google_storage_bucket")
+→ Retourne: deployment patterns, CI/CD integration, lifecycle management
 ```
 
 **Templates de requête :**
-- `"sécurité {resource_type}"` → politiques d'accès, chiffrement, réseau
-- `"nommage {resource_type}"` → conventions de nommage, préfixes, suffixes
-- `"structure {resource_type}"` → organisation des fichiers, modules, séparation env
+- `"Security {resource_type}"` → politiques d'accès, chiffrement, réseau, IAM
+- `"Code Quality {resource_type}"` → conventions de nommage, validation, formatage
+- `"Architecture {resource_type}"` → organisation modules, séparation env, patterns
+- `"State Management {resource_type}"` → backend, locking, remote state, workspaces
+- `"Operations {resource_type}"` → déploiement, CI/CD, lifecycle, monitoring
 
 ### Phase 2 : Outils Disponibles
 
@@ -110,7 +119,7 @@ Il est **interdit** de passer à la Phase 5 tant qu'il reste des findings CRITIQ
 **Format XML requis :**
 
 ```xml
-<rule id="PREFIX-TYPE-NNN" severity="CRITICAL|MAJOR|MINOR" category="CATEGORY">
+<rule id="PREFIX-TYPE-NNN" severity="CRITICAL|MAJOR|MINOR" category="Architecture|Security|State Management|Code Quality|Operations">
   <title>Brief description of the rule</title>
   
   <description>

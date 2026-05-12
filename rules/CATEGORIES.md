@@ -3,13 +3,13 @@
 **Version:** 2.0  
 **Date:** 2026-05-12  
 **Total Règles:** 21  
-**Total Catégories:** 6
+**Total Catégories:** 5
 
 ---
 
 ## 📊 Vue d'Ensemble
 
-Les règles sont organisées en **6 catégories principales** pour une meilleure clarté et cohérence.
+Les règles sont organisées en **5 catégories principales** pour une meilleure clarté et cohérence.
 
 ```
 Code Quality     ██████████████████████████████████░░ 7 règles (33%)
@@ -154,7 +154,7 @@ Operations       ███████████████░░░░░░
 ### v1.0 (Initial) - 13 catégories
 Trop granulaire, chevauchements, difficile à naviguer
 
-### v2.0 (Actuel) - 6 catégories
+### v2.0 (Actuel) - 5 catégories
 
 **Consolidations effectuées:**
 
@@ -167,7 +167,7 @@ Trop granulaire, chevauchements, difficile à naviguer
 | Best Practice, Automation, Monitoring | → | **Operations** |
 
 **Avantages:**
-- ✅ Plus simple à comprendre (6 vs 13)
+- ✅ Plus simple à comprendre (5 vs 13)
 - ✅ Pas de chevauchements
 - ✅ Cohérence sémantique
 - ✅ Facilite la recherche et navigation

@@ -2,213 +2,205 @@
 
 Ce répertoire contient les **règles apprises** et les **best practices** pour la génération Terraform autonome.
 
+---
+
 ## 📁 Structure
 
 | Fichier | Contenu |
 |---------|---------|
+| **CATEGORIES.md** | 📊 Documentation des 5 catégories de règles |
+| **RULES_INDEX.md** | 📇 Index complet des 21 règles par sévérité, catégorie et préfixe |
 | **RULES_FORMAT.md** | 📖 Documentation complète du format XML des règles |
 | **RULES_TEMPLATE.md** | 📋 Template vide à dupliquer pour créer une nouvelle règle |
-| **rules-*.md** | ✅ Règles existantes (exemple: `rules-gcs-providers.md`) |
+| **REVIEW_REPORT.md** | 📝 Rapport de revue et consolidation des règles |
+| **rule-*.md** | ✅ Règles individuelles (21 fichiers) |
+
+---
 
 ## 🎯 Qu'est-ce qu'une Règle?
 
 Une **règle** est un pattern documenté qui:
 
 1. ✅ Identifie un problème ou une bonne pratique
-2. ✅ Fournit des exemples correct et incorrect
-3. ✅ Explique la racine cause et les conséquences
-4. ✅ Inclut des étapes de validation
+2. ✅ Fournit des exemples correct (pattern) et incorrect (antipattern)
+3. ✅ Explique la cause racine et les conséquences
+4. ✅ Inclut une checklist d'implémentation et des étapes de validation
 5. ✅ Est réutilisable par l'agent dans les générations futures
 
-**Exemple:** Règle sur les version constraints
+**Exemple:** Règle sur les version constraints (GCS-PROVIDER-VERSION)
 ```
 Problème: terraform-google-modules/cloud-storage/google v12.3 
           nécessite Google provider >= 6.37.0
-Exemple correct: version = "~> 6.0"
-Exemple incorrect: version = "~> 5.0"
+Pattern correct: version = "~> 6.0"
+Antipattern: version = "~> 5.0"
 Conséquence: Erreur terraform validate
 ```
+
+---
+
+## 📊 Statistiques (v2.0)
+
+| Métrique | Valeur |
+|----------|--------|
+| **Total règles** | 21 |
+| **Catégories** | 5 (Architecture, Security, State Management, Code Quality, Operations) |
+| **CRITICAL** | 14 (67%) |
+| **MAJOR** | 7 (33%) |
+| **MINOR** | 0 (0%) |
+
+### Distribution par Catégorie
+
+```
+Code Quality     ██████████████████████████████████░░ 7 règles (33%)
+Architecture     ████████████████████░░░░░░░░░░░░░░░ 4 règles (19%)
+Security         ████████████████████░░░░░░░░░░░░░░░ 4 règles (19%)
+State Management ███████████████░░░░░░░░░░░░░░░░░░░░ 3 règles (14%)
+Operations       ███████████████░░░░░░░░░░░░░░░░░░░░ 3 règles (14%)
+```
+
+Voir [CATEGORIES.md](CATEGORIES.md) pour la description complète de chaque catégorie.
+
+---
 
 ## 🚀 Utilisation
 
 ### Pour ajouter une nouvelle règle:
 
-1. **Consultez** `RULES_FORMAT.md` pour comprendre la structure
-2. **Dupliquez** `RULES_TEMPLATE.md`
-3. **Complétez** chaque section:
-   - `<title>` — Titre court
+1. **Consultez** [RULES_FORMAT.md](RULES_FORMAT.md) pour comprendre la structure
+2. **Dupliquez** [RULES_TEMPLATE.md](RULES_TEMPLATE.md)
+3. **Choisissez une catégorie** parmi: Architecture, Security, State Management, Code Quality, Operations
+4. **Complétez** chaque section XML:
+   - `<rule id="..." severity="..." category="...">` — Attributs obligatoires
+   - `<title>` — Titre court (< 80 caractères)
    - `<description>` — Explication détaillée
-   - `<pattern id="correct">` — Exemple valide
-   - `<antipattern id="incorrect">` — Exemple invalide
+   - `<context>` — Conditions d'application (module, version, provider)
+   - `<problem>` — Énoncé du problème
+   - `<pattern id="correct">` — Exemple(s) valide(s) avec code HCL
+   - `<antipattern id="incorrect">` — Exemple(s) invalide(s)
+   - `<why>` — Cause racine et explication
+   - `<validation>` — Comment valider la conformité
    - `<when-to-apply>` — Conditions d'application
-4. **Renommez** le fichier: `rules-{PREFIX}-{DOMAIN}.md`
-   - Exemple: `rules-gcs-logging.md`, `rules-tf-backend.md`
-5. **Validez** la structure XML (pas d'erreurs de balise)
-6. **Committez** dans le répertoire `rules/`
+   - `<implementation-checklist>` — Étapes concrètes
+   - `<related-rules>` — Règles connexes
+   - `<references>` — Documentation externe
+5. **Renommez** le fichier: `rule-{prefix}-{name}.md`
+   - Préfixes: `gcs` (Google Cloud Storage), `tf` (Terraform général)
+   - Exemple: `rule-gcs-logging.md`, `rule-tf-backend.md`
+6. **Validez** la structure XML (fermeture correcte des balises)
+7. **Ajoutez** une entrée dans [RULES_INDEX.md](RULES_INDEX.md)
+8. **Committez** dans le répertoire `rules/`
 
 ### Pour l'agent (générations futures):
 
-L'agent indexera automatiquement les règles dans ChromaDB et:
-- 🔍 Cherchera les règles applicables via `search_knowledge_base()`
-- ✅ Validera le code généré contre les règles
-- 🔧 Corrigera les violations selon leur sévérité
-
-## 📊 Règles Existantes
-
-### Par Domaine
-
-#### GCS (Google Cloud Storage)
-- [rules-gcs-providers.md](rules-gcs-providers.md) — Provider version constraints
-- [rules-gcs-input-types.md](rules-gcs-input-types.md) — Input variable types
-
-#### Terraform Structure
-- [rules-tf-project-structure.md](rules-tf-project-structure.md) — File organization
-- [rules-tf-naming-state.md](rules-tf-naming-state.md) — Naming conventions
-- [rules-tf-environments.md](rules-tf-environments.md) — Environment isolation
-- [rules-tf-state-versioning.md](rules-tf-state-versioning.md) — State management
-- [rules-tf-security-cicd.md](rules-tf-security-cicd.md) — Security & CI/CD
-
-### Par Sévérité
-
-**🔴 CRITICAL** — Bloque la génération/déploiement:
-- GCS-PROVIDER-001: Module provider version
-- TF-SECURITY-*: Violations de sécurité
-- TF-STATE-*: State management issues
-
-**🟠 MAJOR** — À corriger avant déploiement:
-- TF-NAMING-*: Conventions de naming
-- TF-STRUCTURE-*: Problèmes de structure
-- TF-ENVIRONMENT-*: Isolation d'environnement
-
-**🟡 MINOR** — Améliorations recommandées:
-- Style et documentation
-- Optimisations de performance
-- Best practices optionnelles
-
-## 🔍 Rechercher une Règle
-
-**Par sujet:**
-```bash
-grep -l "security\|encryption" rules-*.md
-grep -l "provider\|version" rules-*.md
-grep -l "naming\|convention" rules-*.md
-```
-
-**Par sévérité:**
-```bash
-grep 'severity="CRITICAL"' rules-*.md
-grep 'severity="MAJOR"' rules-*.md
-```
-
-**Par domaine:**
-```bash
-ls rules-gcs-*.md      # Google Cloud Storage
-ls rules-tf-*.md       # General Terraform
-```
-
-## 📝 Format de Fichier
-
-Toutes les règles utilisent le format XML structuré:
-
-```xml
-<rule id="PREFIX-TYPE-NNN" severity="CRITICAL" category="Compatibility">
-  <title>...</title>
-  <description>...</description>
-  <context>...</context>
-  <problem>...</problem>
-  <pattern id="correct">...</pattern>
-  <antipattern id="incorrect">...</antipattern>
-  <why>...</why>
-  <validation>...</validation>
-  <when-to-apply>...</when-to-apply>
-  <implementation-checklist>...</implementation-checklist>
-  <related-rules>...</related-rules>
-  <references>...</references>
-</rule>
-```
-
-👉 **Voir [RULES_FORMAT.md](RULES_FORMAT.md) pour la documentation complète**
-
-## 🤖 Intégration Agent
-
-Pour que l'agent utilise les règles:
-
-1. **Génération:** L'agent identifie des patterns et règles
-2. **Documentation:** Formate les règles apprises en XML
-3. **Stockage:** Les sauvegarde dans `rules/`
-4. **Indexation:** ChromaDB les indexe automatiquement
-5. **Réutilisation:** Générations futures les consultent
-
-👉 **Voir [prompts/terraform-system.md](../prompts/terraform-system.md) — Phase 5 : Capture de Connaissance & Génération de Règles** pour les détails techniques
-
-## ✅ Checklist: Créer une Nouvelle Règle
-
-- [ ] Lire [RULES_FORMAT.md](RULES_FORMAT.md)
-- [ ] Dupliquer [RULES_TEMPLATE.md](RULES_TEMPLATE.md)
-- [ ] Compléter toutes les sections obligatoires
-- [ ] Valider la structure XML (pas d'erreurs de balises)
-- [ ] Tester les exemples de code (doivent être exécutables)
-- [ ] Choisir ID, severity, category corrects
-- [ ] Renommer le fichier: `rules-{PREFIX}-{DOMAIN}.md`
-- [ ] Commit dans le repo
-
-## 🔗 Références
-
-| Document | Objectif |
-|----------|----------|
-| [RULES_FORMAT.md](RULES_FORMAT.md) | Guide complet du format des règles |
-| [RULES_TEMPLATE.md](RULES_TEMPLATE.md) | Template pour créer une règle |
-| [terraform-system.md](../prompts/terraform-system.md) | Système prompt — Phase 5 pour génération et documentation |
-| [Terraform Docs](https://www.terraform.io/language) | Référence Terraform officielle |
-| [Google Provider](https://registry.terraform.io/providers/hashicorp/google/latest) | Provider Google officiel |
-
-## 💡 Bonnes Pratiques
-
-✅ **À faire:**
-- Soyez concis mais complet
-- Utilisez des exemples réels et testables
-- Expliquez le "pourquoi", pas juste le "quoi"
-- Référencez la documentation officielle
-- Datez vos règles (creation date)
-- Marquez le statut: "Validated in production", "Proposed", etc.
-
-❌ **À éviter:**
-- Texte trop long ou verbeux
-- Exemples fictifs ou irréalistes
-- Jargon sans explication
-- Règles trop vagues ou générales
-- Sections vides ou incomplètes
-
-## 🎓 Exemples
-
-Consultez les fichiers `rules-*.md` existants pour voir:
-- Comment structurer une règle complexe
-- Comment formater les exemples de code
-- Comment écrire une bonne description
-- Comment couvrir les cas d'erreur courants
-
-## 🐛 Troubleshooting
-
-**Q: Je ne suis pas sûr du format?**  
-A: Consultez [RULES_FORMAT.md](RULES_FORMAT.md) ou dupliquez une règle existante.
-
-**Q: Comment valider ma règle?**  
-A: Vérifiez la structure XML et testez les exemples de code.
-
-**Q: Comment ajouter une règle au projet?**  
-A: Commitez-la dans le répertoire `rules/`. L'agent l'indexera automatiquement.
-
-**Q: Comment l'agent utilise les règles?**  
-A: Consultez [prompts/terraform-system.md](../prompts/terraform-system.md) — Phase 5 : Capture de Connaissance & Génération de Règles.
-
-## 📞 Support
-
-- 📖 Documenté dans [CLAUDE.md](../CLAUDE.md)
-- 🔍 Exemples existants dans `rules-*.md`
-- 🤖 Intégration agent dans [prompts/terraform-system.md](../prompts/terraform-system.md) — Phase 5
+L'agent Terraform autonome indexera automatiquement les règles dans ChromaDB et:
+- 🔍 Cherchera les règles applicables via `search_knowledge_base(query)`
+  - Ex: `"security google_storage_bucket"` → GCS-NAMING-UBLA
+  - Ex: `"state management backend"` → TF-BACKEND-STATE
+- ✅ Validera le code généré contre les règles avec `review_and_fix_code()`
+- 🔧 Corrigera les violations CRITICAL et MAJOR avant de passer en production
 
 ---
 
-**Dernière mise à jour:** 2026-05-11  
-**Statut:** ✅ Production-ready  
-**Nombre de règles:** 7 domaines couverts
+## 📚 Règles Existantes (21 règles)
+
+### Par Catégorie
+
+#### 🏗️ Architecture (4 règles CRITICAL)
+- [TF-STRUCTURE](rule-tf-structure.md) — Project Layout Organization
+- [TF-ENV-SEPARATION](rule-tf-env-separation.md) — Environment Separation: Folders vs Workspaces
+- [TF-ENV-COMPOSITION](rule-tf-env-composition.md) — Environment Configurations Must Not Declare Resources
+- [TF-ENV-ISOLATION](rule-tf-env-isolation.md) — Environment Isolation: Separate Directories and State
+
+#### 🔒 Security (4 règles CRITICAL)
+- [GCS-NAMING-UBLA](rule-gcs-naming-ubla.md) — GCS Bucket Naming Convention and UBLA
+- [TF-ENV-ISOLATION-BACKEND](rule-tf-env-isolation-backend.md) — Environment Isolation: Separate Backends & State
+- [TF-NO-SECRETS](rule-tf-no-hardcoded-secrets.md) — No Hardcoded Secrets
+- [TF-STATE-DELETION](rule-tf-state-deletion.md) — Never Delete State Files Directly
+
+#### 📦 State Management (2 CRITICAL, 1 MAJOR)
+- [TF-BACKEND-STATE](rule-tf-backend-state.md) — Remote State Management via GCS Backend (CRITICAL)
+- [TF-VERSION-PINNING](rule-tf-version-pinning.md) — Version Pinning: Providers & Terraform (CRITICAL)
+- [TF-PROVIDER-LOCKING](rule-tf-provider-locking.md) — Provider Lock Files: Commit .terraform.lock.hcl (MAJOR)
+
+#### ✨ Code Quality (3 CRITICAL, 4 MAJOR)
+- [GCS-BUCKET-SYNTAX](rule-gcs-bucket-syntax.md) — GCS Bucket Block vs Argument Syntax (CRITICAL)
+- [GCS-INPUT-TYPES](rule-gcs-input-types.md) — Module Input Types: Map vs Scalar (CRITICAL)
+- [GCS-PROVIDER-VERSION](rule-gcs-provider-version.md) — GCS Module Provider Version Constraint (CRITICAL)
+- [TF-AVOID-HARDCODING](rule-tf-avoid-hardcoding.md) — Avoid Hardcoding: Use Variables & Locals (MAJOR)
+- [TF-MODULES-DRY](rule-tf-modules-dry.md) — Module Creation Criteria (DRY Principle) (MAJOR)
+- [TF-MODULES-SCOPE](rule-tf-modules-scope.md) — Module Scope: Shallow & Focused (MAJOR)
+- [TF-RESOURCE-NAMING](rule-tf-resource-naming.md) — Resource Naming Convention (MAJOR)
+
+#### 🚀 Operations (1 CRITICAL, 2 MAJOR)
+- [TF-ALWAYS-PLAN](rule-tf-always-plan.md) — Always Review Plan Before Apply (CRITICAL)
+- [TF-CICD](rule-tf-cicd-integration.md) — CI/CD Integration: Format, Validate, Plan (MAJOR)
+- [TF-STATE-DRIFT](rule-tf-state-drift.md) — State Drift Detection: Regular Plan Runs (MAJOR)
+
+### Par Sévérité
+
+**🔴 CRITICAL (14 règles)** — Bloque la génération/déploiement:
+- Toutes les règles Architecture (4)
+- Toutes les règles Security (4)
+- State Management: TF-BACKEND-STATE, TF-VERSION-PINNING
+- Code Quality: GCS-BUCKET-SYNTAX, GCS-INPUT-TYPES, GCS-PROVIDER-VERSION
+- Operations: TF-ALWAYS-PLAN
+
+**🟠 MAJOR (7 règles)** — À corriger avant déploiement:
+- State Management: TF-PROVIDER-LOCKING
+- Code Quality: TF-AVOID-HARDCODING, TF-MODULES-DRY, TF-MODULES-SCOPE, TF-RESOURCE-NAMING
+- Operations: TF-CICD, TF-STATE-DRIFT
+
+---
+
+## 🔄 Évolution
+
+### v2.0 (2026-05-12) — Consolidation
+- ✅ Consolidation de 13 catégories → **5 catégories principales**
+- ✅ Suppression de 1 règle doublon (TF-REMOTE-STATE-008)
+- ✅ 21 règles finales, toutes avec catégorie cohérente
+- ✅ Index et documentation mis à jour
+
+### v1.1 (Précédente)
+- 13 catégories (trop granulaire)
+- 21-24 règles (avec doublons)
+
+### v1.0 (Initial)
+- Première version avec règles apprises
+
+---
+
+## 🛠️ Maintenance
+
+### Workflow de mise à jour
+
+1. **Modifier une règle existante**
+   - Éditer le fichier `rule-*.md`
+   - Si changement de sévérité/catégorie → mettre à jour [RULES_INDEX.md](RULES_INDEX.md)
+   - Re-indexer la knowledge base si nécessaire
+
+2. **Supprimer une règle**
+   - Supprimer le fichier `rule-*.md`
+   - Supprimer les entrées dans [RULES_INDEX.md](RULES_INDEX.md)
+   - Mettre à jour les statistiques dans [CATEGORIES.md](CATEGORIES.md)
+   - Re-indexer la knowledge base
+
+3. **Ajouter une nouvelle catégorie** (exceptionnel)
+   - Mettre à jour [CATEGORIES.md](CATEGORIES.md)
+   - Mettre à jour les templates et la documentation
+   - Mettre à jour le prompt système dans `prompts/terraform-system.md`
+
+---
+
+## 📖 Documentation Complète
+
+- **[CATEGORIES.md](CATEGORIES.md)** — Description détaillée des 5 catégories avec principes et usage
+- **[RULES_INDEX.md](RULES_INDEX.md)** — Index complet avec tables par sévérité, catégorie et préfixe
+- **[RULES_FORMAT.md](RULES_FORMAT.md)** — Spécification du format XML avec exemples
+- **[RULES_TEMPLATE.md](RULES_TEMPLATE.md)** — Template à copier pour créer une nouvelle règle
+- **[REVIEW_REPORT.md](REVIEW_REPORT.md)** — Rapport de revue et consolidation des règles
+
+---
+
+**Version:** 2.0  
+**Dernière mise à jour:** 2026-05-12  
+**Généré par:** Claude Sonnet 4.5

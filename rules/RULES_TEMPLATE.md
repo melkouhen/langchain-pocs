@@ -6,7 +6,7 @@ Dupliquez ce fichier et remplissez chaque section. Consultez `RULES_FORMAT.md` p
 # Renommez ce fichier en: rules-{PREFIX}-{DOMAIN}.md
 # Exemple: rules-gcs-logging.md, rules-tf-backend-config.md
 
-<rule id="XXX-TYPE-001" severity="CRITICAL" category="Compatibility">
+<rule id="XXX-TYPE-001" severity="CRITICAL" category="Architecture|Security|State Management|Code Quality|Operations">
 <title>Titre court et explicite (< 80 caractères)</title>
 
 <description>

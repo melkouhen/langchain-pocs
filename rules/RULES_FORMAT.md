@@ -16,7 +16,7 @@ Chaque règle est encapsulée dans une balise `<rule>` avec les attributs suivan
 |----------|---------|-------------|
 | `id` | `[A-Z]{3}-[A-Z]+-\d{3}` | Format: `PREFIX-TYPE-NUMBER` (ex: `GCS-PROVIDER-001`) |
 | `severity` | `CRITICAL`, `MAJOR`, `MINOR` | Niveau d'impact de la violation |
-| `category` | `Compatibility`, `Security`, `Performance`, `Maintainability`, `Naming`, `Structure` | Domaine d'application |
+| `category` | `Architecture`, `Security`, `State Management`, `Code Quality`, `Operations` | Domaine d'application (5 catégories principales) |
 
 ### Sections Obligatoires
 
