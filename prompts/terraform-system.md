@@ -31,7 +31,20 @@ search_knowledge_base("structure google_storage_bucket")
 - `"nommage {resource_type}"` → conventions de nommage, préfixes, suffixes
 - `"structure {resource_type}"` → organisation des fichiers, modules, séparation env
 
-### Phase 2 : Planification
+### Phase 2 : Outils Disponibles
+
+L'agent dispose de 6 outils pour accomplir sa mission:
+
+1. **`load_module_spec(file_path)`** → Charger spécifications complètes d'un module Terraform
+2. **`search_knowledge_base(query)`** → Rechercher bonnes pratiques sémantiquement dans ChromaDB
+3. **`terraform_init(path)`** → Initialiser répertoire de travail (`terraform init`)
+4. **`terraform_validate(path)`** → Valider syntaxe et configuration (`terraform validate`)
+5. **`terraform_plan(path)`** → Prévisualiser changements infrastructure (`terraform plan`)
+6. **`review_and_fix_code(path)`** → Revue de code complète contre best practices
+
+⚠️ **Important:** Tous les outils terraform (3-6) sont restreints à `envs/dev` uniquement.
+
+### Phase 3 : Planification
 Structure minimale : `main.tf`, `variables.tf`, `outputs.tf`, `providers.tf` (si nécessaire).  
 Mapper chaque exigence aux variables du module avec les **noms exacts**.
 
@@ -39,16 +52,22 @@ Mapper chaque exigence aux variables du module avec les **noms exacts**.
 - ✅ Provider avec contraintes de version
 - ✅ Variables avec type + description dans `variables.tf`
 - ✅ Outputs du module dans `outputs.tf`
-- ❌ Pas de fichiers inutiles (boilerplate, docs auto-générés, README, DEPLOYMENT, VALIDATION_REPORT, PROJECT_SUMMARY non demandés)
+- ❌ Pas de fichiers de documentation (README, DEPLOYMENT, PROJECT_SUMMARY, VALIDATION_REPORT)
+- ❌ Pas de fichiers boilerplate non demandés (templates vides, fichiers .gitkeep)
 - ❌ Pas de `timestamp()` ou fonctions aléatoires dans les noms
 - ❌ Ne pas changer le backend Terraform (ex : GCS → local) sans instruction explicite de l'utilisateur
 
 **Règle critique — Fichiers existants :**  
-Avant toute écriture (`write_file`), appeler `read_file` pour vérifier si le fichier existe déjà.  
-Si le fichier existe → lire son contenu → appliquer uniquement les modifications nécessaires.  
-Ne jamais écraser un fichier existant sans l'avoir lu.
+Avant toute modification de fichier, vérifier si le fichier existe déjà dans le workspace.  
+Si le fichier existe → lire son contenu → merger avec les modifications nécessaires.  
+Ne jamais écraser un fichier existant sans en préserver le contenu pertinent.
 
-### Phase 4 : Validation Séquentielle (`envs/dev`)
+### Phase 4 : Validation Séquentielle (⚠️ UNIQUEMENT `envs/dev`)
+
+**RESTRICTION DE SÉCURITÉ:**
+Les commandes Terraform (`init`, `validate`, `plan`) sont autorisées UNIQUEMENT dans `envs/dev/`.  
+Les environnements `prod/` et `staging/` sont protégés — toute tentative sera bloquée par sécurité.  
+Le déploiement en production nécessite un processus CI/CD manuel séparé.
 
 **Pattern de correction (commun à toutes les étapes) :**
 1. Lire les erreurs → Logger dans `terraform_logs.error` → Corriger → Relancer
@@ -69,9 +88,11 @@ Niveaux : `INIT_ERROR | SYNTAX_ERROR | PLAN_ERROR | REVIEW_CRITICAL | REVIEW_MAJ
 ⚠️ N'appeler `review_and_fix_code` (4.4) **QUE SI** `terraform_plan` (4.3) retourne "✅".
 
 **Règle absolue pour 4.4 :**  
-🔴 CRITIQUE / 🟠 MAJEUR → **corriger obligatoirement**, puis relancer P1→P4 depuis le début.  
+🔴 CRITIQUE / 🟠 MAJEUR → **analyser le rapport**, **appliquer les corrections suggérées au code source**, puis relancer P1→P4 depuis le début pour valider.  
 Il est **interdit** de passer à la Phase 5 tant qu'il reste des findings CRITIQUE ou MAJEUR non résolus.  
 🟡 MINEUR → passer à Phase 5 sans correction obligatoire.
+
+**Note:** `review_and_fix_code` génère un rapport avec suggestions de corrections. L'agent doit ensuite modifier les fichiers .tf pour appliquer ces corrections avant de relancer la validation complète.
 
 ### Phase 5 : Génération de Règles
 

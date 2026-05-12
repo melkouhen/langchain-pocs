@@ -68,5 +68,5 @@ class Config:
         # Content processing constants (centralized from various modules)
         self.CHUNK_SIZE = 1000  # Vectorstore: balance between context and granularity
         self.CHUNK_OVERLAP = 100  # Vectorstore: preserve context at chunk boundaries
-        self.MAX_PLAN_OUTPUT_CHARS = 4000  # Terraform plan: prevent token overflow
-        self.MAX_TF_CONTENT_CHARS = 8000  # Evaluation: limit LLM context size
+        self.MAX_PLAN_OUTPUT_CHARS = 4000  # ~1000 tokens - prevent Claude context overflow in responses
+        self.MAX_TF_CONTENT_CHARS = 8000  # ~2000 tokens - limit for qwen2.5-coder review model context

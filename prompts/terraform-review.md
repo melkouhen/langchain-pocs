@@ -73,47 +73,41 @@ Exemple:
 
 ### Phase 5: Générer le Rapport
 
-**Format de Réponse:**
+**Si code conforme (0 CRITIQUE/MAJEUR):**
 ```
 ## RÉSULTATS DE REVUE
 
-### Résumé
-- **Fichiers analysés:** {{num_files}}
-- **Problèmes détectés:** {{num_total}}
-  - 🔴 CRITIQUE: {{num_critical}}
-  - 🟠 MAJEUR: {{num_major}}
-  - 🟡 MINEUR: {{num_minor}}
+✅ Code conforme aux meilleures pratiques
+
+**Fichiers analysés:** {{num_files}}
+**Problèmes MINEUR:** {{num_minor}} (optionnels)
+
+{{liste des suggestions mineures si présentes}}
+```
+
+**Si problèmes détectés (CRITIQUE ou MAJEUR):**
+```
+## RÉSULTATS DE REVUE
+
+❌ Corrections nécessaires
+
+**Fichiers analysés:** {{num_files}}
+**Problèmes:**
+- 🔴 CRITIQUE: {{num_critical}}
+- 🟠 MAJEUR: {{num_major}}
+- 🟡 MINEUR: {{num_minor}}
 
 ### Problèmes Détectés
 
-#### Problème 1
-- **Type:** 🔴 CRITIQUE
-- **Fichier:** {{fichier}}
-- **Ligne:** {{ligne}}
+{{Pour chaque problème CRITIQUE/MAJEUR:}}
+#### Problème {{n}}
+- **Fichier:** {{file}}:{{line}}
 - **Règle:** {{rule_id}}
-- **Description:** {{description détaillée}}
-- **Impact:** {{risque/impact}}
-- **Correction:**
-  ```hcl
-  {{code corrigé}}
-  ```
-
-[Répéter pour chaque problème]
+- **Description:** {{description}}
 
 ### Code Corrigé
 
-#### Fichier: {{fichier}}
-\`\`\`hcl
-{{code complet du fichier corrigé}}
-\`\`\`
-
-### Logs de Revue
-[Afficher les logs générés]
-
-### Prochaines Étapes
-- ✅ Appliquer les corrections CRITIQUES
-- ✅ Valider avec terraform validate
-- ✅ Relancer review_and_fix_code après corrections
+{{code complet des fichiers corrigés}}
 ```
 
 ## Critères de Succès

@@ -27,7 +27,7 @@ L'agent génère du code Terraform, le valide et corrige automatiquement les err
 | **Claude API** | Génération de code (Haiku 4.5)             |
 | **ChromaDB**   | Recherche sémantique des bonnes pratiques  |
 | **DeepAgents** | Planification autonome                     |
-| **Ollama**     | Validation locale (qwen2.5-coder:7b)       |
+| **Ollama**     | Validation locale (qwen2.5-coder:7b-instruct) |
 
 ## 📁 Structure
 
@@ -37,9 +37,9 @@ notebooks/
 ├── token_analysis.ipynb                   # Analyse consommation tokens
 └── chromadb_explorer.ipynb                # Exploration knowledge base
 
-terraform_agent/                           # Agent Python (624 lignes)
+terraform_agent/                           # Agent Python
 ├── agent.py                               # Orchestration
-├── tools.py                               # 3 outils: search, validate, review
+├── tools.py                               # Outils terraform
 ├── knowledge_base.py                      # ChromaDB
 ├── prompts.py                             # Templates
 └── config.py                              # Configuration
@@ -57,11 +57,7 @@ prompts/                                   # Templates LLM
 
 work/                                      # Sortie générée
 ├── modules/gcs_bucket/                    # Module réutilisable
-├── envs/{dev,prod}/                       # Environnements
-├── README.md
-├── DEPLOYMENT.md
-├── VALIDATION_REPORT.md
-└── PROJECT_SUMMARY.md
+└── envs/{dev,prod}/                       # Environnements
 ```
 
 ## 🏗️ Architecture
@@ -89,14 +85,15 @@ work/                                      # Sortie générée
 
 **Obligatoires:**
 ```bash
-# Python 3.14+
+# Python 3.14+ (version de développement)
+# Note: Python 3.14 est en alpha/beta - pour production stable, utiliser 3.12/3.13
 python --version
 
 # uv (gestionnaire packages)
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
-# Ollama + modèle qwen2.5-coder:7b
-ollama pull qwen2.5-coder:7b
+# Ollama + modèle qwen2.5-coder:7b-instruct
+ollama pull qwen2.5-coder:7b-instruct
 curl http://localhost:11434/api/tags  # Vérifier
 ```
 
@@ -137,8 +134,8 @@ code notebooks/deepchain_terraform_assistant.ipynb
 # 3. Exécuter les cellules (durée: 2-5 min)
 
 # 4. Résultats dans work/
-#    → work/PROJECT_SUMMARY.md (vue d'ensemble)
-#    → work/DEPLOYMENT.md (guide déploiement)
+#    → work/modules/gcs_bucket/ (module Terraform)
+#    → work/envs/dev/ et work/envs/prod/ (environnements)
 ```
 
 ## 📊 Résultats
@@ -153,10 +150,6 @@ code notebooks/deepchain_terraform_assistant.ipynb
 - **Environnements**
   - `envs/dev/`: Bucket simple pour tests
   - `envs/prod/`: Bucket avec lifecycle rules (transition vers COLDLINE après 90j)
-
-**Documentation auto-générée:**
-- `README.md` (400+ lignes): Guide complet d'utilisation
-
 
 **Exemple de résultat:**
 ```hcl

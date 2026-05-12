@@ -4,6 +4,7 @@ import os
 import logging
 import time
 from pathlib import Path
+from functools import wraps
 from langchain_ollama import ChatOllama
 from langchain_core.tools import tool
 
@@ -64,6 +65,23 @@ def _validate_terraform_path(path: str) -> Path:
         raise ValueError(f"Invalid path: {path} - {e}")
 
 
+def validate_work_dir_path(func):
+    """Decorator to validate that path parameter is within work directory.
+
+    Applies _validate_terraform_path to the first argument (path).
+    Returns error string if validation fails.
+    """
+    @wraps(func)
+    def wrapper(path: str) -> str:
+        try:
+            validated_path = _validate_terraform_path(path)
+        except ValueError as e:
+            logger.error(f"Path validation failed in {func.__name__}: {e}")
+            return f"❌ ERROR: {e}"
+        return func(str(validated_path))
+    return wrapper
+
+
 def _check_dev_environment(path: str) -> str | None:
     """Check if path is in dev environment.
 
@@ -95,6 +113,31 @@ def _check_terraform_initialized(path: str) -> str | None:
         logger.warning(f"Terraform not initialized at {path} (.terraform/ missing)")
         return "❌ ERROR: Run terraform_init first (.terraform/ directory missing)"
     return None
+
+
+def _log_to_file(level: str, context: str, message: str, path: str) -> None:
+    """Log message to terraform_logs.error file.
+
+    Args:
+        level: Log level (INIT_ERROR, SYNTAX_ERROR, PLAN_ERROR, REVIEW_CRITICAL, etc.)
+        context: Context of the log (terraform_init, terraform_validate, etc.)
+        message: Log message
+        path: Working directory path where log file should be created
+    """
+    from datetime import datetime
+
+    try:
+        log_file = Path(path) / "terraform_logs.error"
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        log_entry = f"[{timestamp}] [{level}] [{context}] {message}\n"
+
+        # Create or append to log file
+        with open(log_file, "a", encoding="utf-8") as f:
+            f.write(log_entry)
+
+        logger.debug(f"Logged to {log_file}: {log_entry.strip()}")
+    except (OSError, IOError) as e:
+        logger.warning(f"Failed to write to terraform_logs.error: {e}")
 
 
 
@@ -160,6 +203,7 @@ def load_module_spec(file_path: str) -> str:
 
 
 @tool
+@validate_work_dir_path
 def terraform_init(path: str) -> str:
     """Initialize a Terraform working directory.
 
@@ -175,18 +219,11 @@ def terraform_init(path: str) -> str:
         logger.error("Config not initialized")
         return "⚠️ Error: Tools not initialized"
 
-    # Validate path is within work directory
-    try:
-        validated_path = _validate_terraform_path(path)
-    except ValueError as e:
-        logger.error(f"Path validation failed: {e}")
-        return f"❌ ERROR: {e}"
-
     # Check environment
     if error := _check_dev_environment(path):
         return error
 
-    logger.info(f"Running terraform init at {validated_path}")
+    logger.info(f"Running terraform init at {path}")
 
     try:
         logger.debug("Executing: terraform init")
@@ -194,7 +231,7 @@ def terraform_init(path: str) -> str:
 
         init_result = subprocess.run(
             ["terraform", "init"],
-            cwd=str(validated_path),
+            cwd=path,
             capture_output=True,
             text=True,
             timeout=60,
@@ -206,9 +243,11 @@ def terraform_init(path: str) -> str:
         if init_result.returncode != 0:
             logger.error(f"terraform init failed (exit code {init_result.returncode}) after {elapsed:.2f}s")
             logger.debug(f"Init output: {init_output}")
+            _log_to_file("INIT_ERROR", "terraform_init", f"Failed with exit code {init_result.returncode}: {init_output[:200]}", path)
             return f"❌ ERROR: terraform init failed:\n{init_output}"
 
         logger.info(f"terraform init successful in {elapsed:.2f}s")
+        _log_to_file("INIT_SUCCESS", "terraform_init", f"Initialization successful in {elapsed:.2f}s", path)
         return f"✅ terraform init successful"
 
     except FileNotFoundError:
@@ -223,6 +262,7 @@ def terraform_init(path: str) -> str:
 
 
 @tool
+@validate_work_dir_path
 def terraform_validate(path: str) -> str:
     """Validate Terraform configuration files.
 
@@ -237,13 +277,6 @@ def terraform_validate(path: str) -> str:
         logger.error("Tools not fully initialized")
         return "⚠️ Error: Tools not initialized"
 
-    # Validate path is within work directory
-    try:
-        validated_path = _validate_terraform_path(path)
-    except ValueError as e:
-        logger.error(f"Path validation failed: {e}")
-        return f"❌ ERROR: {e}"
-
     # Check environment
     if error := _check_dev_environment(path):
         return error
@@ -252,7 +285,7 @@ def terraform_validate(path: str) -> str:
     if error := _check_terraform_initialized(path):
         return error
 
-    logger.info(f"Running terraform validate at {validated_path}")
+    logger.info(f"Running terraform validate at {path}")
 
     try:
         logger.debug("Executing: terraform validate")
@@ -260,7 +293,7 @@ def terraform_validate(path: str) -> str:
 
         validate_result = subprocess.run(
             ["terraform", "validate"],
-            cwd=str(validated_path),
+            cwd=path,
             capture_output=True,
             text=True,
             timeout=30,
@@ -272,9 +305,11 @@ def terraform_validate(path: str) -> str:
         if validate_result.returncode != 0:
             logger.error(f"terraform validate failed (exit code {validate_result.returncode}) after {elapsed:.2f}s")
             logger.debug(f"Validation output: {validate_output}")
-            return f"❌ ERROR: terraform validate failed. Fix the code and re-run terraform_init + terraform_validate.\n\n{validate_output}"
+            _log_to_file("SYNTAX_ERROR", "terraform_validate", f"Validation failed: {validate_output[:200]}", path)
+            return f"❌ ERROR: terraform validate failed. Fix the code syntax errors and re-run terraform_validate.\n\n{validate_output}"
 
         logger.info(f"terraform validate successful in {elapsed:.2f}s")
+        _log_to_file("VALIDATE_SUCCESS", "terraform_validate", f"Validation successful in {elapsed:.2f}s", path)
         return f"✅ terraform validate successful"
 
     except FileNotFoundError:
@@ -289,6 +324,7 @@ def terraform_validate(path: str) -> str:
 
 
 @tool
+@validate_work_dir_path
 def terraform_plan(path: str) -> str:
     """Generate a Terraform execution plan.
 
@@ -303,13 +339,6 @@ def terraform_plan(path: str) -> str:
         logger.error("Config not initialized")
         return "⚠️ Error: Tools not initialized"
 
-    # Validate path is within work directory
-    try:
-        validated_path = _validate_terraform_path(path)
-    except ValueError as e:
-        logger.error(f"Path validation failed: {e}")
-        return f"❌ ERROR: {e}"
-
     # Check environment
     if error := _check_dev_environment(path):
         return error
@@ -318,7 +347,7 @@ def terraform_plan(path: str) -> str:
     if error := _check_terraform_initialized(path):
         return error
 
-    logger.info(f"Running terraform plan at {validated_path}")
+    logger.info(f"Running terraform plan at {path}")
 
     try:
         logger.debug("Executing: terraform plan -no-color")
@@ -326,7 +355,7 @@ def terraform_plan(path: str) -> str:
 
         plan_result = subprocess.run(
             ["terraform", "plan", "-no-color"],
-            cwd=str(validated_path),
+            cwd=path,
             capture_output=True,
             text=True,
             timeout=60,
@@ -338,9 +367,11 @@ def terraform_plan(path: str) -> str:
         if plan_result.returncode != 0:
             logger.error(f"terraform plan failed (exit code {plan_result.returncode}) after {elapsed:.2f}s")
             logger.debug(f"Plan output: {plan_output[:500]}...")
+            _log_to_file("PLAN_ERROR", "terraform_plan", f"Plan failed: {plan_output[:200]}", path)
             return f"❌ ERROR: terraform plan failed:\n{plan_output}"
 
         logger.info(f"terraform plan successful in {elapsed:.2f}s")
+        _log_to_file("PLAN_SUCCESS", "terraform_plan", f"Plan successful in {elapsed:.2f}s", path)
         max_chars = _config.MAX_PLAN_OUTPUT_CHARS
         truncated = plan_output[:max_chars] + "\n...[truncated]" if len(plan_output) > max_chars else plan_output
         return f"✅ terraform plan successful\n\n{truncated}"
@@ -474,6 +505,7 @@ def _format_review_result(review_response: str, num_files: int, path: str) -> st
 
 
 @tool
+@validate_work_dir_path
 def review_and_fix_code(path: str) -> str:
     """Performs comprehensive code review against best practices.
 
@@ -495,15 +527,8 @@ def review_and_fix_code(path: str) -> str:
         logger.error("Tools not fully initialized")
         return "⚠️ Error: Tools not initialized"
 
-    # Validate path is within work directory
     try:
-        validated_path = _validate_terraform_path(path)
-    except ValueError as e:
-        logger.error(f"Path validation failed: {e}")
-        return f"❌ ERROR: {e}"
-
-    try:
-        logger.info(f"Starting code review at {validated_path}")
+        logger.info(f"Starting code review at {path}")
         start_time = time.time()
 
         # Step 1: Retrieve best practices
@@ -519,6 +544,15 @@ def review_and_fix_code(path: str) -> str:
 
         # Step 5: Format result
         result_summary = _format_review_result(review_response, num_files, path)
+
+        # Log review results
+        if "CRITIQUE" in review_response or "MAJEUR" in review_response:
+            if "CRITIQUE" in review_response:
+                _log_to_file("REVIEW_CRITICAL", "review_and_fix_code", "Critical issues found in code review", path)
+            if "MAJEUR" in review_response:
+                _log_to_file("REVIEW_MAJOR", "review_and_fix_code", "Major issues found in code review", path)
+        else:
+            _log_to_file("REVIEW_SUCCESS", "review_and_fix_code", f"Code review passed - {num_files} files analyzed", path)
 
         elapsed = time.time() - start_time
         logger.info(f"Code review and fix completed in {elapsed:.2f}s")

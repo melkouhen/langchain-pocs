@@ -1,9 +1,12 @@
+import logging
 from langchain_chroma import Chroma
 from langchain_ollama import OllamaEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 
 from .config import Config
+
+logger = logging.getLogger(__name__)
 
 
 class KnowledgeBase:
@@ -84,9 +87,11 @@ class KnowledgeBase:
             existing_ids = self.vectorstore.get()["ids"]
             if existing_ids:
                 print(f"  🗑️ Clearing {len(existing_ids)} existing documents...")
+                logger.info(f"Clearing {len(existing_ids)} existing documents from vectorstore")
                 self.vectorstore.delete(ids=existing_ids)
-        except (KeyError, ValueError):
-            pass
+        except (KeyError, ValueError) as e:
+            logger.debug(f"No existing documents to clear (collection empty or new): {e}")
+            print(f"  ℹ️  Starting with empty vectorstore")
 
         print(f"  Indexing {len(docs)} documents...")
         self.vectorstore.add_documents(docs)

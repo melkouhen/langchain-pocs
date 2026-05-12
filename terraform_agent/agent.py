@@ -1,5 +1,5 @@
 import logging
-from typing import Any
+from typing import TYPE_CHECKING
 from datetime import datetime
 from langchain_core.messages import SystemMessage, HumanMessage
 from deepagents import create_deep_agent
@@ -11,6 +11,9 @@ from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 from .tools import init_tools, load_module_spec, search_knowledge_base, terraform_init, terraform_validate, terraform_plan, review_and_fix_code
+
+if TYPE_CHECKING:
+    from langgraph.graph.state import CompiledStateGraph
 
 logger = logging.getLogger(__name__)
 
@@ -36,7 +39,7 @@ class TerraformAgent:
     config: Config
     prompts: PromptManager
     knowledge_base: KnowledgeBase
-    agent: Any
+    agent: "CompiledStateGraph"
 
     def __init__(
         self,
