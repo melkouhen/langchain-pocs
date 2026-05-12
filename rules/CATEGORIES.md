@@ -1,8 +1,8 @@
 # Catégories des Règles Terraform
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Date:** 2026-05-12  
-**Total Règles:** 21  
+**Total Règles:** 23  
 **Total Catégories:** 5
 
 ---
@@ -12,11 +12,11 @@
 Les règles sont organisées en **5 catégories principales** pour une meilleure clarté et cohérence.
 
 ```
-Code Quality     ██████████████████████████████████░░ 7 règles (33%)
-Architecture     ████████████████████░░░░░░░░░░░░░░░ 4 règles (19%)
-Security         ████████████████████░░░░░░░░░░░░░░░ 4 règles (19%)
-State Management ███████████████░░░░░░░░░░░░░░░░░░░░ 3 règles (14%)
-Operations       ███████████████░░░░░░░░░░░░░░░░░░░░ 3 règles (14%)
+Code Quality     ██████████████████████████████░░░░░░ 7 règles (30%)
+Security         ██████████████████████████░░░░░░░░░ 6 règles (26%)
+Architecture     █████████████████░░░░░░░░░░░░░░░░░░ 4 règles (17%)
+State Management █████████████░░░░░░░░░░░░░░░░░░░░░ 3 règles (13%)
+Operations       █████████████░░░░░░░░░░░░░░░░░░░░░ 3 règles (13%)
 ```
 
 ---
@@ -42,12 +42,14 @@ Operations       ███████████████░░░░░░
 
 ---
 
-## 🔒 2. Security (4 règles)
+## 🔒 2. Security (6 règles)
 
-**Scope:** Sécurité, gestion des credentials, prévention des fuites de données
+**Scope:** Sécurité, gestion des credentials, prévention des fuites de données, contrôle d'accès
 
 | ID | Gravité | Règle |
 |----|---------|-------|
+| CLOUDRUN-INGRESS-SECURITY | CRITICAL | Restrict Ingress to Minimum Required Access |
+| CLOUDRUN-SECRETS-MANAGEMENT | CRITICAL | Use Secret Manager for Sensitive Environment Variables |
 | TF-NO-SECRETS | CRITICAL | No Hardcoded Secrets |
 | TF-ENV-ISOLATION-BACKEND | CRITICAL | Environment Isolation: Separate Backends & State |
 | TF-STATE-DELETION | CRITICAL | Never Delete State Files Directly |
@@ -58,6 +60,8 @@ Operations       ███████████████░░░░░░
 - Backends séparés par environnement (isolation complète)
 - Jamais supprimer les state files manuellement (risque de perte)
 - Nommage conforme DNS + UBLA pour GCS
+- Cloud Run: ingress restrictif (internal/internal-and-cloud-load-balancing)
+- Cloud Run: Secret Manager pour env vars sensibles (pas cleartext)
 
 **Impact:** CRITIQUE - Violation = fuite de credentials ou perte d'infrastructure
 
@@ -132,8 +136,8 @@ Operations       ███████████████░░░░░░
 
 | Gravité | Nombre | % |
 |---------|--------|---|
-| CRITICAL | 14 | 67% |
-| MAJOR | 7 | 33% |
+| CRITICAL | 16 | 70% |
+| MAJOR | 7 | 30% |
 | MINOR | 0 | 0% |
 
 ### Par Catégorie + Gravité
@@ -141,11 +145,11 @@ Operations       ███████████████░░░░░░
 | Catégorie | CRITICAL | MAJOR | Total |
 |-----------|----------|-------|-------|
 | Architecture | 4 | 0 | 4 |
-| Security | 4 | 0 | 4 |
+| Security | 6 | 0 | 6 |
 | State Management | 2 | 1 | 3 |
 | Code Quality | 3 | 4 | 7 |
 | Operations | 1 | 2 | 3 |
-| **Total** | **14** | **7** | **21** |
+| **Total** | **16** | **7** | **23** |
 
 ---
 

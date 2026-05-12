@@ -1,18 +1,20 @@
 # Terraform Rules Index
 
-**Version:** 2.0  
+**Version:** 2.1  
 **Last Updated:** 2026-05-12  
-**Total Rules:** 21  
+**Total Rules:** 23  
 **Total Categories:** 5
 
 ---
 
 ## Rules by Severity
 
-### CRITICAL (14 règles)
+### CRITICAL (16 règles)
 
 | ID | Title | Category | File |
 |----|-------|----------|------|
+| CLOUDRUN-INGRESS-SECURITY | Restrict Ingress to Minimum Required Access | Security | rule-cloudrun-ingress-security.md |
+| CLOUDRUN-SECRETS-MANAGEMENT | Use Secret Manager for Sensitive Environment Variables | Security | rule-cloudrun-secrets-management.md |
 | GCS-BUCKET-SYNTAX | Distinguish GCS Bucket Block vs Argument Syntax | Code Quality | rule-gcs-bucket-syntax.md |
 | GCS-INPUT-TYPES | Module Input Types: Map vs Scalar | Code Quality | rule-gcs-input-types.md |
 | GCS-NAMING-UBLA | GCS Bucket Naming Convention and Uniform Bucket-Level Access | Security | rule-gcs-naming-ubla.md |
@@ -57,16 +59,18 @@
 
 ---
 
-### Security (4 règles)
+### Security (6 règles)
 
 | ID | Severity | Title |
 |----|----------|-------|
+| CLOUDRUN-INGRESS-SECURITY | CRITICAL | Restrict Ingress to Minimum Required Access |
+| CLOUDRUN-SECRETS-MANAGEMENT | CRITICAL | Use Secret Manager for Sensitive Environment Variables |
 | GCS-NAMING-UBLA | CRITICAL | GCS Bucket Naming Convention and Uniform Bucket-Level Access |
 | TF-ENV-ISOLATION-BACKEND | CRITICAL | Environment Isolation: Separate Backends & State |
 | TF-NO-SECRETS | CRITICAL | No Hardcoded Secrets |
 | TF-STATE-DELETION | CRITICAL | Never Delete State Files Directly |
 
-**Principes:** Pas de secrets hardcodés, backends séparés, nommage DNS-compliant, protection state files
+**Principes:** Pas de secrets hardcodés, backends séparés, nommage DNS-compliant, protection state files, ingress restrictif, Secret Manager pour Cloud Run
 
 ---
 
@@ -131,9 +135,9 @@ All other rules covering architecture, state management, operations, and code qu
 
 | Metric | Value |
 |--------|-------|
-| Total Rules | 21 |
-| CRITICAL | 14 (67%) |
-| MAJOR | 7 (33%) |
+| Total Rules | 23 |
+| CRITICAL | 16 (70%) |
+| MAJOR | 7 (30%) |
 | MINOR | 0 (0%) |
 | Categories | 5 |
 
@@ -142,11 +146,11 @@ All other rules covering architecture, state management, operations, and code qu
 | Catégorie | CRITICAL | MAJOR | Total |
 |-----------|----------|-------|-------|
 | Architecture | 4 | 0 | 4 |
-| Security | 4 | 0 | 4 |
+| Security | 6 | 0 | 6 |
 | State Management | 2 | 1 | 3 |
 | Code Quality | 3 | 4 | 7 |
 | Operations | 1 | 2 | 3 |
-| **Total** | **14** | **7** | **21** |
+| **Total** | **16** | **7** | **23** |
 
 ---
 
