@@ -193,12 +193,6 @@ class TerraformGenerator:
             overall_status = "✅ SUCCESS"
             logger.info("Agent execution completed successfully")
 
-            # Finalize callbacks
-            if callbacks:
-                for callback in callbacks:
-                    if hasattr(callback, 'finalize'):
-                        callback.finalize()
-
         except Exception as e:
             overall_status = "❌ FAILED"
             agent_output = str(e)
@@ -207,6 +201,13 @@ class TerraformGenerator:
             import traceback
 
             traceback.print_exc()
+
+        finally:
+            # Finalize callbacks (always called, even on error)
+            if callbacks:
+                for callback in callbacks:
+                    if hasattr(callback, 'finalize'):
+                        callback.finalize()
 
         print(overall_status)
         print("-" * 80)
