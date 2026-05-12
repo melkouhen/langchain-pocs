@@ -33,12 +33,15 @@ L'agent génère du code Terraform, le valide et corrige automatiquement les err
 
 ```
 notebooks/
-├── deepchain_terraform_assistant.ipynb    # Point d'entrée principal
+├── pipeline_executor_demo.ipynb           # 🆕 Pipeline avec phases explicites (recommandé)
+├── deepchain_terraform_assistant.ipynb    # Point d'entrée standard
+├── terraform_generator.ipynb              # Génération simple
 ├── token_analysis.ipynb                   # Analyse consommation tokens
 └── chromadb_explorer.ipynb                # Exploration knowledge base
 
 terraform_agent/                           # Agent Python
-├── agent.py                               # Orchestration
+├── pipeline_executor.py                   # 🆕 Workflow avec phases explicites
+├── generator.py                           # Génération Terraform
 ├── tools.py                               # Outils terraform
 ├── knowledge_base.py                      # ChromaDB
 ├── prompts.py                             # Templates
@@ -61,21 +64,39 @@ work/                                      # Sortie générée
 
 ## 🏗️ Architecture
 
+### 🆕 Pipeline Executor (Recommandé)
+
+Workflow structuré en **4 phases explicites** avec reporting détaillé :
+
 ```
-1. INITIALIZATION
-   → Charge prompts + crée ChromaDB + index docs/
+1. 📋 PLANNING
+   → Analyse requirements + recherche knowledge base
 
-2. SETUP
-   → Initialise Claude + enregistre outils
+2. 🔧 GENERATION
+   → Génération code + terraform init + validate
 
-3. EXECUTION
-   → Agent autonome appelle:
-      - search_knowledge_base → bonnes pratiques
-      - validate_and_fix_code → validation syntaxe
-      - review_and_fix_code   → revue qualité
+3. 🔍 CODE REVIEW
+   → Security checks (UBLA, encryption, etc.)
+   → Best practices compliance
+   → Scoring (80%+ = production-ready)
 
-4. OUTPUT
-   → Génère Terraform + documentation dans work/
+4. ✅ VALIDATION
+   → terraform plan + rapport final
+   → Verdict: SUCCESS/WARNING/FAILED
+```
+
+**Notebook:** `notebooks/pipeline_executor_demo.ipynb`  
+**Documentation:** `docs-init/pipeline-executor.md`
+
+### Standard Generator
+
+Workflow opaque (utilisation interne) :
+
+```
+1. INITIALIZATION → Charge prompts + ChromaDB
+2. SETUP → Initialise Claude + outils
+3. EXECUTION → Agent autonome (init, validate, review, plan)
+4. OUTPUT → Génère Terraform dans work/
 ```
 
 ## 🚀 Démarrage
@@ -139,19 +160,30 @@ Voir `docs-init/model-routing.md` pour détails complets.
 
 ### Exécution
 
+**Option 1 : Pipeline Executor (Recommandé - Phases Explicites)**
+
 ```bash
 # 1. Vérifier setup
 python --version                          # 3.14+
 curl http://localhost:11434/api/tags      # Ollama OK
 
-# 2. Ouvrir notebook
-code notebooks/deepchain_terraform_assistant.ipynb
+# 2. Ouvrir notebook avec phases explicites
+code notebooks/pipeline_executor_demo.ipynb
 
 # 3. Exécuter les cellules (durée: 2-5 min)
+#    Vous verrez 4 phases explicites:
+#    📋 PLANNING → 🔧 GENERATION → 🔍 CODE REVIEW → ✅ VALIDATION
 
 # 4. Résultats dans work/
 #    → work/modules/gcs_bucket/ (module Terraform)
 #    → work/envs/dev/ et work/envs/prod/ (environnements)
+```
+
+**Option 2 : Generator Standard**
+
+```bash
+# Pour usage avancé ou intégration programmatique
+code notebooks/terraform_generator.ipynb
 ```
 
 ## 📊 Résultats
