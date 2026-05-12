@@ -79,15 +79,18 @@ class TerraformPhaseCallback(BaseCallbackHandler):
         """Called when a tool finishes executing.
 
         Args:
-            output: Tool output
+            output: Tool output (can be str or ToolMessage)
             **kwargs: Additional arguments
         """
         tool_name = kwargs.get("name", "unknown")
 
+        # Convert output to string if it's a ToolMessage
+        output_str = str(output) if not isinstance(output, str) else output
+
         # Store tool result for reporting
         self.tool_results[tool_name] = {
-            "output": output,
-            "success": "✅" in output or "successful" in output.lower(),
+            "output": output_str,
+            "success": "✅" in output_str or "successful" in output_str.lower(),
             "timestamp": datetime.now().isoformat(),
         }
 
@@ -300,23 +303,26 @@ class DetailedTerraformCallback(TerraformPhaseCallback):
         """Extract security and best practice checks from review output.
 
         Args:
-            output: Review tool output
+            output: Review tool output (can be str or ToolMessage)
         """
+        # Convert output to string if it's a ToolMessage
+        output_str = str(output) if not isinstance(output, str) else output
+
         # Security checks
         self.security_checks = {
-            "UBLA": "uniform_bucket_level_access" in output,
-            "Public Access Prevention": "public_access_prevention" in output,
-            "Encryption": "encryption" in output or "kms" in output.lower(),
-            "Versioning": "versioning" in output,
-            "Lifecycle Policies": "lifecycle" in output,
+            "UBLA": "uniform_bucket_level_access" in output_str,
+            "Public Access Prevention": "public_access_prevention" in output_str,
+            "Encryption": "encryption" in output_str or "kms" in output_str.lower(),
+            "Versioning": "versioning" in output_str,
+            "Lifecycle Policies": "lifecycle" in output_str,
         }
 
         # Best practices checks
         self.bp_checks = {
-            "Module Structure": "module" in output.lower(),
-            "Variables Defined": "variable" in output or "var." in output,
-            "Outputs Defined": "output" in output,
-            "Documentation": "description" in output or "README" in output,
+            "Module Structure": "module" in output_str.lower(),
+            "Variables Defined": "variable" in output_str or "var." in output_str,
+            "Outputs Defined": "output" in output_str,
+            "Documentation": "description" in output_str or "README" in output_str,
         }
 
     def _print_summary(self, total_duration: float) -> None:
