@@ -3,7 +3,6 @@ from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 from .generator import TerraformGenerator
 from .reviewer import TerraformReviewer
-from .pipeline_executor import PipelineExecutor
 from .callbacks import TerraformPhaseCallback, DetailedTerraformCallback
 
 __all__ = [
@@ -12,7 +11,6 @@ __all__ = [
     "KnowledgeBase",
     "TerraformGenerator",
     "TerraformReviewer",
-    "PipelineExecutor",
     "TerraformPhaseCallback",
     "DetailedTerraformCallback",
 ]

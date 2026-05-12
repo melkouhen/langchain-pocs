@@ -4,7 +4,7 @@
 
 **Problème initial** : Le harness signalait que le workflow manquait de phases explicites de planning et code review.
 
-**Première tentative** : `PipelineExecutor` - un wrapper qui parsait du texte → **Bricolage** ❌
+**Première tentative** : `PipelineExecutor` - un wrapper qui parsait du texte → **Bricolage** ❌ (supprimé)
 
 **Solution finale** : **Callbacks LangChain natifs** - Pattern standard et élégant ✅
 
@@ -363,15 +363,12 @@ callback = TerraformPhaseCallback(verbose=True)
 result = generator.run(user_prompt, callbacks=[callback])
 ```
 
-### Depuis PipelineExecutor (à déprécier)
+### Depuis PipelineExecutor (obsolète - supprimé)
+
+Le `PipelineExecutor` a été supprimé en faveur des callbacks natifs.
 
 ```python
-# Avant
-pipeline = PipelineExecutor(config, prompts, knowledge_base)
-result = pipeline.run(user_prompt)
-report = pipeline.get_execution_report()
-
-# Après
+# Nouvelle approche (callbacks)
 generator = TerraformGenerator(config, prompts, knowledge_base)
 callback = DetailedTerraformCallback(verbose=True)
 result = generator.run(user_prompt, callbacks=[callback])
@@ -399,19 +396,7 @@ code notebooks/pipeline_executor_demo.ipynb
 code notebooks/callbacks_demo.ipynb
 ```
 
-### 3. Décider
-
-**Option A** : Déprécier `PipelineExecutor` (recommandé)
-- Supprimer `terraform_agent/pipeline_executor.py`
-- Supprimer `notebooks/pipeline_executor_demo.ipynb`
-- Supprimer `docs-init/pipeline-executor.md`
-- Mettre à jour README
-
-**Option B** : Garder les deux
-- Documenter quand utiliser quel approach
-- Maintenir les deux en parallèle
-
-### 4. Étendre (optionnel)
+### 3. Étendre (optionnel)
 
 ```python
 # Créer vos callbacks personnalisés
@@ -430,8 +415,8 @@ class CostAwareCallback(DetailedTerraformCallback):
 ```bash
 git log --oneline -3
 
+# [NEW] refactor: remove PipelineExecutor in favor of callbacks
 # 6ce4fa2 feat: add native LangChain callbacks for phase tracking
-# 255354b feat: add PipelineExecutor with explicit workflow phases (deprecated)
 # 6a99952 chore: update test case prompt and enable prompt caching
 ```
 

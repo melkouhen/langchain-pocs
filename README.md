@@ -33,14 +33,14 @@ L'agent génère du code Terraform, le valide et corrige automatiquement les err
 
 ```
 notebooks/
-├── pipeline_executor_demo.ipynb           # 🆕 Pipeline avec phases explicites (recommandé)
+├── callbacks_demo.ipynb                   # 🆕 Démonstration avec callbacks LangChain (recommandé)
 ├── deepchain_terraform_assistant.ipynb    # Point d'entrée standard
 ├── terraform_generator.ipynb              # Génération simple
 ├── token_analysis.ipynb                   # Analyse consommation tokens
 └── chromadb_explorer.ipynb                # Exploration knowledge base
 
 terraform_agent/                           # Agent Python
-├── pipeline_executor.py                   # 🆕 Workflow avec phases explicites
+├── callbacks.py                           # 🆕 Callbacks LangChain pour phase tracking
 ├── generator.py                           # Génération Terraform
 ├── tools.py                               # Outils terraform
 ├── knowledge_base.py                      # ChromaDB
@@ -64,33 +64,40 @@ work/                                      # Sortie générée
 
 ## 🏗️ Architecture
 
-### 🆕 Pipeline Executor (Recommandé)
+### 🆕 Workflow avec Callbacks LangChain (Recommandé)
 
-Workflow structuré en **4 phases explicites** avec reporting détaillé :
+Le `TerraformGenerator` peut être observé via des **callbacks LangChain natifs** qui détectent automatiquement les phases :
 
 ```
 1. 📋 PLANNING
-   → Analyse requirements + recherche knowledge base
+   → Détecté via search_knowledge_base, load_module_spec
 
 2. 🔧 GENERATION
-   → Génération code + terraform init + validate
+   → Détecté via invocation du LLM
 
-3. 🔍 CODE REVIEW
-   → Security checks (UBLA, encryption, etc.)
-   → Best practices compliance
-   → Scoring (80%+ = production-ready)
+3. ✅ VALIDATION
+   → Détecté via terraform_init, terraform_validate, terraform_plan
 
-4. ✅ VALIDATION
-   → terraform plan + rapport final
-   → Verdict: SUCCESS/WARNING/FAILED
+4. 🔍 CODE_REVIEW
+   → Détecté via review_and_fix_code
 ```
 
-**Notebook:** `notebooks/pipeline_executor_demo.ipynb`  
-**Documentation:** `docs-init/pipeline-executor.md`
+**Usage:**
+```python
+from terraform_agent import TerraformGenerator, DetailedTerraformCallback
 
-### Standard Generator
+generator = TerraformGenerator(config, prompts, knowledge_base)
+callback = DetailedTerraformCallback(verbose=True)
+result = generator.run(user_prompt, callbacks=[callback])
 
-Workflow opaque (utilisation interne) :
+# Rapport avec security/BP scores
+report = callback.get_report()
+```
+
+**Notebook:** `notebooks/callbacks_demo.ipynb`  
+**Documentation:** `docs-init/callbacks-approach.md`
+
+### Workflow Interne
 
 ```
 1. INITIALIZATION → Charge prompts + ChromaDB
@@ -160,29 +167,29 @@ Voir `docs-init/model-routing.md` pour détails complets.
 
 ### Exécution
 
-**Option 1 : Pipeline Executor (Recommandé - Phases Explicites)**
+**Option 1 : Avec Callbacks LangChain (Recommandé - Phases Explicites)**
 
 ```bash
 # 1. Vérifier setup
 python --version                          # 3.14+
 curl http://localhost:11434/api/tags      # Ollama OK
 
-# 2. Ouvrir notebook avec phases explicites
-code notebooks/pipeline_executor_demo.ipynb
+# 2. Ouvrir notebook avec callbacks
+code notebooks/callbacks_demo.ipynb
 
 # 3. Exécuter les cellules (durée: 2-5 min)
-#    Vous verrez 4 phases explicites:
-#    📋 PLANNING → 🔧 GENERATION → 🔍 CODE REVIEW → ✅ VALIDATION
+#    Les callbacks détectent automatiquement les phases:
+#    📋 PLANNING → 🔧 GENERATION → ✅ VALIDATION → 🔍 CODE_REVIEW
 
 # 4. Résultats dans work/
 #    → work/modules/gcs_bucket/ (module Terraform)
 #    → work/envs/dev/ et work/envs/prod/ (environnements)
 ```
 
-**Option 2 : Generator Standard**
+**Option 2 : Generator Standard (Sans Callbacks)**
 
 ```bash
-# Pour usage avancé ou intégration programmatique
+# Pour usage programmatique simple
 code notebooks/terraform_generator.ipynb
 ```
 
