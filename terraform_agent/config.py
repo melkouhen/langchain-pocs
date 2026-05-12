@@ -61,6 +61,22 @@ class Config:
         self.AGENT_MODEL = "claude-haiku-4-5-20251001"
         self.ENVIRONMENT = environment
 
+        # Model routing configuration (Phase 1 optimizations)
+        # Set which tasks should use Ollama vs Claude
+        # Options: "summarization", "parsing", "review"
+        # To use Claude for everything: USE_OLLAMA_FOR = set()
+        # To use Ollama for everything: USE_OLLAMA_FOR = {"summarization", "parsing", "review"}
+        self.USE_OLLAMA_FOR = set(os.getenv("USE_OLLAMA_FOR", "summarization,parsing,review").split(","))
+        if "" in self.USE_OLLAMA_FOR:
+            self.USE_OLLAMA_FOR.remove("")  # Clean empty string if env var empty
+
+        # Ollama model mapping by task type
+        self.OLLAMA_MODELS = {
+            "summarization": os.getenv("OLLAMA_SUMMARY_MODEL", "qwen3.5:9b"),
+            "parsing": os.getenv("OLLAMA_PARSE_MODEL", "qwen2.5-coder:7b-instruct"),
+            "review": os.getenv("OLLAMA_REVIEW_MODEL", "qwen2.5-coder:14b"),
+        }
+
         self.PHOENIX_ENDPOINT = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces")
         self.PHOENIX_PROJECT_NAME = os.getenv("PHOENIX_PROJECT_NAME", "terraform-agent")
         self.PHOENIX_ENABLED = os.getenv("PHOENIX_ENABLED", "true").lower() == "true"

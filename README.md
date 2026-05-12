@@ -115,11 +115,28 @@ uv sync
 # Créer .env depuis le template
 cp .env.example .env
 
-# Éditer .env et ajouter:
-# ANTHROPIC_API_KEY=sk-ant-...
+# Éditer .env et configurer:
+# 1. ANTHROPIC_API_KEY=sk-ant-...  (obligatoire)
+# 2. USE_OLLAMA_FOR=summarization,parsing,review  (optionnel - optimisation coûts)
 
-# Obtenir clé: https://console.anthropic.com/account/keys
+# Obtenir clé Claude: https://console.anthropic.com/account/keys
 ```
+
+**🆕 Optimisation Coûts (Phase 1):**
+
+L'agent peut utiliser Ollama (local, gratuit) pour certaines tâches au lieu de Claude:
+- **summarization**: Résume les résultats knowledge base (~30% réduction tokens)
+- **parsing**: Parse les erreurs Terraform (~10% réduction tokens)  
+- **review**: Revue de code (déjà fait par défaut)
+
+```bash
+# .env - Configurations possibles:
+USE_OLLAMA_FOR=summarization,parsing,review  # Max économies (39% réduction)
+USE_OLLAMA_FOR=summarization,parsing         # Équilibré (33% réduction)
+USE_OLLAMA_FOR=                              # Tout Claude (aucune réduction)
+```
+
+Voir `docs-init/model-routing.md` pour détails complets.
 
 ### Exécution
 

@@ -11,6 +11,7 @@ from langchain_core.tools import tool
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
+from .model_router import ModelRouter
 
 logger = logging.getLogger(__name__)
 
@@ -19,23 +20,28 @@ _config: Config | None = None
 _prompts: PromptManager | None = None
 _knowledge_base: KnowledgeBase | None = None
 _review_model: ChatOllama | None = None
+_model_router: ModelRouter | None = None
 
 
-def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase) -> None:
+def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase, model_router: ModelRouter | None = None) -> None:
     """Initialize global instances needed by tools.
 
     Args:
         config: Configuration object
         prompts: PromptManager instance
         knowledge_base: KnowledgeBase instance
+        model_router: Optional ModelRouter for flexible LLM backend selection
     """
-    global _config, _prompts, _knowledge_base, _review_model
+    global _config, _prompts, _knowledge_base, _review_model, _model_router
     logger.info("Initializing tools with config, prompts, and knowledge base")
     _config = config
     _prompts = prompts
     _knowledge_base = knowledge_base
+    _model_router = model_router
     _review_model = ChatOllama(model=config.REVIEW_MODEL_NAME)
     logger.info(f"Tools initialized - Review model: {config.REVIEW_MODEL_NAME}")
+    if model_router:
+        logger.info(f"Model router enabled - Ollama tasks: {config.USE_OLLAMA_FOR}")
 
 
 def _validate_terraform_path(path: str) -> Path:
@@ -138,6 +144,45 @@ def _log_to_file(level: str, context: str, message: str, path: str) -> None:
         logger.debug(f"Logged to {log_file}: {log_entry.strip()}")
     except (OSError, IOError) as e:
         logger.warning(f"Failed to write to terraform_logs.error: {e}")
+
+
+def _parse_terraform_error(error_output: str) -> str:
+    """Parse terraform error with LLM to extract actionable information.
+
+    Uses model_router to parse with Ollama or Claude depending on configuration.
+
+    Args:
+        error_output: Raw error output from terraform command
+
+    Returns:
+        Parsed error summary with root cause and suggested fix
+    """
+    if _model_router is None:
+        # No model router - return raw error
+        return error_output
+
+    try:
+        logger.info("Parsing terraform error with LLM")
+
+        prompt = f"""Parse this Terraform error and provide:
+1. Error type (syntax/provider/resource/validation)
+2. Root cause (one sentence)
+3. Suggested fix (one sentence)
+
+Keep response concise and actionable.
+
+Error:
+{error_output[:1000]}
+
+Parsed error:"""
+
+        parsed = _model_router.invoke("parsing", prompt)
+        logger.info(f"Error parsing completed: {len(error_output)} → {len(parsed)} chars")
+        return parsed
+
+    except Exception as e:
+        logger.warning(f"Error parsing failed: {e}, returning raw error")
+        return error_output
 
 
 
@@ -305,8 +350,12 @@ def terraform_validate(path: str) -> str:
         if validate_result.returncode != 0:
             logger.error(f"terraform validate failed (exit code {validate_result.returncode}) after {elapsed:.2f}s")
             logger.debug(f"Validation output: {validate_output}")
+
+            # Parse error with LLM for better insights
+            parsed_error = _parse_terraform_error(validate_output)
+
             _log_to_file("SYNTAX_ERROR", "terraform_validate", f"Validation failed: {validate_output[:200]}", path)
-            return f"❌ ERROR: terraform validate failed. Fix the code syntax errors and re-run terraform_validate.\n\n{validate_output}"
+            return f"❌ ERROR: terraform validate failed. Fix the code syntax errors and re-run terraform_validate.\n\n{parsed_error}"
 
         logger.info(f"terraform validate successful in {elapsed:.2f}s")
         _log_to_file("VALIDATE_SUCCESS", "terraform_validate", f"Validation successful in {elapsed:.2f}s", path)

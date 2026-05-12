@@ -5,6 +5,7 @@ from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import DirectoryLoader, TextLoader
 
 from .config import Config
+from .model_router import ModelRouter
 
 logger = logging.getLogger(__name__)
 
@@ -25,8 +26,9 @@ class KnowledgeBase:
 
     config: Config
     vectorstore: Chroma | None
+    model_router: ModelRouter | None
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, model_router: ModelRouter | None = None) -> None:
         """Initialize the knowledge base and load documents.
 
         Loads all markdown files from the docs directory, splits them into
@@ -37,6 +39,7 @@ class KnowledgeBase:
             config: Configuration object containing paths and model names
         """
         self.config = config
+        self.model_router = model_router
         self.vectorstore = None
         self._initialize()
 
@@ -97,7 +100,7 @@ class KnowledgeBase:
         self.vectorstore.add_documents(docs)
         print(f"  ✓ Vectorstore created and indexed")
 
-    def search(self, query: str, k: int = 3) -> str:
+    def search(self, query: str, k: int = 3, summarize: bool = True) -> str:
         """Search the knowledge base for relevant documents using semantic similarity.
 
         Performs a similarity search in the ChromaDB vectorstore and returns
@@ -106,11 +109,40 @@ class KnowledgeBase:
         Args:
             query: Search query string (e.g., "Terraform best practices security")
             k: Number of top results to return (default: 3)
+            summarize: If True and model_router available, summarize results with LLM
 
         Returns:
             Concatenated content of the top k matching documents, separated by '---'
+            If summarize=True, returns condensed summary instead of raw chunks
         """
         if self.vectorstore is None:
             raise RuntimeError("Vectorstore not initialized")
+
         results = self.vectorstore.similarity_search(query, k=k)
-        return "\n---\n".join([res.page_content for res in results])
+        raw_content = "\n---\n".join([res.page_content for res in results])
+
+        # If summarization disabled or no model router, return raw content
+        if not summarize or self.model_router is None:
+            return raw_content
+
+        # Summarize with LLM (Ollama or Claude depending on config)
+        try:
+            logger.info(f"Summarizing {len(results)} knowledge base results for query: {query}")
+
+            prompt = f"""Summarize these Terraform best practices for the query: "{query}"
+
+Keep only relevant information. Remove redundancy. Be concise but complete.
+Maximum 200 words.
+
+Content:
+{raw_content}
+
+Summary:"""
+
+            summary = self.model_router.invoke("summarization", prompt)
+            logger.info(f"Summarization completed: {len(raw_content)} → {len(summary)} chars")
+            return summary
+
+        except Exception as e:
+            logger.warning(f"Summarization failed: {e}, returning raw content")
+            return raw_content

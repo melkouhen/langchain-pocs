@@ -10,6 +10,7 @@ from openinference.instrumentation.langchain import LangChainInstrumentor
 from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
+from .model_router import ModelRouter
 from .tools import init_tools, load_module_spec, search_knowledge_base, terraform_init, terraform_validate, terraform_plan, review_and_fix_code
 
 if TYPE_CHECKING:
@@ -39,6 +40,7 @@ class TerraformAgent:
     config: Config
     prompts: PromptManager
     knowledge_base: KnowledgeBase
+    model_router: ModelRouter
     agent: "CompiledStateGraph"
 
     def __init__(
@@ -46,6 +48,7 @@ class TerraformAgent:
         config: Config,
         prompts: PromptManager,
         knowledge_base: KnowledgeBase,
+        model_router: ModelRouter | None = None,
     ) -> None:
         """Initialize the Terraform agent with all required components.
 
@@ -66,10 +69,19 @@ class TerraformAgent:
         self.prompts = prompts
         self.knowledge_base = knowledge_base
 
+        # Initialize model router for flexible backend selection
+        if model_router is None:
+            model_router = ModelRouter(
+                use_ollama_for=config.USE_OLLAMA_FOR,
+                ollama_models=config.OLLAMA_MODELS,
+                claude_model=config.AGENT_MODEL,
+            )
+        self.model_router = model_router
+
         print("🤖 Setting up agent...")
 
         # Initialize global tool instances
-        init_tools(config, prompts, knowledge_base)
+        init_tools(config, prompts, knowledge_base, model_router)
 
         # Initialize Phoenix tracing if enabled
         if config.PHOENIX_ENABLED:
@@ -113,6 +125,14 @@ class TerraformAgent:
         print(f"    - terraform_validate (validate configuration)")
         print(f"    - terraform_plan (preview changes)")
         print(f"    - review_and_fix_code (code review)")
+        print(f"  ✓ Model routing:")
+        if config.USE_OLLAMA_FOR:
+            print(f"    - Ollama tasks: {', '.join(config.USE_OLLAMA_FOR)}")
+            for task in config.USE_OLLAMA_FOR:
+                model = config.OLLAMA_MODELS.get(task, "N/A")
+                print(f"      • {task}: {model}")
+        else:
+            print(f"    - All tasks using Claude ({config.AGENT_MODEL})")
 
     def run(self, user_prompt: str | None = None) -> str:
         """Execute the agent to generate and validate Terraform code.
