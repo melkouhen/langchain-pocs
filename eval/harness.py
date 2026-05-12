@@ -29,6 +29,7 @@ from terraform_agent.generator import TerraformGenerator
 from terraform_agent.config import Config
 from terraform_agent.knowledge_base import KnowledgeBase
 from terraform_agent.prompts import PromptManager
+from terraform_agent.callbacks import DetailedTerraformCallback
 
 from .evaluator import EvaluationResult, evaluate
 from .test_cases import TEST_CASES, TestCase
@@ -62,9 +63,12 @@ def _run_test_case(
         shutil.rmtree(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
 
+    # Setup callback to track phases and security/BP checks
+    callback = DetailedTerraformCallback(verbose=True)
+
     agent_success = True
     try:
-        agent_output = agent.run(user_prompt=test_case.prompt)
+        agent_output = agent.run(user_prompt=test_case.prompt, callbacks=[callback])
     except Exception as exc:
         agent_output = str(exc)
         agent_success = False
@@ -98,6 +102,29 @@ def _run_test_case(
         print(f"  {bar}  {cs.score:.1f}/5  [{pct:2d}%]  {cs.name}")
     if result.summary:
         print(f"\n  {result.summary}")
+
+    # Print callback report with phase durations and security checks
+    print(f"\n  {'─'*70}")
+    print("  Execution Report:")
+    print(f"  {'─'*70}")
+    report = callback.get_report()
+    if report.get("phases"):
+        print("  Phases:")
+        for phase_name, phase_data in report["phases"].items():
+            duration = phase_data.get("duration", 0)
+            print(f"    {phase_name}: {duration:.1f}s")
+
+    if report.get("security_checks"):
+        print("\n  Security Checks:")
+        for check, passed in report["security_checks"].items():
+            status = "✅" if passed else "⚠️ "
+            print(f"    {status} {check}")
+
+    if report.get("bp_checks"):
+        print("\n  Best Practices:")
+        for check, passed in report["bp_checks"].items():
+            status = "✅" if passed else "⚠️ "
+            print(f"    {status} {check}")
 
     return result
 
