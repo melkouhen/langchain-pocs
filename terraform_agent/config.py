@@ -55,6 +55,7 @@ class Config:
         self.WORK_DIR = self.PROJECT_ROOT / "work"
         self.RULES_DIR = self.PROJECT_ROOT / "rules"
         self.PROMPTS_DIR = self.PROJECT_ROOT / "prompts"
+        self.USER_PROMPTS_DIR = self.PROJECT_ROOT / "user_prompts"
 
         self.EMBEDDING_MODEL = "nomic-embed-text"
         self.REVIEW_MODEL_NAME = "qwen2.5-coder:7b-instruct"

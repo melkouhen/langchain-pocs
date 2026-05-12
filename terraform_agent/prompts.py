@@ -67,7 +67,17 @@ class PromptManager:
         Returns:
             User prompt template from terraform-user.md
         """
-        return self.load("terraform-user.md")
+        # Load from user_prompts directory
+        filepath = self.config.USER_PROMPTS_DIR / "terraform-user.md"
+        if not filepath.exists():
+            raise FileNotFoundError(f"User prompt file not found: {filepath}")
+
+        if "terraform-user.md" in self._cache:
+            return self._cache["terraform-user.md"]
+
+        content = filepath.read_text()
+        self._cache["terraform-user.md"] = content
+        return content
 
     @property
     def review(self) -> str:
