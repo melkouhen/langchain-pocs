@@ -49,7 +49,9 @@ Le système suit strictement les phases suivantes :
 7. Génération de règles manquantes
 
 ⚠️ Aucune phase ne peut être sautée.
-⚠️ Il est impossible de passer à la phase suivante tant que la phase en cours n’est pas validée.
+⚠️ Il est impossible de passer à la phase suivante tant que la phase en cours n'est pas validée.
+⚠️ "Validée" = statut explicite `PASS` (exit code 0, aucune erreur, aucun warning bloquant). Les statuts `Pending`, `Skipped`, `Deferred`, `TODO` sont **interdits** comme moyen d'avancer — ils valent `FAIL`.
+⚠️ Sur FAIL en Phase 5, l'agent doit corriger PUIS rejouer la séquence 5.1 → 5.4 depuis 5.1. Voir section 8.
 
 ---
 
@@ -221,55 +223,72 @@ Les commandes Terraform sont autorisées uniquement dans : `envs/dev`
 
 ## Pipeline Obligatoire
 
-| Étape | Outil                 | Relance si erreur |
-| ----- | --------------------- | ----------------- |
-| 5.1   | `terraform_init`      | 5.1               |
-| 5.2   | `terraform_validate`  | 5.1               |
-| 5.3   | `terraform_plan`      | 5.1               |
-| 5.4   | `review_and_fix_code` | 5.1               |
+| Étape | Outil                 | Gate de passage              |
+| ----- | --------------------- | ---------------------------- |
+| 5.1   | `terraform_init`      | exit 0, 0 erreur, 0 warning bloquant |
+| 5.2   | `terraform_validate`  | exit 0, 0 erreur             |
+| 5.3   | `terraform_plan`      | exit 0, 0 erreur, drift signalé |
+| 5.4   | `review_and_fix_code` | 0 finding CRITIQUE, 0 finding MAJEUR |
 
 ---
 
-## Règles d’Exécution
+## 🛑 RÈGLE BLOQUANTE ABSOLUE — Gate de Phase
 
-⚠️ Interdictions :
-- Ne jamais exécuter une étape avant validation de la précédente
-- Ne jamais appeler `review_and_fix_code` si `terraform_plan` échoue
+**Une étape N+1 NE PEUT PAS être tentée tant que l'étape N n'a pas un statut `PASS`.**
+
+`PASS` signifie : exit code 0 ET aucune erreur ET aucun warning bloquant.
+
+Pour chaque étape, l'agent doit explicitement émettre l'un des verdicts suivants AVANT toute autre action :
+
+- ✅ `STATUS: PASS — étape 5.X validée` → autorisé à passer à 5.X+1
+- ❌ `STATUS: FAIL — étape 5.X échouée, raison: <...>` → INTERDIT de passer à 5.X+1
+
+⚠️ Interdictions strictes (violations = arrêt immédiat) :
+- Marquer une étape comme "Pending", "Skipped", "Deferred" ou "TODO" pour avancer — interdit. Une étape se termine en PASS ou FAIL, jamais autre chose.
+- Appeler `terraform_validate`, `terraform_plan` ou `review_and_fix_code` avant d'avoir un `PASS` sur l'étape précédente.
+- Contourner un échec en modifiant la cible (ex: changer `gcs` → `local` pour faire "passer" init) sans logguer ceci comme correction et SANS rejouer 5.1.
+- Déclarer une étape PASS si sa sortie contient `Error:`, `error:`, `failed`, `failure`, ou un exit code non-zéro.
 
 ---
 
-## Pattern de Correction
+## Pattern de Correction (Auto-fix + Replay strict)
+
+Sur tout `FAIL` à l'étape 5.X :
 
 ```text
-Lire → Analyser → Logguer -> Corriger → Relancer
+1. Lire la sortie complète de l'outil
+2. Analyser la cause racine
+3. Logguer la correction prévue dans fixes.log (sévérité, fichier, diff résumé)
+4. Appliquer la correction
+5. REPLAY OBLIGATOIRE : recommencer à 5.1 (PAS à 5.X)
 ```
 
-Résumer au fur et à mesures les corrections apportées dans le fichier "fixes.log"
+**Replay strict 5.1 → 5.4** : après chaque correction, toute la séquence 5.1, 5.2, 5.3, 5.4 doit être rejouée depuis 5.1, dans l'ordre, chacune devant atteindre `PASS` avant la suivante.
+
+Résumer chaque correction dans `fixes.log` au moment où elle est appliquée (pas après coup).
 
 ---
 
-## Gestion des Findings
+## Gestion des Findings (étape 5.4)
 
-| Sévérité   | Action                 |
-| ---------- | ---------------------- |
-| 🔴 CRITIQUE | Correction obligatoire |
-| 🟠 MAJEUR   | Correction obligatoire |
-| 🟡 MINEUR   | Correction facultative |
+| Sévérité   | Action                                  |
+| ---------- | --------------------------------------- |
+| 🔴 CRITIQUE | Correction obligatoire → FAIL → replay 5.1 |
+| 🟠 MAJEUR   | Correction obligatoire → FAIL → replay 5.1 |
+| 🟡 MINEUR   | Correction facultative → n'empêche pas PASS |
 
 ---
 
-## Boucle de Validation
+## Boucle de Validation — Compteur de Cycles
 
-Après correction :
-- relancer entièrement les Phases 1 → 5
+- Un "cycle" = une exécution complète 5.1 → 5.4 avec au moins un FAIL.
+- Maximum : **5 cycles** consécutifs.
+- À chaque entrée dans 5.1, incrémenter le compteur et l'écrire dans `fixes.log` sous la forme : `## Cycle N/5 — <timestamp>`.
 
-Maximum :
-- 5 cycles automatiques
-
-Après 5 échecs :
-- arrêter le processus
-- produire un rapport détaillé
-- demander une validation humaine
+Après 5 cycles sans atteindre 5.4 PASS :
+- ARRÊT du processus (aucune nouvelle tentative)
+- Produire un rapport détaillé dans `fixes.log` listant chaque cycle, chaque FAIL, chaque correction tentée
+- Demander une validation humaine (sortir avec un statut explicite "HUMAN_REVIEW_REQUIRED")
 
 ---
 
@@ -361,13 +380,17 @@ Voir fichier : `rules/RULES_FORMAT.md`
 
 # 11. Portes de Qualité
 
-| Porte | Critère                       | Action                       |
-| ----- | ----------------------------- | ---------------------------- |
-| P1    | `terraform init` valide       | Corriger, Logguer → P1                |
-| P2    | `terraform validate` valide   | Corriger, Logguer → P1 + P2           |
-| P3    | `terraform plan` valide       | Corriger, Logguer → P1 + P2 + P3      |
-| P4    | Aucun finding critique/majeur | Corriger, Logguer → P1 + P2 + P3 + P4 |
-| P5    | Règles documentées            | Relancer Phase 6             |
+Chaque porte est **bloquante** : tant que le critère n'est pas atteint, la porte suivante ne peut pas être tentée. Sur échec, corriger, logguer dans `fixes.log`, puis rejouer depuis P1.
+
+| Porte | Critère                       | Sur échec                              |
+| ----- | ----------------------------- | -------------------------------------- |
+| P1    | `terraform init` PASS         | Corriger, logguer → REPLAY depuis P1   |
+| P2    | `terraform validate` PASS     | Corriger, logguer → REPLAY depuis P1   |
+| P3    | `terraform plan` PASS         | Corriger, logguer → REPLAY depuis P1   |
+| P4    | 0 finding CRITIQUE/MAJEUR     | Corriger, logguer → REPLAY depuis P1   |
+| P5    | Règles documentées            | Relancer Phase 6                       |
+
+⚠️ "PASS" est défini en section 8 (exit 0, aucune erreur, aucun warning bloquant). Une porte ne peut pas être franchie en marquant le statut "Pending" — c'est un FAIL implicite.
 
 ---
 
