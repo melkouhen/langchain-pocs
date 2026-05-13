@@ -52,8 +52,8 @@ docs/                                      # Bonnes pratiques
 └── cloud-storage.md
 
 prompts/                                   # Templates LLM
-├── terraform-system.md                    # Comportement agent
-├── terraform-review.md
+├── terraform-generator.md                    # Comportement agent
+├── terraform-reviewer.md
 ├── terraform-validate.md
 └── terraform-evaluation.md
 

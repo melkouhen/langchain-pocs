@@ -187,7 +187,7 @@ L'agent Terraform autonome indexera automatiquement les règles dans ChromaDB et
 3. **Ajouter une nouvelle catégorie** (exceptionnel)
    - Mettre à jour [CATEGORIES.md](CATEGORIES.md)
    - Mettre à jour les templates et la documentation
-   - Mettre à jour le prompt système dans `prompts/terraform-system.md`
+   - Mettre à jour le prompt système dans `prompts/terraform-generator.md`
 
 ---
 

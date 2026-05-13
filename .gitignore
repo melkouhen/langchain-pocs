@@ -51,6 +51,7 @@ env/
 
 # Project-specific
 .vectorstore*/
+work*/
 work/
 eval/results/
 notebooks/.vectorstore*/

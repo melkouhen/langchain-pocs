@@ -194,7 +194,7 @@ Les 14 règles critiques bloquent le déploiement ou causent des violations de s
 - ✅ Mettre à jour RULES_INDEX.md avec nouvelle structure
 - ✅ Mettre à jour CATEGORIES.md avec 5 catégories
 - ✅ Mettre à jour RULES_FORMAT.md et RULES_TEMPLATE.md
-- ✅ Mettre à jour terraform-system.md prompt
+- ✅ Mettre à jour terraform-generator.md prompt
 - ✅ Vérifier l'unicité des IDs (21 règles)
 
 ### Moyen Terme
@@ -230,7 +230,7 @@ La revue v2.0 a permis de:
 3. ✅ Confirmer la cohérence des niveaux de gravité (14 CRITICAL, 7 MAJOR)
 4. ✅ Valider la structure XML de toutes les règles
 5. ✅ Mettre à jour toute la documentation (RULES_INDEX.md, CATEGORIES.md, README.md, RULES_FORMAT.md, RULES_TEMPLATE.md)
-6. ✅ Mettre à jour le prompt système (terraform-system.md) avec les nouvelles catégories
+6. ✅ Mettre à jour le prompt système (terraform-generator.md) avec les nouvelles catégories
 
 **État final:** 21 règles propres, sans doublon, organisées en 5 catégories cohérentes.
 

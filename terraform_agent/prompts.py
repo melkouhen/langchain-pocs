@@ -32,7 +32,7 @@ class PromptManager:
         Raises FileNotFoundError if the file does not exist.
 
         Args:
-            filename: Name of the prompt file (e.g., 'terraform-system.md')
+            filename: Name of the prompt file (e.g., 'terraform-generator.md')
 
         Returns:
             Content of the prompt file as a string
@@ -56,9 +56,9 @@ class PromptManager:
         """System prompt for configuring the agent's behavior and role.
 
         Returns:
-            System prompt template from terraform-system.md
+            System prompt template from terraform-generator.md
         """
-        return self.load("terraform-system.md")
+        return self.load("terraform-generator.md")
 
     @property
     def user(self) -> str:
