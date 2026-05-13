@@ -111,9 +111,8 @@ L'agent Terraform autonome indexera automatiquement les règles dans ChromaDB et
 - [TF-ENV-COMPOSITION](rule-tf-env-composition.md) — Environment Configurations Must Not Declare Resources
 - [TF-ENV-ISOLATION](rule-tf-env-isolation.md) — Environment Isolation: Separate Directories and State
 
-#### 🔒 Security (4 règles CRITICAL)
+#### 🔒 Security (3 règles CRITICAL)
 - [GCS-NAMING-UBLA](rule-gcs-naming-ubla.md) — GCS Bucket Naming Convention and UBLA
-- [TF-ENV-ISOLATION-BACKEND](rule-tf-env-isolation-backend.md) — Environment Isolation: Separate Backends & State
 - [TF-NO-SECRETS](rule-tf-no-hardcoded-secrets.md) — No Hardcoded Secrets
 - [TF-STATE-DELETION](rule-tf-state-deletion.md) — Never Delete State Files Directly
 

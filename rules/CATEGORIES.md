@@ -55,7 +55,6 @@ Operations       ████████████░░░░░░░░░
 | CLOUDRUN-INGRESS-SECURITY | CRITICAL | Restrict Ingress to Minimum Required Access |
 | CLOUDRUN-SECRETS-MANAGEMENT | CRITICAL | Use Secret Manager for Sensitive Environment Variables |
 | TF-NO-SECRETS | CRITICAL | No Hardcoded Secrets |
-| TF-ENV-ISOLATION-BACKEND | CRITICAL | Environment Isolation: Separate Backends & State |
 | TF-STATE-DELETION | CRITICAL | Never Delete State Files Directly |
 | GCS-NAMING-UBLA | CRITICAL | GCS Bucket Naming Convention and UBLA |
 
