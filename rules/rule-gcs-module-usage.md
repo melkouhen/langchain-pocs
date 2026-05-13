@@ -313,6 +313,73 @@ resource "google_storage_bucket" "uploads" {
 - [ ] Establish policy: all new GCS buckets must use the module
 </implementation-checklist>
 
+<module-interface>
+**Source:** https://github.com/terraform-google-modules/terraform-google-cloud-storage
+
+### Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| `project_id` | Bucket project ID | `string` | n/a | ✅ yes |
+| `names` | Bucket name suffixes (one bucket per element) | `list(string)` | n/a | ✅ yes |
+| `prefix` | Prefix used to generate the bucket name | `string` | `""` | no |
+| `location` | Bucket location | `string` | `"EU"` | no |
+| `storage_class` | Default storage class for all buckets | `string` | `"STANDARD"` | no |
+| `randomize_suffix` | Append an identical random 4-char suffix to all bucket names | `bool` | `false` | no |
+| `labels` | Labels attached to the buckets | `map(string)` | `{}` | no |
+| `versioning` | Map of bucket name => versioning enabled boolean | `map(bool)` | `{}` | no |
+| `force_destroy` | Map of bucket name => force destroy boolean | `map(bool)` | `{}` | no |
+| `autoclass` | Map of bucket name => autoclass enabled boolean | `map(bool)` | `{}` | no |
+| `hierarchical_namespace` | Map of bucket name => hierarchical namespace enabled boolean | `map(bool)` | `{}` | no |
+| `bucket_policy_only` | Map of bucket name => UBLA enabled boolean (disables ad-hoc ACLs) | `map(bool)` | `{}` | no |
+| `public_access_prevention` | Public access prevention mode (`inherited` or `enforced`) | `string` | `"inherited"` | no |
+| `encryption_key_names` | Map of bucket name => CMEK key self-link | `map(string)` | `{}` | no |
+| `default_event_based_hold` | Map of bucket name => enable event-based hold for new objects | `map(bool)` | `{}` | no |
+| `retention_policy` | Map of bucket name => retention policy config | `any` | `{}` | no |
+| `soft_delete_policy` | Map of bucket name => soft delete policy config | `map(any)` | `{}` | no |
+| `lifecycle_rules` | Lifecycle rules applied to all buckets | `set(object)` | `[]` | no |
+| `bucket_lifecycle_rules` | Map of bucket name => additional per-bucket lifecycle rules | `map(set(object))` | `{}` | no |
+| `cors` | CORS config applied to buckets (origin/method/headers/max_age) | `list(object)` | `[]` | no |
+| `website` | Static-website config (`main_page_suffix`, `not_found_page`) | `object` | `{}` | no |
+| `logging` | Map of bucket name => bucket logging config | `any` | `{}` | no |
+| `custom_placement_config` | Map of bucket name => custom dual-region placement config | `any` | `{}` | no |
+| `ip_filter` | Map of bucket name => IP filter config (mode, CIDR ranges, VPCs) | `map(object)` | `{}` | no |
+| `folders` | Map of bucket name => list of top-level folder objects to create | `map(list(string))` | `{}` | no |
+| `admins` | IAM members granted `roles/storage.objectAdmin` on all buckets | `list(string)` | `[]` | no |
+| `creators` | IAM members granted `roles/storage.objectCreator` on all buckets | `list(string)` | `[]` | no |
+| `viewers` | IAM members granted `roles/storage.objectViewer` on all buckets | `list(string)` | `[]` | no |
+| `storage_admins` | IAM members granted `roles/storage.admin` on all buckets | `list(string)` | `[]` | no |
+| `hmac_key_admins` | IAM members granted `roles/storage.hmacKeyAdmin` on all buckets | `list(string)` | `[]` | no |
+| `bucket_admins` | Map of bucket name => comma-delimited per-bucket admins | `map(string)` | `{}` | no |
+| `bucket_creators` | Map of bucket name => comma-delimited per-bucket creators | `map(string)` | `{}` | no |
+| `bucket_viewers` | Map of bucket name => comma-delimited per-bucket viewers | `map(string)` | `{}` | no |
+| `bucket_storage_admins` | Map of bucket name => comma-delimited per-bucket storage admins | `map(string)` | `{}` | no |
+| `bucket_hmac_key_admins` | Map of bucket name => comma-delimited per-bucket HMAC key admins | `map(string)` | `{}` | no |
+| `set_admin_roles` | Grant `roles/storage.objectAdmin` to admins/bucket_admins | `bool` | `false` | no |
+| `set_creator_roles` | Grant `roles/storage.objectCreator` to creators/bucket_creators | `bool` | `false` | no |
+| `set_viewer_roles` | Grant `roles/storage.objectViewer` to viewers/bucket_viewers | `bool` | `false` | no |
+| `set_storage_admin_roles` | Grant `roles/storage.admin` to storage_admins/bucket_storage_admins | `bool` | `false` | no |
+| `set_hmac_key_admin_roles` | Grant `roles/storage.hmacKeyAdmin` to HMAC admins | `bool` | `false` | no |
+| `set_hmac_access` | Enable S3-compatible HMAC access to GCS | `bool` | `false` | no |
+| `hmac_service_accounts` | Map of HMAC service accounts granted access to GCS | `map(string)` | `{}` | no |
+
+### Outputs
+
+| Name | Description |
+|------|-------------|
+| `bucket` | Bucket resource (single-bucket convenience output) |
+| `name` | Bucket name (single-bucket convenience output) |
+| `url` | Bucket URL (single-bucket convenience output) |
+| `buckets` | Bucket resources as list |
+| `buckets_map` | Bucket resources keyed by name |
+| `names` | Bucket names (map keyed by suffix) |
+| `names_list` | List of bucket names |
+| `urls` | Bucket URLs (map keyed by suffix) |
+| `urls_list` | List of bucket URLs |
+| `hmac_keys` | List of HMAC keys (when `set_hmac_access` is enabled) |
+| `apphub_service_uri` | Service URI in CAIS style for AppHub integration |
+</module-interface>
+
 <related-rules>
 - GCS-NAMING-UBLA: GCS bucket naming conventions and UBLA
 - GCS-BUCKET-SYNTAX: Bucket block vs argument syntax

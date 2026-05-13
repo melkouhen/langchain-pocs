@@ -258,6 +258,62 @@ resource "google_cloud_run_service_iam_member" "invoker" {
 - [ ] Establish policy: all new Cloud Run services must use the module
 </implementation-checklist>
 
+<module-interface>
+**Source:** https://github.com/GoogleCloudPlatform/terraform-google-cloud-run
+
+### Inputs
+
+| Name | Description | Type | Default | Required |
+|------|-------------|------|---------|:--------:|
+| `service_name` | The name of the Cloud Run service to create | `string` | n/a | ✅ yes |
+| `project_id` | The project ID to deploy to | `string` | n/a | ✅ yes |
+| `location` | Cloud Run service deployment location | `string` | n/a | ✅ yes |
+| `image` | GCR hosted image URL to deploy | `string` | n/a | ✅ yes |
+| `argument` | Arguments passed to the ENTRYPOINT command (only if image entrypoint needs arguments) | `list(string)` | `[]` | no |
+| `certificate_mode` | The mode of the certificate (`NONE` or `AUTOMATIC`) | `string` | `"NONE"` | no |
+| `container_command` | Override the ENTRYPOINT command defined in the container image | `list(string)` | `[]` | no |
+| `container_concurrency` | Concurrent request limits to the service | `number` | `null` | no |
+| `domain_map_annotations` | Annotations to the domain map | `map(string)` | `{}` | no |
+| `domain_map_labels` | Key/value label pairs to assign to the Domain mapping | `map(string)` | `{}` | no |
+| `encryption_key` | CMEK encryption key self-link (`projects/.../cryptoKeys/...`) | `string` | `null` | no |
+| `env_secret_vars` | [Beta] Environment variables sourced from Secret Manager | `list(object)` | `[]` | no |
+| `env_vars` | Environment variables (cleartext) | `list(object({name, value}))` | `[]` | no |
+| `force_override` | Force override existing domain mapping | `bool` | `false` | no |
+| `generate_revision_name` | Enable automatic revision name generation | `bool` | `true` | no |
+| `limits` | Resource limits on the container (e.g. `cpu`, `memory`) | `map(string)` | `null` | no |
+| `liveness_probe` | Periodic probe of container liveness; restarts container on failure | `object` | `null` | no |
+| `members` | Users/SAs granted invoker access (`roles/run.invoker`) | `list(string)` | `[]` | no |
+| `ports` | Port the container listens on (`http1` or `h2c`) | `object({name, port})` | `{name="http1", port=8080}` | no |
+| `requests` | Resource requests on the container | `map(string)` | `{}` | no |
+| `service_account_email` | Service Account email used by the service | `string` | `""` | no |
+| `service_annotations` | Annotations on the service (e.g. ingress: `all`, `internal`, `internal-and-cloud-load-balancing`) | `map(string)` | `{"run.googleapis.com/ingress" = "all"}` | no |
+| `service_labels` | Key/value label pairs to assign to the service | `map(string)` | `{}` | no |
+| `startup_probe` | Startup probe of the application; disables other probes until success | `object` | `null` | no |
+| `template_annotations` | Annotations on the container metadata (autoscaling, VPC Connector, Cloud SQL) | `map(string)` | min/maxScale defaults | no |
+| `template_labels` | Key/value label pairs on the container metadata | `map(string)` | `{}` | no |
+| `timeout_seconds` | Timeout for each request | `number` | `120` | no |
+| `traffic_split` | Traffic routing configuration (revision/percent/tag) | `list(object)` | 100% to `v1-0-0` | no |
+| `verified_domain_name` | List of custom domain names to map | `list(string)` | `[]` | no |
+| `volume_mounts` | [Beta] Volume mounts attached to the container (secrets) | `list(object({mount_path, name}))` | `[]` | no |
+| `volumes` | [Beta] Volumes for environment variables (secrets) | `list(object)` | `[]` | no |
+
+### Outputs
+
+| Name | Description |
+|------|-------------|
+| `service_name` | Name of the created service |
+| `service_id` | Unique identifier of the created service |
+| `service_url` | The URL on which the deployed service is available |
+| `service_status` | Status of the created service |
+| `revision` | Deployed revision name for the service |
+| `location` | Location where the Cloud Run service was created |
+| `project_id` | Google Cloud project in which the service was created |
+| `domain_map_id` | Unique identifier of the created domain map |
+| `domain_map_status` | Status of the domain mapping |
+| `verified_domain_name` | List of mapped custom domain names |
+| `apphub_service_uri` | Service URI in CAIS style for AppHub integration |
+</module-interface>
+
 <related-rules>
 - CLOUDRUN-SECRETS-MANAGEMENT: Secret Manager for sensitive env vars
 - CLOUDRUN-INGRESS-SECURITY: Restrictive ingress configuration
