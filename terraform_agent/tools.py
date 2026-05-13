@@ -23,7 +23,12 @@ _review_model: ChatOllama | None = None
 _model_router: ModelRouter | None = None
 
 
-def init_tools(config: Config, prompts: PromptManager, knowledge_base: KnowledgeBase, model_router: ModelRouter | None = None) -> None:
+def init_tools(
+    config: Config,
+    prompts: PromptManager,
+    knowledge_base: KnowledgeBase,
+    model_router: ModelRouter | None = None,
+) -> None:
     """Initialize global instances needed by tools.
 
     Args:
@@ -63,8 +68,20 @@ def _validate_terraform_path(path: str) -> Path:
         resolved = Path(path).resolve()
         work_dir = _config.WORK_DIR.resolve()
 
-        if not resolved.is_relative_to(work_dir):
+        try:
+            relative_path = resolved.relative_to(work_dir)
+        except ValueError:
             raise ValueError(f"Path outside work directory: {path}")
+
+        allowed_dirs = {Path("envs") / "dev", Path("modules")}
+
+        def _is_within(rel: Path, allowed: Path) -> bool:
+            return rel == allowed or str(rel).startswith(f"{allowed}/")
+
+        if not any(_is_within(relative_path, allowed) for allowed in allowed_dirs):
+            raise ValueError(
+                f"Path must be within work/dev or work/modules (got {resolved})"
+            )
 
         return resolved
     except (OSError, RuntimeError) as e:
@@ -77,6 +94,7 @@ def validate_work_dir_path(func):
     Applies _validate_terraform_path to the first argument (path).
     Returns error string if validation fails.
     """
+
     @wraps(func)
     def wrapper(path: str) -> str:
         try:
@@ -85,6 +103,7 @@ def validate_work_dir_path(func):
             logger.error(f"Path validation failed in {func.__name__}: {e}")
             return f"❌ ERROR: {e}"
         return func(str(validated_path))
+
     return wrapper
 
 
@@ -102,7 +121,9 @@ def _check_dev_environment(path: str) -> str | None:
 
     environment = "prod" if path.endswith("/prod") or "/prod/" in path else "unknown"
     logger.warning(f"Terraform command blocked: path is in {environment} environment")
-    return f"❌ ERROR: Terraform commands only allowed in dev environment (path: {path})"
+    return (
+        f"❌ ERROR: Terraform commands only allowed in dev environment (path: {path})"
+    )
 
 
 def _check_terraform_initialized(path: str) -> str | None:
@@ -177,7 +198,9 @@ Error:
 Parsed error:"""
 
         parsed = _model_router.invoke("parsing", prompt)
-        logger.info(f"Error parsing completed: {len(error_output)} → {len(parsed)} chars")
+        logger.info(
+            f"Error parsing completed: {len(error_output)} → {len(parsed)} chars"
+        )
         return parsed
 
     except Exception as e:
@@ -185,11 +208,10 @@ Parsed error:"""
         return error_output
 
 
-
-
 # ============================================================================
 # EXTRACTED TOOLS (decorated at module level)
 # ============================================================================
+
 
 @tool
 def search_knowledge_base(query: str) -> str:
@@ -209,7 +231,7 @@ def search_knowledge_base(query: str) -> str:
 
     logger.info(f"Searching knowledge base for: {query}")
     result = _knowledge_base.search(query)
-    preview = result[:50].replace('\n', ' ') if result else '(empty)'
+    preview = result[:50].replace("\n", " ") if result else "(empty)"
     logger.info(f"Knowledge base search completed - preview: {preview}...")
 
     return result
@@ -276,7 +298,7 @@ def terraform_init(path: str) -> str:
         start_time = time.time()
 
         init_result = subprocess.run(
-            ["terraform", "init"],
+            ["terraform", "init", "--upgrade"],
             cwd=path,
             capture_output=True,
             text=True,
@@ -287,13 +309,27 @@ def terraform_init(path: str) -> str:
         init_output = init_result.stdout or init_result.stderr
 
         if init_result.returncode != 0:
-            logger.error(f"terraform init failed (exit code {init_result.returncode}) after {elapsed:.2f}s")
-            logger.error(f"Init output: {init_output[:500]}")  # Show first 500 chars in ERROR log
-            _log_to_file("INIT_ERROR", "terraform_init", f"Failed with exit code {init_result.returncode}: {init_output[:200]}", path)
+            logger.error(
+                f"terraform init failed (exit code {init_result.returncode}) after {elapsed:.2f}s"
+            )
+            logger.error(
+                f"Init output: {init_output[:500]}"
+            )  # Show first 500 chars in ERROR log
+            _log_to_file(
+                "INIT_ERROR",
+                "terraform_init",
+                f"Failed with exit code {init_result.returncode}: {init_output[:200]}",
+                path,
+            )
             return f"❌ ERROR: terraform init failed:\n{init_output}"
 
         logger.info(f"terraform init successful in {elapsed:.2f}s")
-        _log_to_file("INIT_SUCCESS", "terraform_init", f"Initialization successful in {elapsed:.2f}s", path)
+        _log_to_file(
+            "INIT_SUCCESS",
+            "terraform_init",
+            f"Initialization successful in {elapsed:.2f}s",
+            path,
+        )
         return f"✅ terraform init successful"
 
     except FileNotFoundError:
@@ -349,17 +385,29 @@ def terraform_validate(path: str) -> str:
         validate_output = validate_result.stdout or validate_result.stderr
 
         if validate_result.returncode != 0:
-            logger.error(f"terraform validate failed (exit code {validate_result.returncode}) after {elapsed:.2f}s")
+            logger.error(
+                f"terraform validate failed (exit code {validate_result.returncode}) after {elapsed:.2f}s"
+            )
             logger.debug(f"Validation output: {validate_output}")
 
             # Parse error with LLM for better insights
             parsed_error = _parse_terraform_error(validate_output)
 
-            _log_to_file("SYNTAX_ERROR", "terraform_validate", f"Validation failed: {validate_output[:200]}", path)
+            _log_to_file(
+                "SYNTAX_ERROR",
+                "terraform_validate",
+                f"Validation failed: {validate_output[:200]}",
+                path,
+            )
             return f"❌ ERROR: terraform validate failed. Fix the code syntax errors and re-run terraform_validate.\n\n{parsed_error}"
 
         logger.info(f"terraform validate successful in {elapsed:.2f}s")
-        _log_to_file("VALIDATE_SUCCESS", "terraform_validate", f"Validation successful in {elapsed:.2f}s", path)
+        _log_to_file(
+            "VALIDATE_SUCCESS",
+            "terraform_validate",
+            f"Validation successful in {elapsed:.2f}s",
+            path,
+        )
         return f"✅ terraform validate successful"
 
     except FileNotFoundError:
@@ -415,15 +463,28 @@ def terraform_plan(path: str) -> str:
         plan_output = plan_result.stdout or plan_result.stderr
 
         if plan_result.returncode != 0:
-            logger.error(f"terraform plan failed (exit code {plan_result.returncode}) after {elapsed:.2f}s")
+            logger.error(
+                f"terraform plan failed (exit code {plan_result.returncode}) after {elapsed:.2f}s"
+            )
             logger.debug(f"Plan output: {plan_output[:500]}...")
-            _log_to_file("PLAN_ERROR", "terraform_plan", f"Plan failed: {plan_output[:200]}", path)
+            _log_to_file(
+                "PLAN_ERROR",
+                "terraform_plan",
+                f"Plan failed: {plan_output[:200]}",
+                path,
+            )
             return f"❌ ERROR: terraform plan failed:\n{plan_output}"
 
         logger.info(f"terraform plan successful in {elapsed:.2f}s")
-        _log_to_file("PLAN_SUCCESS", "terraform_plan", f"Plan successful in {elapsed:.2f}s", path)
+        _log_to_file(
+            "PLAN_SUCCESS", "terraform_plan", f"Plan successful in {elapsed:.2f}s", path
+        )
         max_chars = _config.MAX_PLAN_OUTPUT_CHARS
-        truncated = plan_output[:max_chars] + "\n...[truncated]" if len(plan_output) > max_chars else plan_output
+        truncated = (
+            plan_output[:max_chars] + "\n...[truncated]"
+            if len(plan_output) > max_chars
+            else plan_output
+        )
         return f"✅ terraform plan successful\n\n{truncated}"
 
     except FileNotFoundError:
@@ -451,7 +512,7 @@ def _retrieve_best_practices() -> str:
     best_practices = _knowledge_base.search(
         "Terraform best practices security standards naming conventions modules"
     )
-    preview = best_practices[:50].replace('\n', ' ') if best_practices else '(empty)'
+    preview = best_practices[:50].replace("\n", " ") if best_practices else "(empty)"
     logger.debug(f"Retrieved {len(best_practices)} characters - preview: {preview}...")
     return best_practices
 
@@ -466,7 +527,11 @@ def _read_terraform_files(path: str) -> tuple[str, int]:
         Tuple of (concatenated file contents, number of files)
     """
     logger.debug("Reading Terraform files")
-    tf_files = sorted(glob.glob(path + "/**/*.tf", recursive=True))
+    tf_files = [
+        f
+        for f in sorted(glob.glob(path + "/**/*.tf", recursive=True))
+        if ".terraform" not in Path(f).parts
+    ]
     logger.info(f"Found {len(tf_files)} Terraform files")
 
     if not tf_files:
@@ -481,7 +546,9 @@ def _read_terraform_files(path: str) -> tuple[str, int]:
             code_content += f"\n\n--- {file_name} ---\n{file_content}"
             logger.debug(f"Loaded {file_name}: {len(file_content)} bytes")
 
-    logger.info(f"Total code to review: {len(code_content)} bytes across {len(tf_files)} files")
+    logger.info(
+        f"Total code to review: {len(code_content)} bytes across {len(tf_files)} files"
+    )
     return code_content, len(tf_files)
 
 
@@ -502,9 +569,7 @@ def _execute_code_review(best_practices: str, code_content: str, path: str) -> s
 
     logger.debug("Preparing review prompt")
     review_prompt = _prompts.review.format(
-        best_practices=best_practices,
-        code_content=code_content,
-        root_folder=path
+        best_practices=best_practices, code_content=code_content, root_folder=path
     )
     logger.debug(f"Review prompt prepared: {len(review_prompt)} bytes")
 
@@ -512,7 +577,9 @@ def _execute_code_review(best_practices: str, code_content: str, path: str) -> s
     review_start = time.time()
     review_response = str(_review_model.invoke(review_prompt).content)
     review_elapsed = time.time() - review_start
-    logger.info(f"Code review completed in {review_elapsed:.2f}s, response length: {len(review_response)} bytes")
+    logger.info(
+        f"Code review completed in {review_elapsed:.2f}s, response length: {len(review_response)} bytes"
+    )
 
     return review_response
 
@@ -599,11 +666,26 @@ def review_and_fix_code(path: str) -> str:
         # Log review results
         if "CRITIQUE" in review_response or "MAJEUR" in review_response:
             if "CRITIQUE" in review_response:
-                _log_to_file("REVIEW_CRITICAL", "review_and_fix_code", "Critical issues found in code review", path)
+                _log_to_file(
+                    "REVIEW_CRITICAL",
+                    "review_and_fix_code",
+                    "Critical issues found in code review",
+                    path,
+                )
             if "MAJEUR" in review_response:
-                _log_to_file("REVIEW_MAJOR", "review_and_fix_code", "Major issues found in code review", path)
+                _log_to_file(
+                    "REVIEW_MAJOR",
+                    "review_and_fix_code",
+                    "Major issues found in code review",
+                    path,
+                )
         else:
-            _log_to_file("REVIEW_SUCCESS", "review_and_fix_code", f"Code review passed - {num_files} files analyzed", path)
+            _log_to_file(
+                "REVIEW_SUCCESS",
+                "review_and_fix_code",
+                f"Code review passed - {num_files} files analyzed",
+                path,
+            )
 
         elapsed = time.time() - start_time
         logger.info(f"Code review and fix completed in {elapsed:.2f}s")
@@ -616,5 +698,3 @@ def review_and_fix_code(path: str) -> str:
     except (OSError, ValueError) as e:
         logger.error(f"Exception during review: {str(e)}")
         return f"⚠️ Error during review: {str(e)}"
-
-

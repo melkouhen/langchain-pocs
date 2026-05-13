@@ -67,16 +67,18 @@ class PromptManager:
         Returns:
             User prompt template from t1-bucket.md
         """
-        # Load from user_prompts directory
-        filepath = self.config.USER_PROMPTS_DIR / "1-bucket.md"
+        return self.load_user_prompt(self.config.DEFAULT_USER_PROMPT)
+
+    def load_user_prompt(self, filename: str) -> str:
+        filepath = self.config.USER_PROMPTS_DIR / filename
         if not filepath.exists():
             raise FileNotFoundError(f"User prompt file not found: {filepath}")
 
-        if "1-bucket.md" in self._cache:
-            return self._cache["1-bucket.md"]
+        if filename in self._cache:
+            return self._cache[filename]
 
         content = filepath.read_text()
-        self._cache["1-bucket.md"] = content
+        self._cache[filename] = content
         return content
 
     @property

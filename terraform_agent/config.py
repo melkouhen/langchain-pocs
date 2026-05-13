@@ -52,10 +52,15 @@ class Config:
             base_dir = Path.cwd()
 
         self.PROJECT_ROOT = base_dir
-        self.WORK_DIR = self.PROJECT_ROOT / "work"
+        default_work_dir = self.PROJECT_ROOT / "work"
+        env_work_dir = os.getenv("WORK_DIR")
+        self.WORK_DIR = (
+            Path(env_work_dir).expanduser() if env_work_dir else default_work_dir
+        )
         self.RULES_DIR = self.PROJECT_ROOT / "rules"
         self.PROMPTS_DIR = self.PROJECT_ROOT / "prompts"
         self.USER_PROMPTS_DIR = self.PROJECT_ROOT / "user_prompts"
+        self.DEFAULT_USER_PROMPT = os.getenv("DEFAULT_USER_PROMPT", "1-bucket.md")
 
         self.EMBEDDING_MODEL = "nomic-embed-text"
         self.REVIEW_MODEL_NAME = "qwen2.5-coder:7b-instruct"
@@ -67,7 +72,9 @@ class Config:
         # Options: "summarization", "parsing", "review"
         # To use Claude for everything: USE_OLLAMA_FOR = set()
         # To use Ollama for everything: USE_OLLAMA_FOR = {"summarization", "parsing", "review"}
-        self.USE_OLLAMA_FOR = set(os.getenv("USE_OLLAMA_FOR", "summarization,parsing,review").split(","))
+        self.USE_OLLAMA_FOR = set(
+            os.getenv("USE_OLLAMA_FOR", "summarization,parsing,review").split(",")
+        )
         if "" in self.USE_OLLAMA_FOR:
             self.USE_OLLAMA_FOR.remove("")  # Clean empty string if env var empty
 
@@ -78,12 +85,18 @@ class Config:
             "review": os.getenv("OLLAMA_REVIEW_MODEL", "qwen2.5-coder:14b"),
         }
 
-        self.PHOENIX_ENDPOINT = os.getenv("PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces")
+        self.PHOENIX_ENDPOINT = os.getenv(
+            "PHOENIX_COLLECTOR_ENDPOINT", "http://localhost:6006/v1/traces"
+        )
         self.PHOENIX_PROJECT_NAME = os.getenv("PHOENIX_PROJECT_NAME", "terraform-agent")
         self.PHOENIX_ENABLED = os.getenv("PHOENIX_ENABLED", "true").lower() == "true"
 
         # Content processing constants (centralized from various modules)
         self.CHUNK_SIZE = 1000  # Vectorstore: balance between context and granularity
         self.CHUNK_OVERLAP = 100  # Vectorstore: preserve context at chunk boundaries
-        self.MAX_PLAN_OUTPUT_CHARS = 4000  # ~1000 tokens - prevent Claude context overflow in responses
-        self.MAX_TF_CONTENT_CHARS = 8000  # ~2000 tokens - limit for qwen2.5-coder review model context
+        self.MAX_PLAN_OUTPUT_CHARS = (
+            4000  # ~1000 tokens - prevent Claude context overflow in responses
+        )
+        self.MAX_TF_CONTENT_CHARS = (
+            8000  # ~2000 tokens - limit for qwen2.5-coder review model context
+        )

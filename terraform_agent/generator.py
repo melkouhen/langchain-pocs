@@ -11,12 +11,21 @@ from .config import Config
 from .prompts import PromptManager
 from .knowledge_base import KnowledgeBase
 from .model_router import ModelRouter
-from .tools import init_tools, load_module_spec, search_knowledge_base, terraform_init, terraform_validate, terraform_plan, review_and_fix_code
+from .tools import (
+    init_tools,
+    load_module_spec,
+    search_knowledge_base,
+    terraform_init,
+    terraform_validate,
+    terraform_plan,
+    review_and_fix_code,
+)
 
 if TYPE_CHECKING:
     from langgraph.graph.state import CompiledStateGraph
 
 logger = logging.getLogger(__name__)
+
 
 class TerraformGenerator:
     """Orchestrates autonomous Terraform code generation and validation.
@@ -134,26 +143,42 @@ class TerraformGenerator:
         else:
             print(f"    - All tasks using Claude ({config.AGENT_MODEL})")
 
-    def run(self, user_prompt: str | None = None, callbacks: list | None = None) -> str:
+    def run(
+        self,
+        user_prompt: str | None = None,
+        callbacks: list | None = None,
+        prompt_file: str | None = None,
+        clean_work_dir: bool = False,
+    ) -> str:
         """Execute the agent to generate and validate Terraform code.
 
         Performs the following steps:
-        1. Cleans and prepares the work directory
-        2. Invokes the agent with the user prompt
-        3. Handles any errors that occur during execution
-        4. Returns the agent's final output
+        1. Cleans the work directory if requested (clean_work_dir=True)
+        2. Prepares the work directory
+        3. Invokes the agent with the user prompt
+        4. Handles any errors that occur during execution
+        5. Returns the agent's final output
 
         Args:
             user_prompt: Optional custom user prompt. If not provided, uses the
                         default prompt from the prompt manager.
             callbacks: Optional list of LangChain callback handlers for tracking
                       execution phases and tool calls.
+            prompt_file: Optional prompt file to load from user_prompts directory.
+            clean_work_dir: If True, deletes the work directory before generation.
 
         Returns:
             The agent's response content as a string, containing generated
             Terraform code and validation/review results
         """
         print("🛠️  Preparing workspace...")
+        if clean_work_dir:
+            import shutil
+
+            if self.config.WORK_DIR.exists():
+                print(f"  🧹 Cleaning work directory: {self.config.WORK_DIR}")
+                shutil.rmtree(self.config.WORK_DIR)
+            self.config.WORK_DIR.mkdir(parents=True, exist_ok=True)
         print("\n🚀 Starting Terraform Code Generation Agent")
         print("=" * 80)
         print(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
@@ -167,7 +192,12 @@ class TerraformGenerator:
 
         try:
             # Build messages with cache control on system prompt
-            prompt_content = user_prompt if user_prompt is not None else self.prompts.user
+            if prompt_file:
+                prompt_content = self.prompts.load_user_prompt(prompt_file)
+            elif user_prompt is not None:
+                prompt_content = user_prompt
+            else:
+                prompt_content = self.prompts.user
             messages = [
                 SystemMessage(
                     content=[
@@ -206,7 +236,7 @@ class TerraformGenerator:
             # Finalize callbacks (always called, even on error)
             if callbacks:
                 for callback in callbacks:
-                    if hasattr(callback, 'finalize'):
+                    if hasattr(callback, "finalize"):
                         callback.finalize()
 
         print(overall_status)

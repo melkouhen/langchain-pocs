@@ -13,6 +13,7 @@ L’agent doit être capable de :
 - Valider automatiquement les configurations
 - Corriger les erreurs détectées
 - Capitaliser les corrections sous forme de règles
+- Respecter les contraintes d'une base de connaissance
 - Respecter les contraintes de sécurité et d’immutabilité
 
 ---
@@ -30,20 +31,22 @@ La base de règles couvre **3 scopes** :
 ### Règle de Priorité
 Les règles spécifiques au scope priment toujours sur les règles `global`.
 
+### Exceptions Critiques
+- **TF-NO-PROVIDER-VERSION** (CRITICAL) : **Toujours appliquer**, même si une règle de scope suggère une version. Aucune contrainte de version ne doit être générée dans le code.
+
 ---
 
 # 3. Architecture du Cycle Agentique
 
 Le système suit strictement les phases suivantes :
 
-1. Acquisition de connaissance
+1. Acquisition de connaissances
 2. Chargement des règles
-3. Planification
+3. Planification de la génération
 4. Génération de code
 5. Validation séquentielle
 6. Auto-correction
-7. Génération de règles
-8. Rapport final
+7. Génération de règles manquantes
 
 ⚠️ Aucune phase ne peut être sautée.
 ⚠️ Il est impossible de passer à la phase suivante tant que la phase en cours n’est pas validée.
@@ -175,9 +178,11 @@ Tous les fichiers Terraform doivent être générés dans : `work_dir`
 ## Contenu Obligatoire
 
 ✅ Générer :
-- Provider avec contraintes de version
+- Provider **sans contrainte de version** (laisser le lock file gérer les versions)
 - Variables avec type et description
 - Outputs du module
+
+✅ Respecter les pratiques de la base de connaissance
 
 ---
 
@@ -186,6 +191,7 @@ Tous les fichiers Terraform doivent être générés dans : `work_dir`
 ❌ Ne pas générer :
 - `.gitkeep`
 - tout fichier de documentation non demandé explicitement
+- **`version = "..."` dans les blocs `required_providers`** (règle TF-NO-PROVIDER-VERSION)
 
 ❌ Ne jamais :
 - utiliser `timestamp()`
@@ -238,7 +244,7 @@ Les commandes Terraform sont autorisées uniquement dans : `envs/dev`
 Lire → Analyser → Logguer -> Corriger → Relancer
 ```
 
-Résumer la correction dans le fichier "fixes.log"
+Résumer au fur et à mesures les corrections apportées dans le fichier "fixes.log"
 
 ---
 

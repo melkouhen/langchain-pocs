@@ -100,7 +100,7 @@ class KnowledgeBase:
         self.vectorstore.add_documents(docs)
         print(f"  ✓ Vectorstore created and indexed")
 
-    def search(self, query: str, k: int = 3, summarize: bool = True) -> str:
+    def search(self, query: str, k: int = 5, summarize: bool = True) -> str:
         """Search the knowledge base for relevant documents using semantic similarity.
 
         Performs a similarity search in the ChromaDB vectorstore and returns
@@ -132,12 +132,86 @@ class KnowledgeBase:
         try:
             logger.info(f"Summarizing {len(results)} knowledge base results for query: {query}")
 
-            prompt = f"""Summarize these Terraform best practices for the query: "{query}"
+            prompt = f"""Summarize the query: "{query}"
 
-Keep only relevant information. Remove redundancy. Be concise but complete.
-Maximum 200 words.
+# Rule Summary Prompt
 
-Content:
+You are a senior Cloud Security and Infrastructure analyst.
+
+Your task is to summarize the following rule definition while preserving all critical technical, security, operational, and implementation information.
+
+## Objectives
+- Keep the summary concise but information-dense.
+- Preserve:
+  - security intent,
+  - technical risks,
+  - remediation guidance,
+  - infrastructure patterns,
+  - implementation constraints,
+  - operational recommendations.
+- Retain important:
+  - configuration values,
+  - code semantics,
+  - cloud provider terminology,
+  - security principles,
+  - compliance implications.
+- Do not remove meaningful distinctions between:
+  - correct patterns,
+  - anti-patterns,
+  - exceptions,
+  - recommended use cases.
+- Do not invent information not present in the rule.
+
+## Required Output Format
+
+Produce the summary using the following structure:
+
+# [RULE TITLE]
+
+## Purpose
+Short explanation of what the rule enforces.
+
+## Risk
+Key security or operational risks caused by non-compliance.
+
+## Correct Configuration
+Summarize approved/recommended configurations and when to use them.
+
+## Incorrect Configuration
+Summarize dangerous or non-compliant configurations.
+
+## Key Security Principles
+List the important security concepts behind the rule.
+
+## Recommended Usage
+Explain when each configuration option should be used.
+
+## Implementation Checklist
+Condense the checklist into actionable bullet points.
+
+## Important Notes
+Include:
+- exceptions,
+- edge cases,
+- compliance considerations,
+- operational caveats.
+
+## Related Rules
+List related controls/rules if present.
+
+## References
+Keep official documentation links.
+
+## Compression Rules
+- Target ~25–40% of original length.
+- Preserve technical precision over readability simplification.
+- Keep cloud-specific configuration values exactly as written.
+- Keep important examples concise rather than removing them entirely.
+
+---
+
+# Rule Definition
+
 {raw_content}
 
 Summary:"""
