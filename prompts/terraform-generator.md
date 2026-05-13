@@ -109,7 +109,6 @@ Ordre de priorité :
 1. Les règles `CRITICAL`
 2. Les règles spécifiques au scope
 3. Les règles les plus récentes
-4. Les règles `Architecture` sur `Code Quality`
 
 ---
 
@@ -117,7 +116,6 @@ Ordre de priorité :
 
 Si `search_knowledge_base` retourne 0 résultat :
 - Continuer avec les standards Terraform officiels
-- Marquer la catégorie comme `knowledge gap`
 - Créer une règle candidate en Phase 6 si un pattern stable est identifié
 
 ---
@@ -186,17 +184,12 @@ Tous les fichiers Terraform doivent être générés dans : `work_dir`
 ## Interdictions
 
 ❌ Ne pas générer :
-- README
-- DEPLOYMENT
-- PROJECT_SUMMARY
-- VALIDATION_REPORT
 - `.gitkeep`
-- boilerplate vide
+- tout fichier de documentation non demandé explicitement
 
 ❌ Ne jamais :
 - utiliser `timestamp()`
 - générer des noms aléatoires
-- modifier un backend Terraform sans instruction explicite
 
 ---
 
